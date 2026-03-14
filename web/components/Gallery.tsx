@@ -139,7 +139,6 @@ function PhotoCard({ photo, onClick }: CardProps) {
 
         {/* Card body */}
         <div className="p-3">
-          <h3 className="text-sm font-medium text-slate-200 mb-1 truncate">{photo.title}</h3>
           <p className="text-xs text-slate-500 mb-2 line-clamp-2">{photo.aiCaption}</p>
           <div className="flex flex-wrap gap-1">
             {photo.tags.slice(0, 4).map((tag) => (
