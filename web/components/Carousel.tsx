@@ -45,18 +45,18 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
 
   return (
     <div
-      className="relative w-full h-[70vh] overflow-hidden"
+      className="relative w-full h-[70vh] overflow-hidden bg-ocean-950 flex items-center justify-center"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Image */}
-      <div className="absolute inset-0 transition-opacity duration-700">
+      <div className="relative w-full h-full transition-opacity duration-700">
         <Image
           key={photo._id}
           src={photo.src}
           alt={photo.title}
           fill
-          className="object-cover"
+          className="object-contain"
           placeholder={photo.blurDataURL ? 'blur' : 'empty'}
           blurDataURL={photo.blurDataURL ?? undefined}
           priority={current === 0}
