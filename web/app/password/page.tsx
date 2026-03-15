@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function PasswordPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -22,7 +20,7 @@ export default function PasswordPage() {
       })
 
       if (res.ok) {
-        router.push('/')
+        window.location.href = '/'
       } else {
         setError(true)
         setPassword('')
