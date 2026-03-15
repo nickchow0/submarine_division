@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className="min-h-screen">
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-gradient-to-b from-ocean-900 to-ocean-950 border-b border-ocean-700">
-          <h1 style={{ fontFamily: "'Italiana', serif" }} className="text-5xl font-normal tracking-wider">
+          <h1 style={{ fontFamily: "'Italiana', serif" }} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight sm:tracking-wider">
             <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors">SubmarineDivision</Link>
           </h1>
           <p className="text-slate-500 text-sm mt-1">Underwater Photography by Nick Chow</p>
