@@ -68,7 +68,7 @@ export default function Gallery({ photos }: Props) {
   return (
     <>
       {/* Search + filters */}
-      <div className="sticky top-0 z-10 bg-ocean-950/90 backdrop-blur-sm py-4 space-y-3 border-b border-ocean-700">
+      <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-sm py-4 space-y-3">
         <SearchBar
           onSearch={handleSearch}
           resultCount={visiblePhotos.length}
@@ -124,7 +124,7 @@ function PhotoCard({ photo, onClick }: CardProps) {
     >
       <Link href={`/photo/${photo._id}`} className="block">
         <div
-          className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700 transition-shadow duration-200"
+          className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800 transition-shadow duration-200"
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
           }}

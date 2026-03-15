@@ -45,7 +45,7 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
 
   return (
     <div
-      className="relative w-full h-[70vh] overflow-hidden bg-ocean-950 flex items-center justify-center"
+      className="relative w-full h-[70vh] overflow-hidden bg-black flex items-center justify-center"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

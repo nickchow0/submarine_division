@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY } from '@/lib/sanity'
+import PhotoPageClient from '@/components/PhotoPageClient'
 import type { Photo } from '@/types'
 import type { Metadata } from 'next'
 
@@ -46,7 +47,8 @@ export default async function PhotoPage({ params }: Props) {
   const nextId = currentIndex < allIds.length - 1 ? allIds[currentIndex + 1]._id : null
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <PhotoPageClient photo={photo} prevId={prevId} nextId={nextId}>
+      <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Navigation bar */}
       <div className="flex items-center justify-between mb-6">
         <Link
@@ -100,7 +102,7 @@ export default async function PhotoPage({ params }: Props) {
       </div>
 
       {/* Photo */}
-      <div className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700">
+      <div className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800">
         <Image
           src={photo.src}
           alt={photo.title}
@@ -166,5 +168,6 @@ export default async function PhotoPage({ params }: Props) {
         </div>
       </div>
     </div>
+    </PhotoPageClient>
   )
 }

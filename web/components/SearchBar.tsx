@@ -44,7 +44,7 @@ export default function SearchBar({ onSearch, resultCount, totalCount }: Props) 
           placeholder="Search by keyword, species, location, technique…"
           className="
             w-full py-3 pl-12 pr-4 rounded-lg
-            bg-ocean-800 border border-ocean-700
+            bg-slate-900 border border-slate-800
             text-slate-100 placeholder-slate-500
             focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/25
             transition-colors text-base

@@ -33,7 +33,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen">
         {/* ── Header ── */}
-        <header className="text-center pt-12 pb-6 bg-gradient-to-b from-ocean-900 to-ocean-950 border-b border-ocean-700">
+        <header className="text-center pt-12 pb-6 bg-black">
           <h1 style={{ fontFamily: "'Italiana', serif" }} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight sm:tracking-wider">
             <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors">SubmarineDivision</Link>
           </h1>
@@ -48,7 +48,7 @@ export default function RootLayout({
         <main>{children}</main>
 
         {/* ── Footer ── */}
-        <footer className="text-center py-8 text-slate-600 text-xs border-t border-ocean-700 mt-12">
+        <footer className="text-center py-8 text-slate-600 text-xs mt-12">
           &copy; {new Date().getFullYear()} SubmarineDivision. All rights reserved.
         </footer>
       </body>

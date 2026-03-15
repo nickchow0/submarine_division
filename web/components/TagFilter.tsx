@@ -25,7 +25,7 @@ export default function TagFilter({ tags, activeTag, onTagClick }: Props) {
               px-4 py-1.5 rounded-full text-sm border transition-all
               ${isActive
                 ? 'bg-sky-500 border-sky-500 text-white'
-                : 'bg-transparent border-ocean-700 text-slate-400 hover:border-sky-500 hover:text-sky-400'
+                : 'bg-transparent border-slate-800 text-slate-400 hover:border-sky-500 hover:text-sky-400'
               }
             `}
           >

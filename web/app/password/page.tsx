@@ -35,7 +35,7 @@ export default function PasswordPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ocean-950/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md">
       <div className="w-full max-w-sm mx-4 text-center">
         {/* Title */}
         <h1
@@ -57,7 +57,7 @@ export default function PasswordPage() {
             }}
             placeholder="Password"
             autoFocus
-            className="w-full px-4 py-3 rounded-lg bg-ocean-800 border border-ocean-700 text-slate-200
+            className="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-800 text-slate-200
                        placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                        transition-colors text-center tracking-wider"
           />
