@@ -30,8 +30,13 @@ export default function AboutPage() {
         <ul className="text-slate-400 space-y-2">
           <li><span className="text-slate-300">Camera:</span> Sony A7RIII</li>
           <li><span className="text-slate-300">Housing:</span> Nauticam</li>
-          <li><span className="text-slate-300">Lenses:</span> Nikonos RS 13, Sony 28-60mm + WWL-1, Sony 90mm macro, Nauticam SMC-1</li>
+          <li><span className="text-slate-300">Lenses:</span></li>
+          <li className="ml-4">Sony 90mm macro + Nauticam SMC-1</li>
+          <li className="ml-4">Nikonos RS 13</li>
+          <li className="ml-4">Sony 28-60mm + WWL-1</li>
+          <li className="ml-4">Sony 16-35 f/4</li>
           <li><span className="text-slate-300">Lighting:</span> Retra Prime x2</li>
+          <li><span className="text-slate-300">Dive gear:</span> rEvo III Expedition hCCR</li>
         </ul>
       </section>
 
