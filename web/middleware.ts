@@ -6,13 +6,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const COOKIE_NAME = 'site_access'
-const COOKIE_VALUE = 'granted'
+const SITE_COOKIE  = 'site_access'
+const SITE_VALUE   = 'granted'
+const ADMIN_COOKIE = 'admin_access'
+const ADMIN_VALUE  = 'granted'
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Always allow the password page itself, its API route, and static assets
+  // Always allow the password page, its API, and static assets through
   if (
     pathname === '/password' ||
     pathname.startsWith('/api/auth') ||
@@ -22,16 +24,30 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for the auth cookie
-  const accessCookie = request.cookies.get(COOKIE_NAME)
-  if (accessCookie?.value === COOKIE_VALUE) {
-    return NextResponse.next()
+  // ── 1. Site-level auth ────────────────────────────────────────────────────
+  const siteCookie = request.cookies.get(SITE_COOKIE)
+  if (siteCookie?.value !== SITE_VALUE) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/password'
+    return NextResponse.redirect(url)
   }
 
-  // Not authenticated — redirect to password page
-  const passwordUrl = request.nextUrl.clone()
-  passwordUrl.pathname = '/password'
-  return NextResponse.redirect(passwordUrl)
+  // ── 2. Admin-level auth (extra layer on top of site auth) ─────────────────
+  // /admin/login and its auth API are exempt so the admin can log in
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isAdminLoginPage = pathname === '/admin/login'
+  const isAdminAuthApi = pathname.startsWith('/api/admin/auth')
+
+  if (isAdminRoute && !isAdminLoginPage && !isAdminAuthApi) {
+    const adminCookie = request.cookies.get(ADMIN_COOKIE)
+    if (adminCookie?.value !== ADMIN_VALUE) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  return NextResponse.next()
 }
 
 // Apply middleware to all routes
