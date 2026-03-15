@@ -35,7 +35,7 @@ export default function RootLayout({
         <header className="text-center pt-12 pb-6 bg-gradient-to-b from-ocean-900 to-ocean-950 border-b border-ocean-700">
           <h1 className="text-3xl font-light tracking-wider">
             {/* Replace with your site name */}
-            <span className="text-sky-400 font-semibold">Submarine Division</span> Photography
+            <span className="text-sky-400 font-semibold">SubmarineDivision</span> Photography
           </h1>
           <p className="text-slate-500 text-sm mt-1">Underwater &amp; Nature Image Library</p>
         </header>

@@ -50,7 +50,7 @@ export default async function PhotoPage({ params }: Props) {
       {/* Navigation bar */}
       <div className="flex items-center justify-between mb-6">
         <Link
-          href="/"
+          href="/gallery"
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

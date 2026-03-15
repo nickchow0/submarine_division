@@ -6,6 +6,7 @@
 // and streams HTML to the browser.
 
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import './globals.css'
 
 // Metadata is used by search engines and social media previews
@@ -34,9 +35,13 @@ export default function RootLayout({
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-gradient-to-b from-ocean-900 to-ocean-950 border-b border-ocean-700">
           <h1 style={{ fontFamily: "'Italiana', serif" }} className="text-5xl font-normal tracking-wider">
-            <span className="text-sky-400">Submarine Division</span>
+            <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors">SubmarineDivision</Link>
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Underwater &amp; Nature Image Library</p>
+          <p className="text-slate-500 text-sm mt-1">Underwater Photography by Nick Chow</p>
+          <nav className="mt-4 flex justify-center gap-6">
+            <Link href="/gallery" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Gallery</Link>
+            <Link href="/about" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">About</Link>
+          </nav>
         </header>
 
         {/* ── Page content ── */}
@@ -44,7 +49,7 @@ export default function RootLayout({
 
         {/* ── Footer ── */}
         <footer className="text-center py-8 text-slate-600 text-xs border-t border-ocean-700 mt-12">
-          &copy; {new Date().getFullYear()} Submarine Division. All rights reserved.
+          &copy; {new Date().getFullYear()} SubmarineDivision. All rights reserved.
         </footer>
       </body>
     </html>

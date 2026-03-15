@@ -42,7 +42,7 @@ export default function PasswordPage() {
           style={{ fontFamily: "'Italiana', serif" }}
           className="text-4xl font-normal tracking-wider text-sky-400 mb-2"
         >
-          Submarine Division
+          SubmarineDivision
         </h1>
         <p className="text-slate-500 text-sm mb-10">Enter the password to continue</p>
 
