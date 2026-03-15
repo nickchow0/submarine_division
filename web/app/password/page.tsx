@@ -35,7 +35,7 @@ export default function PasswordPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ocean-950">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ocean-950/85 backdrop-blur-md">
       <div className="w-full max-w-sm mx-4 text-center">
         {/* Title */}
         <h1
