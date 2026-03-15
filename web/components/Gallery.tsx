@@ -123,7 +123,15 @@ function PhotoCard({ photo, onClick }: CardProps) {
       onClick={onClick}
     >
       <Link href={`/photo/${photo._id}`} className="block">
-        <div className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700 transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-2xl">
+        <div
+          className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700 transition-shadow duration-200"
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+          }}
+        >
           {/* Photo */}
           <div className="relative overflow-hidden">
             <Image
@@ -131,30 +139,12 @@ function PhotoCard({ photo, onClick }: CardProps) {
               alt={photo.title}
               width={photo.width}
               height={photo.height}
-              className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-auto object-cover"
               placeholder={photo.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={photo.blurDataURL ?? undefined}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               loading="lazy"
             />
-          </div>
-
-          {/* Card body */}
-          <div className="p-3">
-            <p className="text-xs text-slate-500 mb-2 line-clamp-2">{photo.aiCaption}</p>
-            <div className="flex flex-wrap gap-1">
-              {photo.tags.slice(0, 4).map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400"
-                >
-                  {tag}
-                </span>
-              ))}
-              {photo.tags.length > 4 && (
-                <span className="text-xs text-slate-600">+{photo.tags.length - 4}</span>
-              )}
-            </div>
           </div>
         </div>
       </Link>
