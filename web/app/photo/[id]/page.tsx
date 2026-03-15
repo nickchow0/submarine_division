@@ -67,8 +67,6 @@ export default async function PhotoPage({ params }: Props) {
 
       {/* Metadata */}
       <div className="mt-6 space-y-4">
-        <h2 className="text-2xl font-semibold text-slate-100">{photo.title}</h2>
-
         {photo.aiCaption && (
           <p className="text-slate-400">{photo.aiCaption}</p>
         )}
