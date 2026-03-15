@@ -82,3 +82,10 @@ export const PHOTO_BY_ID_QUERY = `
     "blurDataURL": image.asset->metadata.lqip
   }
 `
+
+// ─── All photo IDs query ────────────────────────────────────────────────────
+// Returns just the _id of every photo in display order (newest first).
+// Used to determine prev/next navigation on the detail page.
+export const ALL_PHOTO_IDS_QUERY = `
+  *[_type == "photo"] | order(dateTaken desc) { _id }
+`

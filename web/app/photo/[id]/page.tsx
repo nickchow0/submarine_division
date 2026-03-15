@@ -7,7 +7,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { sanityClient, PHOTO_BY_ID_QUERY } from '@/lib/sanity'
+import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY } from '@/lib/sanity'
 import type { Photo } from '@/types'
 import type { Metadata } from 'next'
 
@@ -33,22 +33,71 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhotoPage({ params }: Props) {
   const { id } = await params
-  const photo: Photo | null = await sanityClient.fetch(PHOTO_BY_ID_QUERY, { id })
+  const [photo, allIds] = await Promise.all([
+    sanityClient.fetch<Photo | null>(PHOTO_BY_ID_QUERY, { id }),
+    sanityClient.fetch<{ _id: string }[]>(ALL_PHOTO_IDS_QUERY),
+  ])
 
   if (!photo) notFound()
 
+  // Find prev/next neighbours
+  const currentIndex = allIds.findIndex((p) => p._id === id)
+  const prevId = currentIndex > 0 ? allIds[currentIndex - 1]._id : null
+  const nextId = currentIndex < allIds.length - 1 ? allIds[currentIndex + 1]._id : null
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* Back link */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors mb-6"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-        </svg>
-        Back to gallery
-      </Link>
+      {/* Navigation bar */}
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to gallery
+        </Link>
+
+        <div className="flex items-center gap-3">
+          {prevId ? (
+            <Link
+              href={`/photo/${prevId}`}
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Prev
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 cursor-default">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Prev
+            </span>
+          )}
+          {nextId ? (
+            <Link
+              href={`/photo/${nextId}`}
+              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
+            >
+              Next
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 cursor-default">
+              Next
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </span>
+          )}
+        </div>
+      </div>
 
       {/* Photo */}
       <div className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700">
