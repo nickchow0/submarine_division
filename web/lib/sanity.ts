@@ -10,7 +10,8 @@ export const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
   apiVersion: '2024-01-01',  // pin to a date so the API never changes under you
-  useCdn: true,
+  token: process.env.SANITY_READ_TOKEN,  // required for private datasets
+  useCdn: false,  // token-authenticated requests can't use the CDN
 })
 
 // A second client with write access — used only server-side in API routes
