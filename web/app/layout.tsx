@@ -8,6 +8,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
+import ImageProtection from '@/components/ImageProtection'
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen">
+        <ImageProtection />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
           <h1 style={{ fontFamily: "'Italiana', serif" }} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight sm:tracking-wider">

@@ -18,3 +18,11 @@ html { scroll-behavior: smooth; }
 
 /* Remove default button focus outline on mouse click (keep for keyboard) */
 button:focus:not(:focus-visible) { outline: none; }
+
+/* ─── Image protection ─────────────────────────────────────────────────────── */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
