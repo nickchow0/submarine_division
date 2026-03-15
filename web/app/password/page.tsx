@@ -39,8 +39,8 @@ export default function PasswordPage() {
       <div className="w-full max-w-sm mx-4 text-center">
         {/* Title */}
         <h1
-          style={{ fontFamily: "'Cormorant Garamond', serif" }}
-          className="text-4xl font-light tracking-widest text-sky-400 mb-2"
+          style={{ fontFamily: "'Italiana', serif" }}
+          className="text-4xl font-normal tracking-wider text-sky-400 mb-2"
         >
           Submarine Division
         </h1>
@@ -59,7 +59,7 @@ export default function PasswordPage() {
             autoFocus
             className="w-full px-4 py-3 rounded-lg bg-ocean-800 border border-ocean-700 text-slate-200
                        placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                       transition-colors text-center tracking-widest"
+                       transition-colors text-center tracking-wider"
           />
           {error && (
             <p className="text-red-400 text-sm">Incorrect password. Please try again.</p>
