@@ -11,6 +11,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import Fuse from 'fuse.js'
 import type { Photo } from '@/types'
 import { buildSearchIndex, searchPhotos } from '@/lib/search'
@@ -121,40 +122,42 @@ function PhotoCard({ photo, onClick }: CardProps) {
       className="break-inside-avoid mb-3 group cursor-pointer"
       onClick={onClick}
     >
-      <div className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700 transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-2xl">
-        {/* Photo */}
-        <div className="relative overflow-hidden">
-          <Image
-            src={photo.src}
-            alt={photo.title}
-            width={photo.width}
-            height={photo.height}
-            className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-            placeholder={photo.blurDataURL ? 'blur' : 'empty'}
-            blurDataURL={photo.blurDataURL ?? undefined}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            loading="lazy"
-          />
-        </div>
+      <Link href={`/photo/${photo._id}`} className="block">
+        <div className="rounded-lg overflow-hidden bg-ocean-800 border border-ocean-700 transition-transform duration-200 group-hover:-translate-y-1 group-hover:shadow-2xl">
+          {/* Photo */}
+          <div className="relative overflow-hidden">
+            <Image
+              src={photo.src}
+              alt={photo.title}
+              width={photo.width}
+              height={photo.height}
+              className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+              placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+              blurDataURL={photo.blurDataURL ?? undefined}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              loading="lazy"
+            />
+          </div>
 
-        {/* Card body */}
-        <div className="p-3">
-          <p className="text-xs text-slate-500 mb-2 line-clamp-2">{photo.aiCaption}</p>
-          <div className="flex flex-wrap gap-1">
-            {photo.tags.slice(0, 4).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400"
-              >
-                {tag}
-              </span>
-            ))}
-            {photo.tags.length > 4 && (
-              <span className="text-xs text-slate-600">+{photo.tags.length - 4}</span>
-            )}
+          {/* Card body */}
+          <div className="p-3">
+            <p className="text-xs text-slate-500 mb-2 line-clamp-2">{photo.aiCaption}</p>
+            <div className="flex flex-wrap gap-1">
+              {photo.tags.slice(0, 4).map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400"
+                >
+                  {tag}
+                </span>
+              ))}
+              {photo.tags.length > 4 && (
+                <span className="text-xs text-slate-600">+{photo.tags.length - 4}</span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   )
 }

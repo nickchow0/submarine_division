@@ -64,3 +64,21 @@ export const ALL_PHOTOS_QUERY = `
 // lqip = Low Quality Image Placeholder — Sanity generates a tiny base64
 // blurred version of every image automatically. Next.js uses it while
 // the full image loads (the blur-up effect).
+
+// ─── Single photo query ─────────────────────────────────────────────────────
+// Fetches one photo by its Sanity _id. Used by the /photo/[id] detail page.
+export const PHOTO_BY_ID_QUERY = `
+  *[_type == "photo" && _id == $id][0] {
+    _id,
+    title,
+    "tags": coalesce(tags, []),
+    "aiCaption": coalesce(aiCaption, ""),
+    "location": coalesce(location, null),
+    "camera": coalesce(camera, null),
+    "dateTaken": coalesce(dateTaken, null),
+    "src": image.asset->url,
+    "width": image.asset->metadata.dimensions.width,
+    "height": image.asset->metadata.dimensions.height,
+    "blurDataURL": image.asset->metadata.lqip
+  }
+`
