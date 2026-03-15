@@ -5,8 +5,10 @@
 import { NextResponse } from 'next/server'
 import { sanityClient } from '@/lib/sanity'
 
+// Admin query fetches ALL published photos regardless of visibility.
+// Excludes drafts (ids starting with "drafts.") to avoid duplicates.
 const ADMIN_PHOTOS_QUERY = `
-  *[_type == "photo"] | order(dateTaken desc) {
+  *[_type == "photo" && !(_id in path("drafts.**"))] | order(dateTaken desc) {
     _id,
     title,
     "tags": coalesce(tags, []),
@@ -14,6 +16,7 @@ const ADMIN_PHOTOS_QUERY = `
     "location": coalesce(location, null),
     "camera": coalesce(camera, null),
     "dateTaken": coalesce(dateTaken, null),
+    "visible": coalesce(visible, true),
     "src": image.asset->url,
     "width": image.asset->metadata.dimensions.width,
     "height": image.asset->metadata.dimensions.height,

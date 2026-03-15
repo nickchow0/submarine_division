@@ -15,6 +15,7 @@ export async function PATCH(request: Request) {
         location?: string
         camera?: string
         dateTaken?: string
+        visible?: boolean
       }
     }
 
@@ -26,11 +27,12 @@ export async function PATCH(request: Request) {
     const patch = sanityWriteClient.patch(id)
 
     const updates: Record<string, unknown> = {}
-    if (fields.title    !== undefined) updates.title    = fields.title
-    if (fields.tags     !== undefined) updates.tags     = fields.tags
-    if (fields.location !== undefined) updates.location = fields.location
-    if (fields.camera   !== undefined) updates.camera   = fields.camera
+    if (fields.title     !== undefined) updates.title     = fields.title
+    if (fields.tags      !== undefined) updates.tags      = fields.tags
+    if (fields.location  !== undefined) updates.location  = fields.location
+    if (fields.camera    !== undefined) updates.camera    = fields.camera
     if (fields.dateTaken !== undefined) updates.dateTaken = fields.dateTaken
+    if (fields.visible   !== undefined) updates.visible   = fields.visible
 
     await patch.set(updates).commit()
 

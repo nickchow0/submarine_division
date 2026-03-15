@@ -66,5 +66,13 @@ export const photoType = defineType({
       title: 'Date Taken',
       type: 'date',
     }),
+
+    defineField({
+      name: 'visible',
+      title: 'Visible in gallery',
+      type: 'boolean',
+      description: 'Uncheck to hide this photo from the public gallery without deleting it.',
+      initialValue: true,
+    }),
   ],
 })

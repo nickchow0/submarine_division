@@ -9,8 +9,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { sanityClient, sanityWriteClient } from '@/lib/sanity'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
 const PROJECT_ID = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
 const DATASET    = process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production'
 
@@ -23,6 +21,7 @@ function buildImageUrl(ref: string): string {
 }
 
 async function generateCaption(photoId: string, imageRef: string): Promise<string> {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const imageUrl = buildImageUrl(imageRef)
   const imageRes = await fetch(imageUrl)
   if (!imageRes.ok) throw new Error(`Failed to fetch image: ${imageRes.status}`)

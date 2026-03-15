@@ -9,6 +9,7 @@ export type Photo = {
   location: string | null
   camera: string | null
   dateTaken: string | null   // ISO date string e.g. "2024-11-03"
+  visible: boolean           // false = hidden from gallery (default true)
 
   // Image fields projected from the Sanity asset
   src: string                // Full CDN URL from Sanity

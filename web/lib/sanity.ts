@@ -14,12 +14,14 @@ export const sanityClient = createClient({
   useCdn: false,  // token-authenticated requests can't use the CDN
 })
 
-// A second client with write access — used only server-side in API routes
+// A second client with write access — used only server-side in API routes.
+// Falls back to the read token if no dedicated write token is set; this works
+// as long as the token was created with Editor (not Viewer) permissions.
 export const sanityWriteClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
   apiVersion: '2024-01-01',
-  token: process.env.SANITY_WRITE_TOKEN,  // never exposed to the browser
+  token: process.env.SANITY_WRITE_TOKEN ?? process.env.SANITY_READ_TOKEN,
   useCdn: false,
 })
 
@@ -46,8 +48,10 @@ export function urlFor(source: SanityImageSource) {
 //
 // The @ symbol refers to the current document being iterated.
 
+// visible != false means photos where visible is true OR the field doesn't exist
+// yet — so existing photos without the field set still appear by default.
 export const ALL_PHOTOS_QUERY = `
-  *[_type == "photo"] | order(dateTaken desc) {
+  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) {
     _id,
     title,
     "tags": coalesce(tags, []),
@@ -55,6 +59,7 @@ export const ALL_PHOTOS_QUERY = `
     "location": coalesce(location, null),
     "camera": coalesce(camera, null),
     "dateTaken": coalesce(dateTaken, null),
+    "visible": coalesce(visible, true),
     "src": image.asset->url,
     "width": image.asset->metadata.dimensions.width,
     "height": image.asset->metadata.dimensions.height,
@@ -76,6 +81,7 @@ export const PHOTO_BY_ID_QUERY = `
     "location": coalesce(location, null),
     "camera": coalesce(camera, null),
     "dateTaken": coalesce(dateTaken, null),
+    "visible": coalesce(visible, true),
     "src": image.asset->url,
     "width": image.asset->metadata.dimensions.width,
     "height": image.asset->metadata.dimensions.height,
@@ -84,8 +90,8 @@ export const PHOTO_BY_ID_QUERY = `
 `
 
 // ─── All photo IDs query ────────────────────────────────────────────────────
-// Returns just the _id of every photo in display order (newest first).
+// Returns just the _id of every visible photo in display order (newest first).
 // Used to determine prev/next navigation on the detail page.
 export const ALL_PHOTO_IDS_QUERY = `
-  *[_type == "photo"] | order(dateTaken desc) { _id }
+  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) { _id }
 `
