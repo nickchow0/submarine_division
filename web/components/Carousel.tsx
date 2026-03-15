@@ -62,8 +62,6 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
           priority={current === 0}
           sizes="100vw"
         />
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ocean-950 via-ocean-950/30 to-transparent" />
       </div>
 
       {/* Prev / Next arrows */}
