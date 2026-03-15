@@ -212,12 +212,17 @@ export default function AdminPage() {
           </h2>
           <p className="text-slate-500 text-sm mt-0.5">SubmarineDivision</p>
         </div>
-        <button
-          onClick={logout}
-          className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
-        >
-          Sign out
-        </button>
+        <div className="flex items-center gap-4">
+          <a href="/admin/locations" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">
+            Locations
+          </a>
+          <button
+            onClick={logout}
+            className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

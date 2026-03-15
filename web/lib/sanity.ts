@@ -89,6 +89,25 @@ export const PHOTO_BY_ID_QUERY = `
   }
 `
 
+// ─── Map pins query ──────────────────────────────────────────────────────────
+// Fetches all map pin documents with their referenced photos expanded.
+export const ALL_MAP_PINS_QUERY = `
+  *[_type == "mapPin"] | order(name asc) {
+    _id,
+    name,
+    "description": coalesce(description, null),
+    coordinates,
+    "photos": photos[]->{
+      _id,
+      title,
+      "src": image.asset->url,
+      "width": image.asset->metadata.dimensions.width,
+      "height": image.asset->metadata.dimensions.height,
+      "blurDataURL": image.asset->metadata.lqip
+    }
+  }
+`
+
 // ─── All photo IDs query ────────────────────────────────────────────────────
 // Returns just the _id of every visible photo in display order (newest first).
 // Used to determine prev/next navigation on the detail page.

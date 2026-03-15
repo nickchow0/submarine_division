@@ -36,6 +36,22 @@ export type SanityPhotoDocument = {
   }
 }
 
+// ─── Map pin ──────────────────────────────────────────────────────────────────
+export type MapPin = {
+  _id: string
+  name: string
+  description: string | null
+  coordinates: { lat: number; lng: number }
+  photos: {
+    _id: string
+    title: string
+    src: string
+    width: number
+    height: number
+    blurDataURL: string | null
+  }[]
+}
+
 // ─── Sanity webhook payload ───────────────────────────────────────────────────
 export type SanityWebhookPayload = {
   _id: string

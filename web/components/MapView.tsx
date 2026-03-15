@@ -1,0 +1,158 @@
+'use client'
+
+// ─── MapView ──────────────────────────────────────────────────────────────────
+// Vanilla Leaflet (no react-leaflet) — avoids the "container already
+// initialized" error that plagues react-leaflet + React 18 StrictMode.
+
+import { useEffect, useRef, useState } from 'react'
+import L from 'leaflet'
+import Image from 'next/image'
+import Link from 'next/link'
+import type { MapPin } from '@/types'
+import 'leaflet/dist/leaflet.css'
+
+function makePinIcon(active = false) {
+  return L.divIcon({
+    className: '',
+    iconAnchor: [12, 36],
+    html: `<svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z"
+        fill="${active ? '#38bdf8' : '#0ea5e9'}" opacity="${active ? '1' : '0.85'}"/>
+      <circle cx="12" cy="12" r="5" fill="white" opacity="0.9"/>
+    </svg>`,
+  })
+}
+
+export default function MapView({ pins }: { pins: MapPin[] }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mapRef       = useRef<L.Map | null>(null)
+  const markersRef   = useRef<Map<string, L.Marker>>(new Map())
+  const [selected, setSelected] = useState<MapPin | null>(null)
+
+  // ── Initialize map once ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return
+
+    const map = L.map(containerRef.current, { center: [20, 0], zoom: 2, zoomControl: true })
+    mapRef.current = map
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+      maxZoom: 19,
+    }).addTo(map)
+
+    return () => {
+      map.remove()
+      mapRef.current = null
+      markersRef.current.clear()
+    }
+  }, [])
+
+  // ── Sync markers when pins or selection changes ───────────────────────────
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    // Remove old markers
+    markersRef.current.forEach(m => m.remove())
+    markersRef.current.clear()
+
+    if (pins.length === 0) return
+
+    pins.forEach(pin => {
+      const marker = L.marker([pin.coordinates.lat, pin.coordinates.lng], {
+        icon: makePinIcon(selected?._id === pin._id),
+      }).addTo(map)
+
+      marker.on('click', () => {
+        setSelected(prev => prev?._id === pin._id ? null : pin)
+      })
+
+      markersRef.current.set(pin._id, marker)
+    })
+
+    // Fit bounds on first load
+    if (pins.length === 1) {
+      map.setView([pins[0].coordinates.lat, pins[0].coordinates.lng], 8)
+    } else if (pins.length > 1) {
+      const bounds = L.latLngBounds(pins.map(p => [p.coordinates.lat, p.coordinates.lng]))
+      map.fitBounds(bounds, { padding: [60, 60] })
+    }
+  }, [pins, selected])
+
+  return (
+    <div className="relative w-full h-full flex">
+      {/* Map container */}
+      <div ref={containerRef} className="flex-1 h-full" style={{ background: '#0f172a' }} />
+
+      {/* Photo panel */}
+      <div
+        className={`
+          absolute top-0 right-0 h-full z-[1000] bg-slate-950/95 backdrop-blur-sm
+          border-l border-slate-800 overflow-y-auto transition-all duration-300 ease-in-out
+          ${selected ? 'w-80 sm:w-96 opacity-100' : 'w-0 opacity-0 pointer-events-none'}
+        `}
+      >
+        {selected && (
+          <div className="p-5">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-slate-100 font-medium">{selected.name}</h2>
+                {selected.description && (
+                  <p className="text-slate-500 text-sm mt-0.5">{selected.description}</p>
+                )}
+                <p className="text-slate-600 text-xs mt-1">
+                  {selected.photos.length} photo{selected.photos.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0 ml-2"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {selected.photos.length === 0 ? (
+              <p className="text-slate-600 text-sm italic">No photos tagged to this location yet.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {selected.photos.map(photo => (
+                  <Link
+                    key={photo._id}
+                    href={`/photo/${photo._id}`}
+                    className="group relative aspect-square rounded-lg overflow-hidden bg-slate-800 block"
+                  >
+                    <Image
+                      src={`${photo.src}?w=300&q=70`}
+                      alt={photo.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="150px"
+                      placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+                      blurDataURL={photo.blurDataURL ?? undefined}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    <p className="absolute bottom-0 left-0 right-0 px-2 py-1.5 text-xs text-white bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2">
+                      {photo.title}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {pins.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[500]">
+          <p className="text-slate-500 text-sm bg-slate-900/80 px-4 py-2 rounded-lg">
+            No locations added yet
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

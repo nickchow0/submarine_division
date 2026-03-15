@@ -43,7 +43,8 @@ export default function RootLayout({
           <p className="text-slate-500 text-sm mt-1">Underwater Photography by Nick Chow</p>
           <nav className="mt-4 flex justify-center gap-6">
             <Link href="/gallery" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Gallery</Link>
-            <Link href="/about" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">About</Link>
+            <Link href="/map"     className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Map</Link>
+            <Link href="/about"   className="text-sm text-slate-400 hover:text-sky-400 transition-colors">About</Link>
           </nav>
         </header>
 
