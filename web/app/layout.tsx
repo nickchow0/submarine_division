@@ -9,6 +9,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
 import ImageProtection from '@/components/ImageProtection'
+import PageTransition from '@/components/PageTransition'
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function RootLayout({
         </header>
 
         {/* ── Page content ── */}
-        <main>{children}</main>
+        <PageTransition>{children}</PageTransition>
 
         {/* ── Footer ── */}
         <footer className="text-center py-8 text-slate-600 text-xs mt-12">

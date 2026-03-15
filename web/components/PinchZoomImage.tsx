@@ -114,7 +114,7 @@ export default function PinchZoomImage({ photo }: Props) {
           alt={photo.title}
           width={photo.width}
           height={photo.height}
-          className="w-full h-auto object-contain max-h-[80vh]"
+          className="block w-auto h-auto max-w-full max-h-[80vh] mx-auto"
           placeholder={photo.blurDataURL ? 'blur' : 'empty'}
           blurDataURL={photo.blurDataURL ?? undefined}
           priority
