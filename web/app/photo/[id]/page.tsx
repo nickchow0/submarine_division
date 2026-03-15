@@ -5,10 +5,10 @@
 // on the server, protected by the middleware password gate.
 
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY } from '@/lib/sanity'
 import PhotoPageClient from '@/components/PhotoPageClient'
+import PinchZoomImage from '@/components/PinchZoomImage'
 import type { Photo } from '@/types'
 import type { Metadata } from 'next'
 
@@ -102,19 +102,7 @@ export default async function PhotoPage({ params }: Props) {
       </div>
 
       {/* Photo */}
-      <div className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800">
-        <Image
-          src={photo.src}
-          alt={photo.title}
-          width={photo.width}
-          height={photo.height}
-          className="w-full h-auto object-contain"
-          placeholder={photo.blurDataURL ? 'blur' : 'empty'}
-          blurDataURL={photo.blurDataURL ?? undefined}
-          priority
-          sizes="(max-width: 1024px) 100vw, 1024px"
-        />
-      </div>
+      <PinchZoomImage photo={photo} />
 
       {/* Metadata */}
       <div className="mt-6 space-y-4">
