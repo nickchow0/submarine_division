@@ -35,7 +35,7 @@ export default function AboutPage() {
           <li className="ml-4">Nikonos RS 13</li>
           <li className="ml-4">Sony 28-60mm + WWL-1</li>
           <li className="ml-4">Sony 16-35 f/4</li>
-          <li><span className="text-slate-300">Lighting:</span> Retra Prime x2</li>
+          <li><span className="text-slate-300">Lighting:</span> Retra Prime x2, Retra LSD</li>
           <li><span className="text-slate-300">Dive gear:</span> rEvo III Expedition hCCR</li>
         </ul>
       </section>

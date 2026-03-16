@@ -8,6 +8,7 @@
 
 import { NextResponse } from 'next/server'
 import { sanityWriteClient } from '@/lib/sanity'
+import { parseExif } from '@/lib/exif'
 
 // Allow up to 60 seconds — large files take time to transfer to Sanity
 export const maxDuration = 60
@@ -21,21 +22,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: 'No file provided' }, { status: 400 })
     }
 
-    // ── Upload directly to Sanity asset store ────────────────────────────────
-    // Pass the Blob/File directly instead of converting to a Buffer first —
-    // avoids creating two copies of the file in memory (important for large files).
-    const asset = await sanityWriteClient.assets.upload('image', file, {
+    // ── Read file buffer once for both EXIF parsing and upload ───────────────
+    const buf    = Buffer.from(await file.arrayBuffer())
+    const exif   = parseExif(buf)
+
+    // ── Upload to Sanity asset store ──────────────────────────────────────────
+    const asset = await sanityWriteClient.assets.upload('image', buf, {
       filename: file.name,
       contentType: file.type || 'image/jpeg',
     })
 
     // ── Derive a human-readable title from the filename ──────────────────────
     const title = file.name
-      .replace(/\.[^/.]+$/, '')          // strip extension
-      .replace(/[-_]+/g, ' ')            // hyphens / underscores → spaces
+      .replace(/\.[^/.]+$/, '')              // strip extension
+      .replace(/[-_]+/g, ' ')               // hyphens / underscores → spaces
       .replace(/\b\w/g, c => c.toUpperCase()) // Title Case
 
-    // ── Create the photo document ────────────────────────────────────────────
+    // ── Create the photo document (with EXIF fields if found) ─────────────────
     const doc = await sanityWriteClient.create({
       _type: 'photo',
       title,
@@ -43,27 +46,39 @@ export async function POST(request: Request) {
         _type: 'image',
         asset: { _type: 'reference', _ref: asset._id },
       },
-      visible: true,
-      tags: [],
-      aiCaption: '',
+      visible:     true,
+      tags:        [],
+      aiCaption:   '',
+      camera:      exif.camera      ?? null,
+      lens:        exif.lens        ?? null,
+      focalLength: exif.focalLength ?? null,
+      iso:         exif.iso         ?? null,
+      shutterSpeed: exif.shutterSpeed ?? null,
+      aperture:    exif.aperture    ?? null,
+      dateTaken:   exif.dateTaken   ?? null,
     })
 
     // ── Return AdminPhoto shape ───────────────────────────────────────────────
     return NextResponse.json({
       ok: true,
       photo: {
-        _id:       doc._id,
+        _id:         doc._id,
         title,
-        tags:      [],
-        aiCaption: '',
-        location:  null,
-        camera:    null,
-        dateTaken: null,
-        visible:   true,
-        src:       asset.url,
-        width:     (asset as any).metadata?.dimensions?.width  ?? 0,
-        height:    (asset as any).metadata?.dimensions?.height ?? 0,
-        imageRef:  asset._id,
+        tags:        [],
+        aiCaption:   '',
+        location:    null,
+        camera:      exif.camera      ?? null,
+        lens:        exif.lens        ?? null,
+        focalLength: exif.focalLength ?? null,
+        iso:         exif.iso         ?? null,
+        shutterSpeed: exif.shutterSpeed ?? null,
+        aperture:    exif.aperture    ?? null,
+        dateTaken:   exif.dateTaken   ?? null,
+        visible:     true,
+        src:         asset.url,
+        width:       (asset as any).metadata?.dimensions?.width  ?? 0,
+        height:      (asset as any).metadata?.dimensions?.height ?? 0,
+        imageRef:    asset._id,
       },
     })
   } catch (err) {

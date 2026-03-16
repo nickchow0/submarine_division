@@ -123,12 +123,17 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
       body: JSON.stringify({
         id: photo._id,
         fields: {
-          title:     editState.title.trim(),
-          tags:      editState.tags.split(',').map(t => t.trim()).filter(Boolean),
-          aiCaption: editState.aiCaption.trim(),
-          location:  editState.location.trim()  || null,
-          camera:    editState.camera.trim()    || null,
-          dateTaken: editState.dateTaken.trim() || null,
+          title:       editState.title.trim(),
+          tags:        editState.tags.split(',').map(t => t.trim()).filter(Boolean),
+          aiCaption:   editState.aiCaption.trim(),
+          location:    editState.location.trim()    || null,
+          camera:      editState.camera.trim()      || null,
+          dateTaken:   editState.dateTaken.trim()   || null,
+          lens:        editState.lens.trim()        || null,
+          focalLength: editState.focalLength.trim() || null,
+          iso:         editState.iso.trim()         || null,
+          shutterSpeed: editState.shutterSpeed.trim() || null,
+          aperture:    editState.aperture.trim()    || null,
         },
       }),
     })
@@ -137,12 +142,17 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
       setPhotos(prev => prev.map(p =>
         p._id !== photo._id ? p : {
           ...p,
-          title:     editState.title.trim(),
-          tags:      editState.tags.split(',').map(t => t.trim()).filter(Boolean),
-          aiCaption: editState.aiCaption.trim(),
-          location:  editState.location.trim()  || null,
-          camera:    editState.camera.trim()    || null,
-          dateTaken: editState.dateTaken.trim() || null,
+          title:       editState.title.trim(),
+          tags:        editState.tags.split(',').map(t => t.trim()).filter(Boolean),
+          aiCaption:   editState.aiCaption.trim(),
+          location:    editState.location.trim()    || null,
+          camera:      editState.camera.trim()      || null,
+          dateTaken:   editState.dateTaken.trim()   || null,
+          lens:        editState.lens.trim()        || null,
+          focalLength: editState.focalLength.trim() || null,
+          iso:         editState.iso.trim()         || null,
+          shutterSpeed: editState.shutterSpeed.trim() || null,
+          aperture:    editState.aperture.trim()    || null,
         }
       ))
       setEditingId(null)
@@ -648,6 +658,26 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
                 <div>
                   <label className="text-xs text-slate-500 mb-1 block">Date taken</label>
                   <input type="date" value={editState.dateTaken} onChange={e => setEditState({ ...editState, dateTaken: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Lens</label>
+                  <input value={editState.lens} onChange={e => setEditState({ ...editState, lens: e.target.value })} placeholder="e.g. Sigma 15mm f/2.8 Fisheye" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Focal length</label>
+                  <input value={editState.focalLength} onChange={e => setEditState({ ...editState, focalLength: e.target.value })} placeholder="e.g. 15mm" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">ISO</label>
+                  <input value={editState.iso} onChange={e => setEditState({ ...editState, iso: e.target.value })} placeholder="e.g. 800" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Shutter speed</label>
+                  <input value={editState.shutterSpeed} onChange={e => setEditState({ ...editState, shutterSpeed: e.target.value })} placeholder="e.g. 1/250" className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Aperture</label>
+                  <input value={editState.aperture} onChange={e => setEditState({ ...editState, aperture: e.target.value })} placeholder="e.g. f/2.8" className={inputCls} />
                 </div>
               </div>
               <div>

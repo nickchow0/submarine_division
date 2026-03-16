@@ -13,10 +13,15 @@ export async function PATCH(request: Request) {
         title?: string
         tags?: string[]
         aiCaption?: string
-        location?: string
-        camera?: string
-        dateTaken?: string
+        location?: string | null
+        camera?: string | null
+        dateTaken?: string | null
         visible?: boolean
+        lens?: string | null
+        focalLength?: string | null
+        iso?: string | null
+        shutterSpeed?: string | null
+        aperture?: string | null
       }
     }
 
@@ -28,13 +33,18 @@ export async function PATCH(request: Request) {
     const patch = sanityWriteClient.patch(id)
 
     const updates: Record<string, unknown> = {}
-    if (fields.title      !== undefined) updates.title      = fields.title
-    if (fields.tags       !== undefined) updates.tags       = fields.tags
-    if (fields.aiCaption  !== undefined) updates.aiCaption  = fields.aiCaption
-    if (fields.location   !== undefined) updates.location   = fields.location
-    if (fields.camera     !== undefined) updates.camera     = fields.camera
-    if (fields.dateTaken  !== undefined) updates.dateTaken  = fields.dateTaken
-    if (fields.visible    !== undefined) updates.visible    = fields.visible
+    if (fields.title       !== undefined) updates.title       = fields.title
+    if (fields.tags        !== undefined) updates.tags        = fields.tags
+    if (fields.aiCaption   !== undefined) updates.aiCaption   = fields.aiCaption
+    if (fields.location    !== undefined) updates.location    = fields.location
+    if (fields.camera      !== undefined) updates.camera      = fields.camera
+    if (fields.dateTaken   !== undefined) updates.dateTaken   = fields.dateTaken
+    if (fields.visible     !== undefined) updates.visible     = fields.visible
+    if (fields.lens        !== undefined) updates.lens        = fields.lens
+    if (fields.focalLength !== undefined) updates.focalLength = fields.focalLength
+    if (fields.iso         !== undefined) updates.iso         = fields.iso
+    if (fields.shutterSpeed !== undefined) updates.shutterSpeed = fields.shutterSpeed
+    if (fields.aperture    !== undefined) updates.aperture    = fields.aperture
 
     await patch.set(updates).commit()
 

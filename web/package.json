@@ -10,7 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "captions": "npx tsx scripts/generate-captions.ts"
+    "captions": "npx tsx scripts/generate-captions.ts",
+    "extract-exif": "npx tsx scripts/extract-exif.ts",
+    "extract-exif:local": "npx tsx scripts/extract-exif.ts --local-dir"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
