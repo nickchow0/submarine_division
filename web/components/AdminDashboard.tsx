@@ -28,6 +28,7 @@ export type AdminPhoto = {
 type EditState = {
   title: string
   tags: string
+  aiCaption: string
   location: string
   camera: string
   dateTaken: string
@@ -70,6 +71,7 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     setEditState({
       title:     photo.title,
       tags:      photo.tags.join(', '),
+      aiCaption: photo.aiCaption ?? '',
       location:  photo.location  ?? '',
       camera:    photo.camera    ?? '',
       dateTaken: photo.dateTaken ?? '',
@@ -92,6 +94,7 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         fields: {
           title:     editState.title.trim(),
           tags:      editState.tags.split(',').map(t => t.trim()).filter(Boolean),
+          aiCaption: editState.aiCaption.trim(),
           location:  editState.location.trim()  || null,
           camera:    editState.camera.trim()    || null,
           dateTaken: editState.dateTaken.trim() || null,
@@ -105,6 +108,7 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
           ...p,
           title:     editState.title.trim(),
           tags:      editState.tags.split(',').map(t => t.trim()).filter(Boolean),
+          aiCaption: editState.aiCaption.trim(),
           location:  editState.location.trim()  || null,
           camera:    editState.camera.trim()    || null,
           dateTaken: editState.dateTaken.trim() || null,
@@ -321,6 +325,16 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
                           className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
                         />
                       </div>
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Caption</label>
+                      <textarea
+                        value={editState.aiCaption}
+                        onChange={e => setEditState({ ...editState, aiCaption: e.target.value })}
+                        rows={3}
+                        placeholder="Write a caption, or use the ✦ button to generate one with AI"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500 resize-y"
+                      />
                     </div>
                     <div className="flex gap-2 pt-1">
                       <button
