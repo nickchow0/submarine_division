@@ -18,6 +18,11 @@ export type AdminPhoto = {
   location: string | null
   camera: string | null
   dateTaken: string | null
+  lens: string | null
+  focalLength: string | null
+  iso: string | null
+  shutterSpeed: string | null
+  aperture: string | null
   visible: boolean
   src: string
   width: number
@@ -32,6 +37,11 @@ type EditState = {
   location: string
   camera: string
   dateTaken: string
+  lens: string
+  focalLength: string
+  iso: string
+  shutterSpeed: string
+  aperture: string
 }
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
@@ -79,12 +89,17 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   function startEdit(photo: AdminPhoto) {
     setEditingId(photo._id)
     setEditState({
-      title:     photo.title,
-      tags:      photo.tags.join(', '),
-      aiCaption: photo.aiCaption ?? '',
-      location:  photo.location  ?? '',
-      camera:    photo.camera    ?? '',
-      dateTaken: photo.dateTaken ?? '',
+      title:       photo.title,
+      tags:        photo.tags.join(', '),
+      aiCaption:   photo.aiCaption  ?? '',
+      location:    photo.location   ?? '',
+      camera:      photo.camera     ?? '',
+      dateTaken:   photo.dateTaken  ?? '',
+      lens:        photo.lens       ?? '',
+      focalLength: photo.focalLength ?? '',
+      iso:         photo.iso         ?? '',
+      shutterSpeed: photo.shutterSpeed ?? '',
+      aperture:    photo.aperture   ?? '',
     })
   }
 

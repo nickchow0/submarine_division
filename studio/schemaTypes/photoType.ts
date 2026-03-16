@@ -68,6 +68,41 @@ export const photoType = defineType({
     }),
 
     defineField({
+      name: 'lens',
+      title: 'Lens',
+      type: 'string',
+      description: 'e.g. "Sigma 15mm f/2.8 Fisheye"',
+    }),
+
+    defineField({
+      name: 'focalLength',
+      title: 'Focal Length',
+      type: 'string',
+      description: 'e.g. "15mm"',
+    }),
+
+    defineField({
+      name: 'iso',
+      title: 'ISO',
+      type: 'string',
+      description: 'e.g. "800"',
+    }),
+
+    defineField({
+      name: 'shutterSpeed',
+      title: 'Shutter Speed',
+      type: 'string',
+      description: 'e.g. "1/250"',
+    }),
+
+    defineField({
+      name: 'aperture',
+      title: 'Aperture',
+      type: 'string',
+      description: 'e.g. "f/2.8"',
+    }),
+
+    defineField({
       name: 'visible',
       title: 'Visible in gallery',
       type: 'boolean',

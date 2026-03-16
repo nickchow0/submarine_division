@@ -9,6 +9,11 @@ export type Photo = {
   location: string | null
   camera: string | null
   dateTaken: string | null   // ISO date string e.g. "2024-11-03"
+  lens: string | null
+  focalLength: string | null
+  iso: string | null
+  shutterSpeed: string | null
+  aperture: string | null
   visible: boolean           // false = hidden from gallery (default true)
 
   // Image fields projected from the Sanity asset
