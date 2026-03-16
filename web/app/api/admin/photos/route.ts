@@ -45,6 +45,35 @@ export async function PATCH(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  try {
+    const { id, imageRef } = await request.json() as { id: string; imageRef: string }
+
+    if (!id) {
+      return NextResponse.json({ ok: false, error: 'Missing photo id' }, { status: 400 })
+    }
+
+    // Delete the photo document first
+    await sanityWriteClient.delete(id)
+
+    // Also delete the underlying image asset so it doesn't pile up in the media library.
+    // image.asset._ref is the asset document's _id, so we can delete it directly.
+    // If the asset is referenced by other documents this will fail silently — that's fine.
+    if (imageRef) {
+      try {
+        await sanityWriteClient.delete(imageRef)
+      } catch {
+        // Asset may be referenced elsewhere — not a fatal error
+      }
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('Admin photo delete error:', err)
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
+}
+
 export function GET() {
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }
