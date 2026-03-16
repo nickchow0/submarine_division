@@ -77,6 +77,7 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
   const [bulkTagInput, setBulkTagInput] = useState('')
   const [bulkTagging, setBulkTagging]   = useState(false)
+  const [imageLoading, setImageLoading] = useState(false)
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalPhotos  = photos.length
@@ -87,6 +88,7 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
 
   // ── Edit helpers ──────────────────────────────────────────────────────────
   function startEdit(photo: AdminPhoto) {
+    setImageLoading(true)
     setEditingId(photo._id)
     setEditState({
       title:       photo.title,
@@ -109,10 +111,24 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   }
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') cancelEdit() }
+    const handler = (e: KeyboardEvent) => {
+      if (!editingId) return
+      // Don't steal arrow keys while the user is typing in an input/textarea
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if (e.key === 'Escape') {
+        cancelEdit()
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        const idx = photos.findIndex(p => p._id === editingId)
+        const next = e.key === 'ArrowLeft' ? photos[idx - 1] : photos[idx + 1]
+        if (next) startEdit(next)
+      }
+    }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [editingId, photos])
 
   async function saveEdit(photo: AdminPhoto) {
     if (!editState) return
@@ -607,6 +623,32 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
           className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={cancelEdit}
         >
+          {/* Prev arrow (outside modal, on the left) */}
+          {(() => { const idx = photos.findIndex(p => p._id === editingPhoto._id); return idx > 0 ? (
+            <button
+              onClick={e => { e.stopPropagation(); startEdit(photos[idx - 1]) }}
+              className="absolute left-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-[9999]"
+              title="Previous photo (←)"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          ) : null })()}
+
+          {/* Next arrow (outside modal, on the right) */}
+          {(() => { const idx = photos.findIndex(p => p._id === editingPhoto._id); return idx < photos.length - 1 ? (
+            <button
+              onClick={e => { e.stopPropagation(); startEdit(photos[idx + 1]) }}
+              className="absolute right-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-[9999]"
+              title="Next photo (→)"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          ) : null })()}
+
           <div
             className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
             onClick={e => e.stopPropagation()}
@@ -614,13 +656,21 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
             {/* Photo + close button */}
             <div className="relative bg-slate-950">
               <Image
-                src={editingPhoto.src}
+                key={editingPhoto._id}
+                src={`${editingPhoto.src}?w=1400&q=75&fm=jpg&auto=format`}
                 alt={editingPhoto.title}
                 width={editingPhoto.width}
                 height={editingPhoto.height}
-                className="w-full h-auto max-h-[60vh] object-contain block"
+                className={`w-full h-auto max-h-[60vh] object-contain block transition-opacity duration-200 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                 unoptimized
+                onLoad={() => setImageLoading(false)}
               />
+              {/* Spinner shown while image loads */}
+              {imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center min-h-[200px]">
+                  <span className="w-8 h-8 border-2 border-slate-600 border-t-sky-400 rounded-full animate-spin" />
+                </div>
+              )}
               <button
                 onClick={cancelEdit}
                 className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-1.5 transition-colors"
@@ -632,12 +682,12 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
             </div>
 
             {/* Title bar */}
-            <div className="px-6 pt-4 pb-3 border-b border-slate-800">
+            <div className={`px-6 pt-4 pb-3 border-b border-slate-800 transition-opacity duration-150 ${imageLoading ? 'opacity-40' : 'opacity-100'}`}>
               <p className="text-slate-200 text-sm font-medium truncate">{editingPhoto.title}</p>
             </div>
 
             {/* Form */}
-            <div className="px-6 py-4 space-y-3">
+            <div className={`px-6 py-4 space-y-3 transition-opacity duration-150 ${imageLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-slate-500 mb-1 block">Title</label>
