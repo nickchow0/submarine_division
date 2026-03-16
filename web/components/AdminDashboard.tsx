@@ -5,7 +5,7 @@
 // then handles all interactive features client-side: visibility toggle, inline
 // editing, caption regeneration, and bulk caption generation.
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -79,6 +79,38 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   const [bulkTagging, setBulkTagging]   = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
 
+  // ── Sort & filter ──────────────────────────────────────────────────────────
+  type SortKey = 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc'
+  const [sortBy,           setSortBy]           = useState<SortKey>('date-desc')
+  const [filterVisibility, setFilterVisibility] = useState<'all' | 'visible' | 'hidden'>('all')
+  const [filterCaption,    setFilterCaption]    = useState<'all' | 'missing'>('all')
+  const [filterTag,        setFilterTag]        = useState('')
+
+  const visiblePhotos = useMemo(() => {
+    let list = [...photos]
+
+    // Filter
+    if (filterVisibility === 'visible') list = list.filter(p => p.visible)
+    if (filterVisibility === 'hidden')  list = list.filter(p => !p.visible)
+    if (filterCaption    === 'missing') list = list.filter(p => !p.aiCaption)
+    if (filterTag.trim()) {
+      const q = filterTag.trim().toLowerCase()
+      list = list.filter(p => p.tags.some(t => t.toLowerCase().includes(q)))
+    }
+
+    // Sort — hidden photos always sink to the end
+    list.sort((a, b) => {
+      if (a.visible !== b.visible) return a.visible ? -1 : 1
+      if (sortBy === 'date-desc') return (b.dateTaken ?? '').localeCompare(a.dateTaken ?? '')
+      if (sortBy === 'date-asc')  return (a.dateTaken ?? '').localeCompare(b.dateTaken ?? '')
+      if (sortBy === 'title-asc') return a.title.localeCompare(b.title)
+      if (sortBy === 'title-desc')return b.title.localeCompare(a.title)
+      return 0
+    })
+
+    return list
+  }, [photos, sortBy, filterVisibility, filterCaption, filterTag])
+
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalPhotos  = photos.length
   const hiddenPhotos = photos.filter(p => !p.visible).length
@@ -121,14 +153,14 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         cancelEdit()
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault()
-        const idx = photos.findIndex(p => p._id === editingId)
-        const next = e.key === 'ArrowLeft' ? photos[idx - 1] : photos[idx + 1]
+        const idx = visiblePhotos.findIndex(p => p._id === editingId)
+        const next = e.key === 'ArrowLeft' ? visiblePhotos[idx - 1] : visiblePhotos[idx + 1]
         if (next) startEdit(next)
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [editingId, photos])
+  }, [editingId, visiblePhotos])
 
   async function saveEdit(photo: AdminPhoto) {
     if (!editState) return
@@ -437,6 +469,56 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         )}
       </div>
 
+      {/* ── Sort & filter bar ─────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value as SortKey)}
+          className="text-sm bg-slate-800 border border-slate-700 text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-sky-500"
+        >
+          <option value="date-desc">Date ↓ newest</option>
+          <option value="date-asc">Date ↑ oldest</option>
+          <option value="title-asc">Title A → Z</option>
+          <option value="title-desc">Title Z → A</option>
+        </select>
+
+        {/* Visibility filter */}
+        <div className="flex rounded-lg overflow-hidden border border-slate-700 text-sm">
+          {(['all', 'visible', 'hidden'] as const).map(v => (
+            <button
+              key={v}
+              onClick={() => setFilterVisibility(v)}
+              className={`px-3 py-1.5 capitalize transition-colors ${filterVisibility === v ? 'bg-slate-600 text-slate-100' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+
+        {/* Caption filter */}
+        <button
+          onClick={() => setFilterCaption(f => f === 'all' ? 'missing' : 'all')}
+          className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${filterCaption === 'missing' ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'}`}
+        >
+          No caption
+        </button>
+
+        {/* Tag search */}
+        <input
+          value={filterTag}
+          onChange={e => setFilterTag(e.target.value)}
+          placeholder="Filter by tag…"
+          className="text-sm bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 placeholder-slate-600 focus:outline-none focus:border-sky-500 w-36"
+        />
+
+        {/* Result count */}
+        <span className="text-xs text-slate-600 ml-1">
+          {visiblePhotos.length}{visiblePhotos.length !== photos.length ? ` / ${photos.length}` : ''} photo{visiblePhotos.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       {/* ── Bulk tag bar (visible when photos are selected) ───────────────── */}
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-3 mb-4 bg-slate-900 border border-sky-500/30 rounded-xl px-4 py-3">
@@ -467,11 +549,13 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
       )}
 
       {/* ── Photo grid ────────────────────────────────────────────────────── */}
-      {photos.length === 0 ? (
-        <div className="text-center py-20 text-slate-500">No photos found in Sanity.</div>
+      {visiblePhotos.length === 0 ? (
+        <div className="text-center py-20 text-slate-500">
+          {photos.length === 0 ? 'No photos found in Sanity.' : 'No photos match the current filters.'}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {photos.map(photo => (
+          {visiblePhotos.map(photo => (
             <div
               key={photo._id}
               onClick={() => startEdit(photo)}
@@ -624,9 +708,9 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
           onClick={cancelEdit}
         >
           {/* Prev arrow (outside modal, on the left) */}
-          {(() => { const idx = photos.findIndex(p => p._id === editingPhoto._id); return idx > 0 ? (
+          {(() => { const idx = visiblePhotos.findIndex(p => p._id === editingPhoto._id); return idx > 0 ? (
             <button
-              onClick={e => { e.stopPropagation(); startEdit(photos[idx - 1]) }}
+              onClick={e => { e.stopPropagation(); startEdit(visiblePhotos[idx - 1]) }}
               className="absolute left-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-[9999]"
               title="Previous photo (←)"
             >
@@ -637,9 +721,9 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
           ) : null })()}
 
           {/* Next arrow (outside modal, on the right) */}
-          {(() => { const idx = photos.findIndex(p => p._id === editingPhoto._id); return idx < photos.length - 1 ? (
+          {(() => { const idx = visiblePhotos.findIndex(p => p._id === editingPhoto._id); return idx < visiblePhotos.length - 1 ? (
             <button
-              onClick={e => { e.stopPropagation(); startEdit(photos[idx + 1]) }}
+              onClick={e => { e.stopPropagation(); startEdit(visiblePhotos[idx + 1]) }}
               className="absolute right-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-[9999]"
               title="Next photo (→)"
             >
