@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+// leaflet/dist/leaflet.css is imported in globals.css
 
 // Minimal type — only the fields the map picker needs
 export type PinBase = {

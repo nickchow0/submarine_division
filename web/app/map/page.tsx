@@ -17,7 +17,9 @@ export default async function MapPage() {
   const pins = await sanityClient.fetch<MapPin[]>(ALL_MAP_PINS_QUERY)
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 160px)' }}>
+    // position:relative + explicit height gives MapView's `absolute inset-0`
+    // a reliable bounding box regardless of flex/grid parent quirks
+    <div style={{ position: 'relative', height: 'calc(100vh - 160px)' }}>
       <MapViewWrapper pins={pins} />
     </div>
   )

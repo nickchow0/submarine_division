@@ -7,6 +7,7 @@
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import './globals.css'
 import ImageProtection from '@/components/ImageProtection'
 import PageTransition from '@/components/PageTransition'
@@ -17,21 +18,28 @@ export const metadata: Metadata = {
   description: 'Underwater & nature photography — searchable image library',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = await cookies()
+  const isAdmin = cookieStore.get('admin_access')?.value === 'granted'
+
   return (
     <html lang="en">
       <head>
-        {/* Google Fonts — Inter (body) + Cormorant Garamond (title) */}
+        {/* Google Fonts — Inter (body) + Italiana (title) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Italiana&display=swap"
           rel="stylesheet"
         />
+        {/* Leaflet CSS — served from /public so it works without postcss-import.
+            Must be a plain <link> because @import in globals.css needs postcss-import
+            and CSS imports inside next/dynamic chunks are unreliable. */}
+        <link rel="stylesheet" href="/leaflet.css" />
       </head>
       <body className="min-h-screen">
         <ImageProtection />
@@ -45,6 +53,9 @@ export default function RootLayout({
             <Link href="/gallery" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Gallery</Link>
             <Link href="/map"     className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Map</Link>
             <Link href="/about"   className="text-sm text-slate-400 hover:text-sky-400 transition-colors">About</Link>
+            {isAdmin && (
+              <Link href="/admin" className="text-sm text-slate-600 hover:text-sky-400 transition-colors">Admin</Link>
+            )}
           </nav>
         </header>
 

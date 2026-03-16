@@ -1,17 +1,5 @@
-'use client'
-
-import dynamic from 'next/dynamic'
-import type { MapPin } from '@/types'
-
-const MapView = dynamic(() => import('@/components/MapView'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center text-slate-500 text-sm">
-      Loading map…
-    </div>
-  ),
-})
-
-export default function MapViewWrapper({ pins }: { pins: MapPin[] }) {
-  return <MapView pins={pins} />
-}
+// MapView handles its own lazy Leaflet loading inside useEffect,
+// so next/dynamic + ssr:false is no longer needed here.
+// This wrapper exists solely as the client-component boundary between
+// the server-rendered MapPage and the interactive MapView.
+export { default } from '@/components/MapView'

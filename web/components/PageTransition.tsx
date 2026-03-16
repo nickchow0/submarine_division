@@ -1,22 +1,19 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
-// Renders as <main> so we don't add an extra wrapper div that could
-// disrupt page layout — the animation sits on the element that already
-// exists, not inside it.
+// Fades in page content on route changes using a CSS animation.
+// CSS-based rather than framer-motion so it works even if JS hydration
+// is delayed — the browser runs the animation natively without waiting
+// for React to settle.
 export default function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
+  // The key prop forces React to unmount/remount this element on navigation,
+  // which restarts the CSS animation on every page change.
   return (
-    <motion.main
-      key={pathname}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-    >
+    <main key={pathname} className="page-transition">
       {children}
-    </motion.main>
+    </main>
   )
 }

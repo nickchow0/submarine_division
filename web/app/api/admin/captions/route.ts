@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
         }
       `)
 
-      const results: { id: string; ok: boolean; error?: string }[] = []
+      const results: { id: string; ok: boolean; caption?: string; error?: string }[] = []
 
       for (const photo of missing) {
         try {
-          await generateCaption(photo._id, photo.imageRef)
-          results.push({ id: photo._id, ok: true })
+          const caption = await generateCaption(photo._id, photo.imageRef)
+          results.push({ id: photo._id, ok: true, caption })
         } catch (err) {
           results.push({ id: photo._id, ok: false, error: String(err) })
         }
