@@ -118,7 +118,7 @@ export default function PinchZoomImage({ photo }: Props) {
           placeholder={photo.blurDataURL ? 'blur' : 'empty'}
           blurDataURL={photo.blurDataURL ?? undefined}
           priority
-          sizes="(max-width: 1024px) 100vw, 1024px"
+          unoptimized
           draggable={false}
         />
       </div>

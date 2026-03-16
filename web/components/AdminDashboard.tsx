@@ -5,7 +5,7 @@
 // then handles all interactive features client-side: visibility toggle, inline
 // editing, caption regeneration, and bulk caption generation.
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -62,6 +62,8 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   const [feedback, setFeedback]           = useState<{ id: string; msg: string } | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId]       = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalPhotos  = photos.length
@@ -219,6 +221,37 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     setDeletingId(null)
   }
 
+  // ── Upload ────────────────────────────────────────────────────────────────
+  async function handleUpload(files: FileList) {
+    if (!files.length) return
+    const list = Array.from(files)
+    setUploadProgress({ done: 0, total: list.length })
+
+    for (let i = 0; i < list.length; i++) {
+      const formData = new FormData()
+      formData.append('file', list[i])
+
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (res.ok && data.photo) {
+        // Add to top of grid immediately
+        setPhotos(prev => [data.photo, ...prev])
+        // Then auto-generate caption in the background
+        regenerateCaption(data.photo)
+      } else {
+        setFeedback({ id: 'upload', msg: `Failed to upload ${list[i].name}` })
+        setTimeout(() => setFeedback(null), 5000)
+      }
+
+      setUploadProgress({ done: i + 1, total: list.length })
+    }
+
+    setUploadProgress(null)
+    // Reset file input so the same files can be re-selected if needed
+    if (uploadInputRef.current) uploadInputRef.current.value = ''
+  }
+
   // ── Logout ────────────────────────────────────────────────────────────────
   async function logout() {
     await fetch('/api/admin/auth/logout', { method: 'POST' })
@@ -265,8 +298,46 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         <StatCard label="Coverage"      value={totalPhotos ? `${Math.round(hasCaptions / totalPhotos * 100)}%` : '—'} sub="captioned" />
       </div>
 
-      {/* Caption bulk action */}
-      <div className="flex items-center gap-4 mb-8">
+      {/* Toolbar: upload + bulk captions */}
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+
+        {/* Hidden file input */}
+        <input
+          ref={uploadInputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+          onChange={e => { if (e.target.files?.length) handleUpload(e.target.files) }}
+        />
+
+        {/* Upload button */}
+        <button
+          onClick={() => uploadInputRef.current?.click()}
+          disabled={!!uploadProgress}
+          className="flex items-center gap-2 text-sm bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 border border-slate-700 rounded-lg px-4 py-2 transition-colors"
+        >
+          {uploadProgress ? (
+            <>
+              <span className="inline-block w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
+              Uploading {uploadProgress.done}/{uploadProgress.total}…
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              Upload photos
+            </>
+          )}
+        </button>
+
+        {/* Upload error feedback */}
+        {feedback?.id === 'upload' && (
+          <span className="text-sm text-red-400">{feedback.msg}</span>
+        )}
+
+        {/* Bulk caption generation */}
         <button
           onClick={generateAllMissing}
           disabled={bulkRunning || missingCap === 0}
@@ -307,11 +378,12 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
               {/* Image — object-contain so the full photo is always visible */}
               <div className="relative aspect-square bg-slate-950">
                 <Image
-                  src={`${photo.src}?w=600&q=75`}
+                  src={`${photo.src}?w=800&fm=jpg`}
                   alt={photo.title}
                   fill
                   className="object-contain"
                   sizes="(max-width: 1280px) 33vw, 400px"
+                  unoptimized
                 />
                 {!photo.visible && (
                   <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-slate-400 text-xs px-1.5 py-0.5 rounded">
@@ -384,16 +456,6 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
 
                 {/* Right: edit + delete */}
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => startEdit(photo)}
-                    title="Edit metadata"
-                    className="text-slate-500 hover:text-sky-400 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                    </svg>
-                  </button>
-
                   {confirmDeleteId === photo._id ? (
                     <span className="flex items-center gap-1">
                       <button
@@ -447,12 +509,12 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
             {/* Photo + close button */}
             <div className="relative bg-slate-950">
               <Image
-                src={`${editingPhoto.src}?w=800&q=85`}
+                src={editingPhoto.src}
                 alt={editingPhoto.title}
                 width={editingPhoto.width}
                 height={editingPhoto.height}
                 className="w-full h-auto max-h-[60vh] object-contain block"
-                sizes="672px"
+                unoptimized
               />
               <button
                 onClick={cancelEdit}

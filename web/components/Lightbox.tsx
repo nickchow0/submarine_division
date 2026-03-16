@@ -55,6 +55,7 @@ export default function Lightbox({ photo, onClose }: Props) {
             placeholder={photo.blurDataURL ? 'blur' : 'empty'}
             blurDataURL={photo.blurDataURL ?? undefined}
             priority
+            unoptimized
           />
         </div>
 

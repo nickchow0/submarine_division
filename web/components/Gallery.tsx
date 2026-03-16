@@ -135,14 +135,14 @@ function PhotoCard({ photo, onClick }: CardProps) {
           {/* Photo */}
           <div className="relative overflow-hidden">
             <Image
-              src={photo.src}
+              src={`${photo.src}?w=1200&fm=jpg`}
               alt={photo.title}
               width={photo.width}
               height={photo.height}
               className="w-full h-auto object-cover"
               placeholder={photo.blurDataURL ? 'blur' : 'empty'}
               blurDataURL={photo.blurDataURL ?? undefined}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
               loading="lazy"
             />
           </div>

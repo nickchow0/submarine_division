@@ -61,6 +61,7 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
           blurDataURL={photo.blurDataURL ?? undefined}
           priority={current === 0}
           sizes="100vw"
+          unoptimized
         />
       </div>
 
