@@ -83,7 +83,7 @@ export default function Gallery({ photos }: Props) {
 
       {/* Masonry grid */}
       {visiblePhotos.length > 0 ? (
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 p-4 max-w-7xl mx-auto">
+        <div className="columns-1 sm:columns-2 xl:columns-3 gap-3 p-4 max-w-7xl mx-auto">
           {visiblePhotos.map((photo) => (
             <PhotoCard
               key={photo._id}

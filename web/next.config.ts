@@ -16,8 +16,6 @@ const nextConfig: NextConfig = {
         pathname: '/images/**',
       },
     ],
-    // Photography site — keep quality high globally (default is 75)
-    quality: 90,
   },
 }
 
