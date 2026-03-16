@@ -64,6 +64,9 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   const [deletingId, setDeletingId]       = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
+  const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
+  const [bulkTagInput, setBulkTagInput] = useState('')
+  const [bulkTagging, setBulkTagging]   = useState(false)
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalPhotos  = photos.length
@@ -252,6 +255,37 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     if (uploadInputRef.current) uploadInputRef.current.value = ''
   }
 
+  // ── Bulk tag ──────────────────────────────────────────────────────────────
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkAddTags() {
+    const newTags = bulkTagInput.split(',').map(t => t.trim()).filter(Boolean)
+    if (!newTags.length || !selectedIds.size) return
+    setBulkTagging(true)
+
+    await Promise.all(Array.from(selectedIds).map(async id => {
+      const photo = photos.find(p => p._id === id)
+      if (!photo) return
+      const merged = [...new Set([...photo.tags, ...newTags])]
+      const res = await fetch('/api/admin/photos', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, fields: { tags: merged } }),
+      })
+      if (res.ok) setPhotos(prev => prev.map(p => p._id === id ? { ...p, tags: merged } : p))
+    }))
+
+    setBulkTagging(false)
+    setBulkTagInput('')
+    setSelectedIds(new Set())
+  }
+
   // ── Logout ────────────────────────────────────────────────────────────────
   async function logout() {
     await fetch('/api/admin/auth/logout', { method: 'POST' })
@@ -362,6 +396,35 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         )}
       </div>
 
+      {/* ── Bulk tag bar (visible when photos are selected) ───────────────── */}
+      {selectedIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-3 mb-4 bg-slate-900 border border-sky-500/30 rounded-xl px-4 py-3">
+          <span className="text-sm text-sky-400 font-medium shrink-0">
+            {selectedIds.size} photo{selectedIds.size !== 1 ? 's' : ''} selected
+          </span>
+          <input
+            value={bulkTagInput}
+            onChange={e => setBulkTagInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleBulkAddTags() }}
+            placeholder="Tags to add (comma-separated)"
+            className="flex-1 min-w-[200px] bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+          />
+          <button
+            onClick={handleBulkAddTags}
+            disabled={bulkTagging || !bulkTagInput.trim()}
+            className="text-sm bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-medium rounded-lg px-4 py-1.5 transition-colors shrink-0"
+          >
+            {bulkTagging ? 'Adding…' : 'Add tags'}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-sm text-slate-500 hover:text-slate-300 transition-colors shrink-0"
+          >
+            Clear selection
+          </button>
+        </div>
+      )}
+
       {/* ── Photo grid ────────────────────────────────────────────────────── */}
       {photos.length === 0 ? (
         <div className="text-center py-20 text-slate-500">No photos found in Sanity.</div>
@@ -372,7 +435,9 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
               key={photo._id}
               onClick={() => startEdit(photo)}
               className={`bg-slate-900 border rounded-xl overflow-hidden flex flex-col transition-colors cursor-pointer hover:border-slate-600 ${
-                photo.visible ? 'border-slate-800' : 'border-slate-700/50 opacity-60'
+                selectedIds.has(photo._id)
+                  ? 'border-sky-500 ring-1 ring-sky-500/50'
+                  : photo.visible ? 'border-slate-800' : 'border-slate-700/50 opacity-60'
               }`}
             >
               {/* Image — object-contain so the full photo is always visible */}
@@ -385,6 +450,21 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
                   sizes="(max-width: 1280px) 33vw, 400px"
                   unoptimized
                 />
+                {/* Selection checkbox */}
+                <button
+                  onClick={e => { e.stopPropagation(); toggleSelect(photo._id) }}
+                  className={`absolute top-2 right-2 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                    selectedIds.has(photo._id)
+                      ? 'bg-sky-500 border-sky-500'
+                      : 'bg-black/40 border-slate-400 hover:border-sky-400'
+                  }`}
+                >
+                  {selectedIds.has(photo._id) && (
+                    <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  )}
+                </button>
                 {!photo.visible && (
                   <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-slate-400 text-xs px-1.5 py-0.5 rounded">
                     Hidden
