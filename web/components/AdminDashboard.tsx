@@ -5,7 +5,7 @@
 // then handles all interactive features client-side: visibility toggle, inline
 // editing, caption regeneration, and bulk caption generation.
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -46,19 +46,22 @@ function StatCard({ label, value, sub }: { label: string; value: number | string
   )
 }
 
+// ─── Shared input / label styles ──────────────────────────────────────────────
+const inputCls = 'w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500'
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AdminDashboard({ initialPhotos }: { initialPhotos: AdminPhoto[] }) {
-  const [photos, setPhotos]           = useState<AdminPhoto[]>(initialPhotos)
-  const [editingId, setEditingId]           = useState<string | null>(null)
-  const [editState, setEditState]           = useState<EditState | null>(null)
-  const [saving, setSaving]                 = useState(false)
-  const [captionIds, setCaptionIds]         = useState<Set<string>>(new Set())
-  const [bulkRunning, setBulkRunning]       = useState(false)
-  const [bulkDone, setBulkDone]             = useState<number | null>(null)
-  const [feedback, setFeedback]             = useState<{ id: string; msg: string } | null>(null)
+  const [photos, setPhotos]               = useState<AdminPhoto[]>(initialPhotos)
+  const [editingId, setEditingId]         = useState<string | null>(null)
+  const [editState, setEditState]         = useState<EditState | null>(null)
+  const [saving, setSaving]               = useState(false)
+  const [captionIds, setCaptionIds]       = useState<Set<string>>(new Set())
+  const [bulkRunning, setBulkRunning]     = useState(false)
+  const [bulkDone, setBulkDone]           = useState<number | null>(null)
+  const [feedback, setFeedback]           = useState<{ id: string; msg: string } | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
-  const [deletingId, setDeletingId]         = useState<string | null>(null)
+  const [deletingId, setDeletingId]       = useState<string | null>(null)
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalPhotos  = photos.length
@@ -84,6 +87,12 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     setEditingId(null)
     setEditState(null)
   }
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') cancelEdit() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   async function saveEdit(photo: AdminPhoto) {
     if (!editState) return
@@ -175,7 +184,6 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     setBulkRunning(false)
 
     if (res.ok) {
-      // Update captions in local state from the results (no re-fetch needed)
       const successful = (data.results ?? []).filter((r: { ok: boolean }) => r.ok)
       setBulkDone(successful.length)
       if (successful.length > 0) {
@@ -217,9 +225,13 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
     window.location.href = '/'
   }
 
+  // ── Hover helpers ─────────────────────────────────────────────────────────
+  // ── Edit modal photo lookup ────────────────────────────────────────────────
+  const editingPhoto = editingId ? photos.find(p => p._id === editingId) ?? null : null
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto px-4 py-10">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-10">
@@ -279,209 +291,234 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
         )}
       </div>
 
-      {/* Photo list */}
+      {/* ── Photo grid ────────────────────────────────────────────────────── */}
       {photos.length === 0 ? (
         <div className="text-center py-20 text-slate-500">No photos found in Sanity.</div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {photos.map(photo => (
             <div
               key={photo._id}
-              className={`bg-slate-900 border rounded-xl overflow-hidden transition-colors ${photo.visible ? 'border-slate-800' : 'border-slate-700/50 opacity-60'}`}
+              onClick={() => startEdit(photo)}
+              className={`bg-slate-900 border rounded-xl overflow-hidden flex flex-col transition-colors cursor-pointer hover:border-slate-600 ${
+                photo.visible ? 'border-slate-800' : 'border-slate-700/50 opacity-60'
+              }`}
             >
-              <div className="flex gap-4 p-4">
-                {/* Thumbnail */}
-                <div className="flex-shrink-0 w-20 h-20 relative rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src={`${photo.src}?w=160&q=60`}
-                    alt={photo.title}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </div>
+              {/* Image — object-contain so the full photo is always visible */}
+              <div className="relative aspect-square bg-slate-950">
+                <Image
+                  src={`${photo.src}?w=600&q=75`}
+                  alt={photo.title}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 1280px) 33vw, 400px"
+                />
+                {!photo.visible && (
+                  <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-slate-400 text-xs px-1.5 py-0.5 rounded">
+                    Hidden
+                  </span>
+                )}
+                {feedback?.id === photo._id && (
+                  <span className="absolute bottom-2 left-2 right-2 text-center bg-sky-500/20 backdrop-blur-sm text-sky-400 text-xs px-2 py-1 rounded">
+                    {feedback.msg}
+                  </span>
+                )}
+              </div>
 
-                {/* Content */}
-                {editingId === photo._id && editState ? (
-                  /* ── Edit mode ── */
-                  <div className="flex-1 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">Title</label>
-                        <input
-                          value={editState.title}
-                          onChange={e => setEditState({ ...editState, title: e.target.value })}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">Tags (comma-separated)</label>
-                        <input
-                          value={editState.tags}
-                          onChange={e => setEditState({ ...editState, tags: e.target.value })}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">Location</label>
-                        <input
-                          value={editState.location}
-                          onChange={e => setEditState({ ...editState, location: e.target.value })}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">Camera</label>
-                        <input
-                          value={editState.camera}
-                          onChange={e => setEditState({ ...editState, camera: e.target.value })}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">Date taken</label>
-                        <input
-                          type="date"
-                          value={editState.dateTaken}
-                          onChange={e => setEditState({ ...editState, dateTaken: e.target.value })}
-                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1 block">Caption</label>
-                      <textarea
-                        value={editState.aiCaption}
-                        onChange={e => setEditState({ ...editState, aiCaption: e.target.value })}
-                        rows={3}
-                        placeholder="Write a caption, or use the ✦ button to generate one with AI"
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500 resize-y"
-                      />
-                    </div>
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={() => saveEdit(photo)}
-                        disabled={saving}
-                        className="text-xs bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-black font-medium rounded-lg px-3 py-1.5 transition-colors"
-                      >
-                        {saving ? 'Saving…' : 'Save'}
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="text-xs text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* ── View mode ── */
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-slate-200 text-sm font-medium truncate">{photo.title}</p>
-                        <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
-                          {photo.aiCaption || <span className="text-slate-600 italic">No caption</span>}
-                        </p>
-                        {photo.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {photo.tags.map(tag => (
-                              <span key={tag} className="text-xs px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500/80">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {/* Visibility toggle */}
-                        <button
-                          onClick={() => toggleVisibility(photo)}
-                          title={photo.visible ? 'Hide from gallery' : 'Show in gallery'}
-                          className={`transition-colors ${photo.visible ? 'text-slate-500 hover:text-slate-300' : 'text-slate-600 hover:text-sky-400'}`}
-                        >
-                          {photo.visible ? (
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            </svg>
-                          )}
-                        </button>
-                        {/* Regenerate caption */}
-                        <button
-                          onClick={() => regenerateCaption(photo)}
-                          disabled={captionIds.has(photo._id)}
-                          title="Regenerate caption"
-                          className="text-slate-500 hover:text-sky-400 disabled:opacity-40 transition-colors"
-                        >
-                          {captionIds.has(photo._id) ? (
-                            <span className="inline-block w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                            </svg>
-                          )}
-                        </button>
-                        {/* Edit */}
-                        <button
-                          onClick={() => startEdit(photo)}
-                          title="Edit metadata"
-                          className="text-slate-500 hover:text-sky-400 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                          </svg>
-                        </button>
-
-                        {/* Delete — first click arms, second click confirms */}
-                        {confirmDeleteId === photo._id ? (
-                          <span className="flex items-center gap-1">
-                            <button
-                              onClick={() => deletePhoto(photo)}
-                              disabled={!!deletingId}
-                              title="Confirm delete"
-                              className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors disabled:opacity-40"
-                            >
-                              {deletingId === photo._id ? (
-                                <span className="inline-block w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                              ) : 'Delete?'}
-                            </button>
-                            <button
-                              onClick={() => setConfirmDeleteId(null)}
-                              title="Cancel"
-                              className="text-slate-600 hover:text-slate-400 transition-colors"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => setConfirmDeleteId(photo._id)}
-                            title="Delete photo"
-                            className="text-slate-600 hover:text-red-400 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    {/* Inline feedback toast */}
-                    {feedback?.id === photo._id && (
-                      <p className="text-xs text-sky-400 mt-1">{feedback.msg}</p>
+              {/* Info */}
+              <div className="px-3 pt-2.5 pb-1 flex-1">
+                <p className="text-slate-200 text-sm font-medium truncate">{photo.title}</p>
+                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2 leading-relaxed">
+                  {photo.aiCaption || <span className="italic text-slate-600">No caption</span>}
+                </p>
+                {photo.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {photo.tags.slice(0, 4).map(tag => (
+                      <span key={tag} className="text-xs px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500/80">
+                        {tag}
+                      </span>
+                    ))}
+                    {photo.tags.length > 4 && (
+                      <span className="text-xs text-slate-600">+{photo.tags.length - 4}</span>
                     )}
                   </div>
                 )}
               </div>
+
+              {/* Action bar — stop propagation so these don't open the edit modal */}
+              <div onClick={e => e.stopPropagation()} className="border-t border-slate-800 mt-2 px-3 py-2 flex items-center justify-between">
+                {/* Left: visibility + caption */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => toggleVisibility(photo)}
+                    title={photo.visible ? 'Hide from gallery' : 'Show in gallery'}
+                    className={`transition-colors ${photo.visible ? 'text-slate-500 hover:text-slate-300' : 'text-slate-600 hover:text-sky-400'}`}
+                  >
+                    {photo.visible ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                      </svg>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => regenerateCaption(photo)}
+                    disabled={captionIds.has(photo._id)}
+                    title="Regenerate caption with AI"
+                    className="text-slate-500 hover:text-sky-400 disabled:opacity-40 transition-colors"
+                  >
+                    {captionIds.has(photo._id) ? (
+                      <span className="inline-block w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {/* Right: edit + delete */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => startEdit(photo)}
+                    title="Edit metadata"
+                    className="text-slate-500 hover:text-sky-400 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                    </svg>
+                  </button>
+
+                  {confirmDeleteId === photo._id ? (
+                    <span className="flex items-center gap-1">
+                      <button
+                        onClick={() => deletePhoto(photo)}
+                        disabled={!!deletingId}
+                        title="Confirm delete"
+                        className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors disabled:opacity-40"
+                      >
+                        {deletingId === photo._id ? (
+                          <span className="inline-block w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                        ) : 'Delete?'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        title="Cancel"
+                        className="text-slate-600 hover:text-slate-400 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteId(photo._id)}
+                      title="Delete photo"
+                      className="text-slate-600 hover:text-red-400 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Edit modal ────────────────────────────────────────────────────── */}
+      {editingPhoto && editState && (
+        <div
+          className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={cancelEdit}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Photo + close button */}
+            <div className="relative bg-slate-950">
+              <Image
+                src={`${editingPhoto.src}?w=800&q=85`}
+                alt={editingPhoto.title}
+                width={editingPhoto.width}
+                height={editingPhoto.height}
+                className="w-full h-auto max-h-[60vh] object-contain block"
+                sizes="672px"
+              />
+              <button
+                onClick={cancelEdit}
+                className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-1.5 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Title bar */}
+            <div className="px-6 pt-4 pb-3 border-b border-slate-800">
+              <p className="text-slate-200 text-sm font-medium truncate">{editingPhoto.title}</p>
+            </div>
+
+            {/* Form */}
+            <div className="px-6 py-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Title</label>
+                  <input value={editState.title} onChange={e => setEditState({ ...editState, title: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Tags (comma-separated)</label>
+                  <input value={editState.tags} onChange={e => setEditState({ ...editState, tags: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Location</label>
+                  <input value={editState.location} onChange={e => setEditState({ ...editState, location: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Camera</label>
+                  <input value={editState.camera} onChange={e => setEditState({ ...editState, camera: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Date taken</label>
+                  <input type="date" value={editState.dateTaken} onChange={e => setEditState({ ...editState, dateTaken: e.target.value })} className={inputCls} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Caption</label>
+                <textarea
+                  value={editState.aiCaption}
+                  onChange={e => setEditState({ ...editState, aiCaption: e.target.value })}
+                  rows={3}
+                  placeholder="Write a caption, or use the ✦ button to generate one with AI"
+                  className={`${inputCls} resize-y`}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-2 px-6 pb-5">
+              <button onClick={cancelEdit} className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-4 py-2">
+                Cancel
+              </button>
+              <button
+                onClick={() => saveEdit(editingPhoto)}
+                disabled={saving}
+                className="text-sm bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-black font-medium rounded-lg px-4 py-2 transition-colors"
+              >
+                {saving ? 'Saving…' : 'Save changes'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
