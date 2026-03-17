@@ -6,7 +6,6 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { sanityLoader } from "@/lib/sanityImageLoader";
 import type { Photo } from "@/types";
 
 type Props = {
@@ -131,7 +130,6 @@ export default function PhotoModal({
         {/* ── Photo ── */}
         <div className="flex-1 min-h-0 flex items-center justify-center px-8 pt-12 pb-8">
           <Image
-            loader={sanityLoader}
             key={photo._id}
             src={photo.src}
             alt={photo.title}

@@ -67,15 +67,20 @@ export default function AdminLocationsPage() {
   // ── Fetch data ───────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [pinsRes, photosRes] = await Promise.all([
-      fetch("/api/admin/locations"),
-      fetch("/api/admin/photos-list"),
-    ]);
-    const pinsData = await pinsRes.json();
-    const photosData = await photosRes.json();
-    setPins(pinsData.pins ?? []);
-    setPhotos(photosData.photos ?? []);
-    setLoading(false);
+    try {
+      const [pinsRes, photosRes] = await Promise.all([
+        fetch("/api/admin/locations"),
+        fetch("/api/admin/photos-list"),
+      ]);
+      const pinsData = await pinsRes.json();
+      const photosData = await photosRes.json();
+      setPins(pinsData.pins ?? []);
+      setPhotos(photosData.photos ?? []);
+    } catch (err) {
+      console.error("Failed to load locations data:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -190,7 +195,7 @@ export default function AdminLocationsPage() {
       {/* Map */}
       <div
         className="rounded-xl overflow-hidden border border-slate-800 mb-6"
-        style={{ height: 400 }}
+        style={{ height: 800 }}
       >
         {!loading && (
           <AdminMapPickerWrapper

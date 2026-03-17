@@ -158,9 +158,6 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
                       blurDataURL={photo.blurDataURL ?? undefined}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                    <p className="absolute bottom-0 left-0 right-0 px-2 py-1.5 text-xs text-white bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2">
-                      {photo.title}
-                    </p>
                   </Link>
                 ))}
               </div>

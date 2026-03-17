@@ -8,7 +8,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY, SITE_SETTINGS_QUERY } from '@/lib/sanity'
 import Image from 'next/image'
-import { sanityLoader } from '@/lib/sanityImageLoader'
 import PhotoPageClient from '@/components/PhotoPageClient'
 import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from '@/types'
 import type { Metadata } from 'next'
@@ -107,7 +106,6 @@ export default async function PhotoPage({ params }: Props) {
 
       {/* Photo */}
       <Image
-        loader={sanityLoader}
         src={photo.src}
         alt={photo.title}
         width={photo.width}

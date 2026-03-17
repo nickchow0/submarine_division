@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Use the Sanity CDN loader globally so every <Image> automatically
+    // requests the right width/quality via Sanity's URL parameters.
+    // This avoids passing the loader function as a prop (which fails in
+    // Server Components because functions can't cross the server→client boundary).
+    loaderFile: './lib/sanityImageLoader.ts',
     // Allow images from Sanity's CDN and your own domain
     remotePatterns: [
       {
