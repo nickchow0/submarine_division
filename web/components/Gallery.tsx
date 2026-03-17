@@ -164,7 +164,7 @@ function PhotoCard({ photo, onOpen }: CardProps) {
       {/* Use a button for the click target so keyboard users can activate it,
           but wrap in a Link so right-click → "Open in new tab" still works */}
       <div
-        className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800 cursor-pointer transition-shadow duration-200"
+        className="overflow-hidden bg-slate-900 cursor-pointer transition-shadow duration-200"
         onClick={() => onOpen(photo._id)}
         onMouseEnter={e => {
           (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
