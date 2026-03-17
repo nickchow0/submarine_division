@@ -181,8 +181,17 @@ export default function AdminDashboard({
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!editingId) return
-      // Don't steal arrow keys while the user is typing in an input/textarea
       const tag = (e.target as HTMLElement).tagName
+
+      // Enter from any field except textarea triggers save
+      if (e.key === 'Enter' && tag !== 'TEXTAREA') {
+        e.preventDefault()
+        const photo = visiblePhotos.find(p => p._id === editingId)
+        if (photo && !saving) saveEdit(photo)
+        return
+      }
+
+      // Don't steal arrow/escape keys while the user is typing in an input/textarea
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 
       if (e.key === 'Escape') {
@@ -196,7 +205,7 @@ export default function AdminDashboard({
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [editingId, visiblePhotos])
+  }, [editingId, visiblePhotos, saving])
 
   async function saveEdit(photo: AdminPhoto) {
     if (!editState) return
