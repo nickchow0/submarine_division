@@ -8,9 +8,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import Script from 'next/script'
 import './globals.css'
 import ImageProtection from '@/components/ImageProtection'
 import PageTransition from '@/components/PageTransition'
+import Analytics from '@/components/Analytics'
 import { sanityClient, SITE_SETTINGS_QUERY } from '@/lib/sanity'
 import { DEFAULT_SETTINGS, type SiteSettings } from '@/types'
 
@@ -50,8 +52,25 @@ export default async function RootLayout({
             Must be a plain <link> because @import in globals.css needs postcss-import
             and CSS imports inside next/dynamic chunks are unreliable. */}
         <link rel="stylesheet" href="/leaflet.css" />
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
       </head>
       <body className="min-h-screen">
+        <Analytics />
         <ImageProtection />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
