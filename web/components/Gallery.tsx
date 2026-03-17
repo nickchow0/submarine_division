@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 // ─── Gallery ──────────────────────────────────────────────────────────────────
 // Handles search, tag filtering, and the photo modal.
@@ -10,121 +10,128 @@
 // Visiting /photo/[id] directly (shared link, hard navigation) bypasses this
 // component entirely and shows the full dedicated photo page instead.
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import Fuse from 'fuse.js'
-import type { Photo } from '@/types'
-import { buildSearchIndex, searchPhotos } from '@/lib/search'
-import SearchBar from './SearchBar'
-import TagFilter from './TagFilter'
-import PhotoModal from './PhotoModal'
+import { useState, useMemo, useCallback, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import Fuse from "fuse.js";
+import type { Photo } from "@/types";
+import { buildSearchIndex, searchPhotos } from "@/lib/search";
+import SearchBar from "./SearchBar";
+import TagFilter from "./TagFilter";
+import PhotoModal from "./PhotoModal";
 
-export default function Gallery({ photos, showCaptions = false }: { photos: Photo[]; showCaptions?: boolean }) {
+export default function Gallery({
+  photos,
+  showCaptions = false,
+}: {
+  photos: Photo[];
+  showCaptions?: boolean;
+}) {
   // ── State ──────────────────────────────────────────────────────────────────
-  const [query, setQuery]           = useState('')
-  const [activeTag, setActiveTag]   = useState<string | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [query, setQuery] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // ── Search index ───────────────────────────────────────────────────────────
-  const fuseIndex = useMemo<Fuse<Photo>>(() => buildSearchIndex(photos), [photos])
+  const fuseIndex = useMemo<Fuse<Photo>>(
+    () => buildSearchIndex(photos),
+    [photos],
+  );
 
   // ── All unique tags ────────────────────────────────────────────────────────
   const allTags = useMemo(
-    () => [...new Set(photos.flatMap(p => p.tags))].sort(),
+    () => [...new Set(photos.flatMap((p) => p.tags))].sort(),
     [photos],
-  )
+  );
 
   // ── Derived: visible photos after search + tag filter ─────────────────────
   const visiblePhotos = useMemo(() => {
-    let results = query.trim() ? searchPhotos(fuseIndex, query) : photos
-    if (activeTag) results = results.filter(p => p.tags.includes(activeTag))
-    return results
-  }, [query, activeTag, fuseIndex, photos])
+    let results = query.trim() ? searchPhotos(fuseIndex, query) : photos;
+    if (activeTag) results = results.filter((p) => p.tags.includes(activeTag));
+    return results;
+  }, [query, activeTag, fuseIndex, photos]);
 
   // ── Modal helpers ──────────────────────────────────────────────────────────
   const selectedPhoto = useMemo(
-    () => photos.find(p => p._id === selectedId) ?? null,
+    () => photos.find((p) => p._id === selectedId) ?? null,
     [photos, selectedId],
-  )
+  );
 
   // Derive prev/next from the full (unfiltered) photos list so arrows work
   // regardless of active search/tag filters
   const selectedIndex = useMemo(
-    () => photos.findIndex(p => p._id === selectedId),
+    () => photos.findIndex((p) => p._id === selectedId),
     [photos, selectedId],
-  )
-  const prevId = selectedIndex > 0 ? photos[selectedIndex - 1]._id : null
-  const nextId = selectedIndex < photos.length - 1 ? photos[selectedIndex + 1]._id : null
+  );
+  const prevId = selectedIndex > 0 ? photos[selectedIndex - 1]._id : null;
+  const nextId =
+    selectedIndex < photos.length - 1 ? photos[selectedIndex + 1]._id : null;
 
   // Next.js patches window.history.pushState on the instance, which means
   // calling it normally triggers a Next.js navigation. The original browser
   // implementation lives on the prototype and is unaffected — we call that
   // directly to update the address bar URL without any routing side-effects.
   const nativePush = useCallback((url: string) => {
-    Object.getPrototypeOf(window.history).pushState.call(window.history, null, '', url)
-  }, [])
+    Object.getPrototypeOf(window.history).pushState.call(
+      window.history,
+      null,
+      "",
+      url,
+    );
+  }, []);
 
   // Open modal: update URL without triggering Next.js navigation
-  const openModal = useCallback((id: string) => {
-    setSelectedId(id)
-    nativePush(`/photo/${id}`)
-  }, [nativePush])
+  const openModal = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      nativePush(`/photo/${id}`);
+    },
+    [nativePush],
+  );
 
   // Close modal: restore gallery URL
   const closeModal = useCallback(() => {
-    setSelectedId(null)
-    nativePush('/gallery')
-  }, [nativePush])
+    setSelectedId(null);
+    nativePush("/gallery");
+  }, [nativePush]);
 
   // Navigate within modal: update URL to the new photo
-  const navigateModal = useCallback((id: string) => {
-    setSelectedId(id)
-    nativePush(`/photo/${id}`)
-  }, [nativePush])
+  const navigateModal = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      nativePush(`/photo/${id}`);
+    },
+    [nativePush],
+  );
 
   // Sync with browser back / forward buttons
   useEffect(() => {
     const handlePopstate = () => {
-      const match = window.location.pathname.match(/^\/photo\/(.+)$/)
-      setSelectedId(match ? match[1] : null)
-    }
-    window.addEventListener('popstate', handlePopstate)
-    return () => window.removeEventListener('popstate', handlePopstate)
-  }, [])
+      const match = window.location.pathname.match(/^\/photo\/(.+)$/);
+      setSelectedId(match ? match[1] : null);
+    };
+    window.addEventListener("popstate", handlePopstate);
+    return () => window.removeEventListener("popstate", handlePopstate);
+  }, []);
 
   // ── Search handlers ────────────────────────────────────────────────────────
   const handleSearch = useCallback((q: string) => {
-    setQuery(q)
-    setActiveTag(null)
-  }, [])
+    setQuery(q);
+    setActiveTag(null);
+  }, []);
 
   const handleTagClick = useCallback((tag: string) => {
-    setActiveTag(prev => prev === tag ? null : tag)
-    setQuery('')
-  }, [])
+    setActiveTag((prev) => (prev === tag ? null : tag));
+    setQuery("");
+  }, []);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Search + tag filter */}
-      <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-sm py-4 space-y-3">
-        <SearchBar
-          onSearch={handleSearch}
-          resultCount={visiblePhotos.length}
-          totalCount={photos.length}
-        />
-        <TagFilter
-          tags={allTags}
-          activeTag={activeTag}
-          onTagClick={handleTagClick}
-        />
-      </div>
-
       {/* Masonry grid */}
       {visiblePhotos.length > 0 ? (
         <div className="columns-1 sm:columns-2 xl:columns-3 gap-3 p-4 max-w-7xl mx-auto">
-          {visiblePhotos.map(photo => (
+          {visiblePhotos.map((photo) => (
             <PhotoCard key={photo._id} photo={photo} onOpen={openModal} />
           ))}
         </div>
@@ -132,7 +139,10 @@ export default function Gallery({ photos, showCaptions = false }: { photos: Phot
         <div className="text-center py-24 text-slate-500">
           <p className="text-lg">No photos match your search.</p>
           <button
-            onClick={() => { setQuery(''); setActiveTag(null) }}
+            onClick={() => {
+              setQuery("");
+              setActiveTag(null);
+            }}
             className="mt-3 text-sky-500 hover:text-sky-400 text-sm underline"
           >
             Clear filters
@@ -151,13 +161,26 @@ export default function Gallery({ photos, showCaptions = false }: { photos: Phot
           showCaptions={showCaptions}
         />
       )}
+      {/* Search + tag filter */}
+      <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-sm py-4 space-y-3">
+        <SearchBar
+          onSearch={handleSearch}
+          resultCount={visiblePhotos.length}
+          totalCount={photos.length}
+        />
+        <TagFilter
+          tags={allTags}
+          activeTag={activeTag}
+          onTagClick={handleTagClick}
+        />
+      </div>
     </>
-  )
+  );
 }
 
 // ── PhotoCard ─────────────────────────────────────────────────────────────────
 
-type CardProps = { photo: Photo; onOpen: (id: string) => void }
+type CardProps = { photo: Photo; onOpen: (id: string) => void };
 
 function PhotoCard({ photo, onOpen }: CardProps) {
   return (
@@ -173,7 +196,7 @@ function PhotoCard({ photo, onOpen }: CardProps) {
             width={photo.width}
             height={photo.height}
             className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
-            placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+            placeholder={photo.blurDataURL ? "blur" : "empty"}
             blurDataURL={photo.blurDataURL ?? undefined}
             unoptimized
             loading="lazy"
@@ -181,5 +204,5 @@ function PhotoCard({ photo, onOpen }: CardProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
