@@ -6,6 +6,7 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import { sanityLoader } from "@/lib/sanityImageLoader";
 import type { Photo } from "@/types";
 
 type Props = {
@@ -130,17 +131,21 @@ export default function PhotoModal({
         {/* ── Photo ── */}
         <div className="flex-1 min-h-0 flex items-center justify-center px-8 pt-12 pb-8">
           <Image
-            src={`${photo.src}?w=2400&q=90&fm=jpg&auto=format`}
+            loader={sanityLoader}
+            key={photo._id}
+            src={photo.src}
             alt={photo.title}
             width={photo.width}
             height={photo.height}
-            key={photo._id}
+            // Modal panel is max-w-5xl (1024px) with px-8 padding each side,
+            // so the photo is at most ~880px on large screens.
+            sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
+            quality={90}
             className="object-contain max-w-full max-h-full rounded photo-fade-in"
             style={{ maxHeight: "calc(90dvh - 300px)" }}
             placeholder={photo.blurDataURL ? "blur" : "empty"}
             blurDataURL={photo.blurDataURL ?? undefined}
             priority
-            unoptimized
           />
         </div>
 
