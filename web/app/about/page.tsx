@@ -1,5 +1,6 @@
 // ─── About Page ──────────────────────────────────────────────────────────────
 
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -29,6 +30,24 @@ export default function AboutPage() {
           and reach places that are less commonly explored.
         </p>
       </section>
+
+      {/* Photos */}
+      <div className="grid grid-cols-2 gap-3">
+        <Image
+          src="https://cdn.sanity.io/images/vtmlottj/production/b93880fd8b93c7cc96c7e0f0692e8362d5db2aae-6733x4491.jpg?w=800&q=85&fm=jpg&auto=format"
+          alt="Nick Chow underwater"
+          width={800}
+          height={534}
+          className="rounded-lg object-cover w-full aspect-[4/3]"
+        />
+        <Image
+          src="https://cdn.sanity.io/images/vtmlottj/production/3d7c99ba9c64500303e5babbab0327766896c59d-2048x1366.jpg?w=800&q=85&fm=jpg&auto=format"
+          alt="Nick Chow underwater"
+          width={800}
+          height={534}
+          className="rounded-lg object-cover w-full aspect-[4/3]"
+        />
+      </div>
 
       {/* Gear */}
       <section className="space-y-4">
