@@ -28,6 +28,15 @@ html { scroll-behavior: smooth; }
   animation: page-fade-in 0.3s ease-out;
 }
 
+/* ─── Modal photo fade-in ───────────────────────────────────────────────────── */
+@keyframes photo-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.photo-fade-in {
+  animation: photo-fade-in 0.4s ease-in-out forwards;
+}
+
 /* Remove default button focus outline on mouse click (keep for keyboard) */
 button:focus:not(:focus-visible) { outline: none; }
 

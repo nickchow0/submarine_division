@@ -164,14 +164,8 @@ function PhotoCard({ photo, onOpen }: CardProps) {
       {/* Use a button for the click target so keyboard users can activate it,
           but wrap in a Link so right-click → "Open in new tab" still works */}
       <div
-        className="overflow-hidden bg-slate-900 cursor-pointer transition-shadow duration-200"
+        className="overflow-hidden bg-slate-900 cursor-pointer"
         onClick={() => onOpen(photo._id)}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
-        }}
       >
         <div className="relative overflow-hidden">
           <Image
@@ -179,7 +173,7 @@ function PhotoCard({ photo, onOpen }: CardProps) {
             alt={photo.title}
             width={photo.width}
             height={photo.height}
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
             placeholder={photo.blurDataURL ? 'blur' : 'empty'}
             blurDataURL={photo.blurDataURL ?? undefined}
             unoptimized

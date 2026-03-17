@@ -132,7 +132,8 @@ export default function PhotoModal({
             alt={photo.title}
             width={photo.width}
             height={photo.height}
-            className="object-contain max-w-full max-h-full rounded"
+            key={photo._id}
+            className="object-contain max-w-full max-h-full rounded photo-fade-in"
             style={{ maxHeight: "calc(90dvh - 300px)" }}
             placeholder={photo.blurDataURL ? "blur" : "empty"}
             blurDataURL={photo.blurDataURL ?? undefined}

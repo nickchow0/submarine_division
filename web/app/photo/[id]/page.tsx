@@ -7,8 +7,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY } from '@/lib/sanity'
+import Image from 'next/image'
 import PhotoPageClient from '@/components/PhotoPageClient'
-import PinchZoomImage from '@/components/PinchZoomImage'
 import type { Photo } from '@/types'
 import type { Metadata } from 'next'
 
@@ -102,7 +102,17 @@ export default async function PhotoPage({ params }: Props) {
       </div>
 
       {/* Photo */}
-      <PinchZoomImage photo={photo} />
+      <Image
+        src={photo.src}
+        alt={photo.title}
+        width={photo.width}
+        height={photo.height}
+        className="w-auto h-auto max-w-full max-h-[80vh] mx-auto block"
+        placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+        blurDataURL={photo.blurDataURL ?? undefined}
+        priority
+        unoptimized
+      />
 
       {/* Metadata */}
       <div className="mt-6 space-y-4">
