@@ -15,10 +15,18 @@ import type { Photo } from '@/types'
 
 export const FUSE_OPTIONS: IFuseOptions<Photo> = {
   keys: [
-    { name: 'tags',      weight: 3 },
-    { name: 'title',     weight: 2 },
-    { name: 'aiCaption', weight: 1 },
-    { name: 'location',  weight: 1 },
+    { name: 'tags',         weight: 3 },
+    { name: 'title',        weight: 2 },
+    { name: 'aiCaption',    weight: 1 },
+    { name: 'location',     weight: 1 },
+    // EXIF fields — useful for searching by gear or shoot date
+    { name: 'camera',       weight: 1 },
+    { name: 'lens',         weight: 1 },
+    { name: 'focalLength',  weight: 0.5 },
+    { name: 'aperture',     weight: 0.5 },
+    { name: 'shutterSpeed', weight: 0.5 },
+    { name: 'iso',          weight: 0.5 },
+    { name: 'dateTaken',    weight: 0.5 },
   ],
   threshold: 0.35,
   includeScore: true,
