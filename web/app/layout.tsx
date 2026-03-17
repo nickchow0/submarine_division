@@ -70,7 +70,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className="min-h-screen">
-        <Analytics />
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && <Analytics />}
         <ImageProtection />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
