@@ -170,33 +170,32 @@ export default function AdminLocationsPage() {
   const isFormReady = form.name.trim() && form.lat && form.lng;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2
-            style={{ fontFamily: "'Italiana', serif" }}
-            className="text-3xl text-sky-400 tracking-wider"
+    <div>
+      {/* Header — constrained width */}
+      <div className="max-w-5xl mx-auto px-4 pt-10 pb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2
+              style={{ fontFamily: "'Italiana', serif" }}
+              className="text-3xl text-sky-400 tracking-wider"
+            >
+              Locations
+            </h2>
+            <p className="text-slate-500 text-sm mt-0.5">
+              Click the map to place a pin, then assign photos to it.
+            </p>
+          </div>
+          <a
+            href="/admin"
+            className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
           >
-            Locations
-          </h2>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Click the map to place a pin, then assign photos to it.
-          </p>
+            ← Admin
+          </a>
         </div>
-        <a
-          href="/admin"
-          className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
-        >
-          ← Admin
-        </a>
       </div>
 
-      {/* Map */}
-      <div
-        className="rounded-xl overflow-hidden border border-slate-800 mb-6"
-        style={{ height: 800 }}
-      >
+      {/* Map — full width, same structure as the public map page */}
+      <div style={{ position: "relative", height: "calc(80vh - 160px)", marginBottom: "1.5rem" }}>
         {!loading && (
           <AdminMapPickerWrapper
             pins={pins}
@@ -206,6 +205,9 @@ export default function AdminLocationsPage() {
           />
         )}
       </div>
+
+      {/* Content below map — constrained width */}
+      <div className="max-w-5xl mx-auto px-4 pb-10">
 
       {/* Form */}
       {isFormOpen && (
@@ -274,7 +276,7 @@ export default function AdminLocationsPage() {
             <label className="text-xs text-slate-500 mb-2 block">
               Tagged photos ({form.photoIds.length} selected)
             </label>
-            <div className="grid grid-cols-5 sm:grid-cols-8 gap-1.5 max-h-48 overflow-y-auto">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-160 overflow-y-auto">
               {photos.map((photo) => {
                 const selected = form.photoIds.includes(photo._id);
                 return (
@@ -289,11 +291,12 @@ export default function AdminLocationsPage() {
                     }`}
                   >
                     <Image
-                      src={`${photo.src}?w=80&q=50`}
+                      src={photo.src}
                       alt={photo.title}
                       fill
                       className="object-cover"
-                      sizes="60px"
+                      sizes="(max-width: 640px) 30vw, 180px"
+                      quality={75}
                     />
                     {selected && (
                       <div className="absolute inset-0 bg-sky-400/20 flex items-center justify-center">
@@ -372,6 +375,7 @@ export default function AdminLocationsPage() {
           ))}
         </div>
       )}
+      </div> {/* end constrained content */}
     </div>
   );
 }

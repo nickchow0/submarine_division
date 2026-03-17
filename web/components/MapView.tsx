@@ -72,6 +72,11 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
         maxZoom: 19,
       }).addTo(map)
 
+      // Force Leaflet to remeasure the container after the browser has painted.
+      // Without this, the map is often offset when the container's final size
+      // wasn't settled at the moment L.map() was called.
+      requestAnimationFrame(() => map.invalidateSize())
+
       setReady(true)
     })
 

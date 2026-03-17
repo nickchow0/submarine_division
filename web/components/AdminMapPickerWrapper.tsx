@@ -1,9 +1,7 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import AdminMapPicker from '@/components/AdminMapPicker'
 import type { PinBase } from '@/components/AdminMapPicker'
-
-const AdminMapPicker = dynamic(() => import('@/components/AdminMapPicker'), { ssr: false })
 
 type Props = {
   pins: PinBase[]
