@@ -25,6 +25,13 @@ export const siteSettingsType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'autoGenerateCaptions',
+      title: 'Auto-generate captions on upload',
+      description: 'Automatically generates an AI caption for each photo when it is uploaded.',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'maintenanceMode',
       title: 'Maintenance mode',
       description: 'Replaces the public site with a "coming soon" message. Admin access is unaffected.',

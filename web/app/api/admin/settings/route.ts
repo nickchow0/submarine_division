@@ -22,7 +22,7 @@ export async function PATCH(req: Request) {
 
     // Only allow known boolean keys through
     const allowed: (keyof SiteSettings)[] = [
-      'showLocations', 'maintenanceMode', 'showCaptions',
+      'showLocations', 'maintenanceMode', 'showCaptions', 'autoGenerateCaptions',
     ]
 
     const updates: Partial<SiteSettings> = {}

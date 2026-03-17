@@ -123,9 +123,10 @@ export const ALL_MAP_PINS_QUERY = `
 // the flag is on/off by default even before the document is first created.
 export const SITE_SETTINGS_QUERY = `
   *[_type == "siteSettings" && _id == "siteSettings"][0] {
-    "showLocations":   coalesce(showLocations,   true),
-    "maintenanceMode": coalesce(maintenanceMode, false),
-    "showCaptions":    coalesce(showCaptions,    false)
+    "showLocations":        coalesce(showLocations,        true),
+    "maintenanceMode":      coalesce(maintenanceMode,      false),
+    "showCaptions":         coalesce(showCaptions,         false),
+    "autoGenerateCaptions": coalesce(autoGenerateCaptions, true)
   }
 `
 

@@ -349,8 +349,10 @@ export default function AdminDashboard({
       if (res.ok && data.photo) {
         // Add to top of grid immediately
         setPhotos(prev => [data.photo, ...prev])
-        // Then auto-generate caption in the background
-        regenerateCaption(data.photo)
+        // Auto-generate caption unless the experiment flag is disabled
+        if (settings.autoGenerateCaptions) {
+          regenerateCaption(data.photo)
+        }
       } else {
         setFeedback({ id: 'upload', msg: `Failed to upload ${list[i].name}` })
         setTimeout(() => setFeedback(null), 5000)
@@ -759,6 +761,11 @@ export default function AdminDashboard({
                 key: 'showCaptions' as const,
                 label: 'Show captions',
                 description: 'Displays AI-generated captions in gallery cards, the photo modal, and the photo page.',
+              },
+              {
+                key: 'autoGenerateCaptions' as const,
+                label: 'Auto-generate captions on upload',
+                description: 'Automatically generates an AI caption for each photo when it is uploaded.',
               },
               {
                 key: 'maintenanceMode' as const,
