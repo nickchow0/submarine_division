@@ -9,10 +9,18 @@ import { usePathname } from 'next/navigation'
 export default function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
-  // The key prop forces React to unmount/remount this element on navigation,
-  // which restarts the CSS animation on every page change.
+  // When navigating from /gallery to /photo/[id], Next.js opens a modal overlay
+  // via the @modal intercepting route. In that case we don't want to re-animate
+  // the background page — the gallery should stay mounted silently behind the
+  // modal backdrop. Grouping gallery and photo routes under the same key achieves
+  // this: React sees no key change, so it doesn't unmount/remount the <main>.
+  const transitionKey =
+    pathname.startsWith('/gallery') || pathname.startsWith('/photo/')
+      ? '/gallery'
+      : pathname
+
   return (
-    <main key={pathname} className="page-transition">
+    <main key={transitionKey} className="page-transition">
       {children}
     </main>
   )

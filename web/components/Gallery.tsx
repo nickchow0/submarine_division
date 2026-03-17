@@ -1,15 +1,16 @@
 'use client'
 
 // ─── Gallery ──────────────────────────────────────────────────────────────────
-// The main interactive component. Receives the full photo list from the server
-// (page.tsx), then handles search, tag filtering, and lightbox client-side.
+// Handles search, tag filtering, and the photo modal.
 //
-// This is a Client Component ('use client') because it uses:
-//   - useState (search query, active tag, selected photo)
-//   - useMemo   (building the Fuse search index, deriving visible photos)
-//   - Event handlers (typing, clicking)
+// When a photo is clicked we use window.history.pushState to update the URL to
+// /photo/[id] WITHOUT triggering a Next.js navigation — so the gallery page
+// stays completely mounted in the background and the modal overlays it.
+//
+// Visiting /photo/[id] directly (shared link, hard navigation) bypasses this
+// component entirely and shows the full dedicated photo page instead.
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Fuse from 'fuse.js'
@@ -17,57 +18,96 @@ import type { Photo } from '@/types'
 import { buildSearchIndex, searchPhotos } from '@/lib/search'
 import SearchBar from './SearchBar'
 import TagFilter from './TagFilter'
-import Lightbox from './Lightbox'
+import PhotoModal from './PhotoModal'
 
-type Props = {
-  photos: Photo[]
-}
-
-export default function Gallery({ photos }: Props) {
+export default function Gallery({ photos }: { photos: Photo[] }) {
   // ── State ──────────────────────────────────────────────────────────────────
   const [query, setQuery]           = useState('')
   const [activeTag, setActiveTag]   = useState<string | null>(null)
-  const [selected, setSelected]     = useState<Photo | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // ── Search index ───────────────────────────────────────────────────────────
-  // useMemo ensures we only rebuild the Fuse index when the photos array changes
-  // (i.e. on initial load), not on every render.
   const fuseIndex = useMemo<Fuse<Photo>>(() => buildSearchIndex(photos), [photos])
 
-  // ── All unique tags (for the filter bar) ──────────────────────────────────
+  // ── All unique tags ────────────────────────────────────────────────────────
   const allTags = useMemo(
-    () => [...new Set(photos.flatMap((p) => p.tags))].sort(),
-    [photos]
+    () => [...new Set(photos.flatMap(p => p.tags))].sort(),
+    [photos],
   )
 
   // ── Derived: visible photos after search + tag filter ─────────────────────
   const visiblePhotos = useMemo(() => {
-    // Start with search results, or all photos if no query
     let results = query.trim() ? searchPhotos(fuseIndex, query) : photos
-
-    // Then apply tag filter on top
-    if (activeTag) {
-      results = results.filter((p) => p.tags.includes(activeTag))
-    }
-
+    if (activeTag) results = results.filter(p => p.tags.includes(activeTag))
     return results
   }, [query, activeTag, fuseIndex, photos])
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Modal helpers ──────────────────────────────────────────────────────────
+  const selectedPhoto = useMemo(
+    () => photos.find(p => p._id === selectedId) ?? null,
+    [photos, selectedId],
+  )
+
+  // Derive prev/next from the full (unfiltered) photos list so arrows work
+  // regardless of active search/tag filters
+  const selectedIndex = useMemo(
+    () => photos.findIndex(p => p._id === selectedId),
+    [photos, selectedId],
+  )
+  const prevId = selectedIndex > 0 ? photos[selectedIndex - 1]._id : null
+  const nextId = selectedIndex < photos.length - 1 ? photos[selectedIndex + 1]._id : null
+
+  // Next.js patches window.history.pushState on the instance, which means
+  // calling it normally triggers a Next.js navigation. The original browser
+  // implementation lives on the prototype and is unaffected — we call that
+  // directly to update the address bar URL without any routing side-effects.
+  const nativePush = useCallback((url: string) => {
+    Object.getPrototypeOf(window.history).pushState.call(window.history, null, '', url)
+  }, [])
+
+  // Open modal: update URL without triggering Next.js navigation
+  const openModal = useCallback((id: string) => {
+    setSelectedId(id)
+    nativePush(`/photo/${id}`)
+  }, [nativePush])
+
+  // Close modal: restore gallery URL
+  const closeModal = useCallback(() => {
+    setSelectedId(null)
+    nativePush('/gallery')
+  }, [nativePush])
+
+  // Navigate within modal: update URL to the new photo
+  const navigateModal = useCallback((id: string) => {
+    setSelectedId(id)
+    nativePush(`/photo/${id}`)
+  }, [nativePush])
+
+  // Sync with browser back / forward buttons
+  useEffect(() => {
+    const handlePopstate = () => {
+      const match = window.location.pathname.match(/^\/photo\/(.+)$/)
+      setSelectedId(match ? match[1] : null)
+    }
+    window.addEventListener('popstate', handlePopstate)
+    return () => window.removeEventListener('popstate', handlePopstate)
+  }, [])
+
+  // ── Search handlers ────────────────────────────────────────────────────────
   const handleSearch = useCallback((q: string) => {
     setQuery(q)
-    setActiveTag(null)  // clear tag filter when user types a new search
+    setActiveTag(null)
   }, [])
 
   const handleTagClick = useCallback((tag: string) => {
-    setActiveTag((prev) => (prev === tag ? null : tag))  // toggle
-    setQuery('')        // clear text search when a tag is clicked
+    setActiveTag(prev => prev === tag ? null : tag)
+    setQuery('')
   }, [])
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Search + filters */}
+      {/* Search + tag filter */}
       <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-sm py-4 space-y-3">
         <SearchBar
           onSearch={handleSearch}
@@ -84,12 +124,8 @@ export default function Gallery({ photos }: Props) {
       {/* Masonry grid */}
       {visiblePhotos.length > 0 ? (
         <div className="columns-1 sm:columns-2 xl:columns-3 gap-3 p-4 max-w-7xl mx-auto">
-          {visiblePhotos.map((photo) => (
-            <PhotoCard
-              key={photo._id}
-              photo={photo}
-              onClick={() => setSelected(photo)}
-            />
+          {visiblePhotos.map(photo => (
+            <PhotoCard key={photo._id} photo={photo} onOpen={openModal} />
           ))}
         </div>
       ) : (
@@ -104,50 +140,53 @@ export default function Gallery({ photos }: Props) {
         </div>
       )}
 
-      {/* Lightbox */}
-      <Lightbox photo={selected} onClose={() => setSelected(null)} />
+      {/* Photo modal — rendered over the gallery, no page navigation */}
+      {selectedPhoto && (
+        <PhotoModal
+          photo={selectedPhoto}
+          prevId={prevId}
+          nextId={nextId}
+          onClose={closeModal}
+          onNavigate={navigateModal}
+        />
+      )}
     </>
   )
 }
 
 // ── PhotoCard ─────────────────────────────────────────────────────────────────
-// Extracted as a separate component so React can re-render cards individually
-// instead of the whole grid when something changes.
 
-type CardProps = { photo: Photo; onClick: () => void }
+type CardProps = { photo: Photo; onOpen: (id: string) => void }
 
-function PhotoCard({ photo, onClick }: CardProps) {
+function PhotoCard({ photo, onOpen }: CardProps) {
   return (
-    <div
-      className="break-inside-avoid mb-3 group cursor-pointer"
-      onClick={onClick}
-    >
-      <Link href={`/photo/${photo._id}`} className="block">
-        <div
-          className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800 transition-shadow duration-200"
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
-          }}
-        >
-          {/* Photo */}
-          <div className="relative overflow-hidden">
-            <Image
-              src={`${photo.src}?w=1200&fm=jpg`}
-              alt={photo.title}
-              width={photo.width}
-              height={photo.height}
-              className="w-full h-auto object-cover"
-              placeholder={photo.blurDataURL ? 'blur' : 'empty'}
-              blurDataURL={photo.blurDataURL ?? undefined}
-              unoptimized
-              loading="lazy"
-            />
-          </div>
+    <div className="break-inside-avoid mb-3 group">
+      {/* Use a button for the click target so keyboard users can activate it,
+          but wrap in a Link so right-click → "Open in new tab" still works */}
+      <div
+        className="rounded-lg overflow-hidden bg-slate-900 border border-slate-800 cursor-pointer transition-shadow duration-200"
+        onClick={() => onOpen(photo._id)}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLDivElement).style.boxShadow = '0 25px 50px -12px rgba(56, 189, 248, 0.3)'
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+        }}
+      >
+        <div className="relative overflow-hidden">
+          <Image
+            src={`${photo.src}?w=1200&fm=jpg`}
+            alt={photo.title}
+            width={photo.width}
+            height={photo.height}
+            className="w-full h-auto object-cover"
+            placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+            blurDataURL={photo.blurDataURL ?? undefined}
+            unoptimized
+            loading="lazy"
+          />
         </div>
-      </Link>
+      </div>
     </div>
   )
 }
