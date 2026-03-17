@@ -16,6 +16,7 @@ import Link from "next/link";
 import Fuse from "fuse.js";
 import type { Photo } from "@/types";
 import { buildSearchIndex, searchPhotos } from "@/lib/search";
+import { trackEvent } from "@/lib/analytics";
 import SearchBar from "./SearchBar";
 import TagFilter from "./TagFilter";
 import PhotoModal from "./PhotoModal";
@@ -124,6 +125,29 @@ export default function Gallery({
     setActiveTag((prev) => (prev === tag ? null : tag));
     setQuery("");
   }, []);
+
+  // Fire gallery_search 500ms after the user stops typing.
+  // Only [query] is in the dep array so the debounce resets only when the
+  // query changes — not when the result count shifts. visiblePhotos.length is
+  // captured inside the closure and will be current when the timer fires.
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    const timer = setTimeout(() => {
+      trackEvent("gallery_search", {
+        search_term: trimmed,
+        result_count: visiblePhotos.length,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // Fire tag_filter when a tag is selected
+  useEffect(() => {
+    if (!activeTag) return;
+    trackEvent("tag_filter", { tag_name: activeTag });
+  }, [activeTag]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
