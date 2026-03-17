@@ -18,7 +18,15 @@ export default async function GalleryPage() {
 
   const { showCaptions } = settings ?? DEFAULT_SETTINGS
 
+  // Shuffle using Fisher-Yates so the gallery order is random on each
+  // cache revalidation (every 60 seconds) rather than always newest-first.
+  const shuffled = [...photos]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+
   return (
-    <Gallery photos={photos} showCaptions={showCaptions} />
+    <Gallery photos={shuffled} showCaptions={showCaptions} />
   )
 }
