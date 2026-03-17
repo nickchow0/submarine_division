@@ -7,6 +7,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   photo: Photo;
@@ -34,6 +35,14 @@ export default function PhotoModal({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose, onNavigate, prevId, nextId]);
+
+  useEffect(() => {
+    trackEvent('photo_view', {
+      photo_id: photo._id,
+      photo_title: photo.title,
+      location: photo.location ?? null,
+    })
+  }, [photo]);
 
   const hasExif =
     photo.camera ||
