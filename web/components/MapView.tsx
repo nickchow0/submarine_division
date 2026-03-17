@@ -7,11 +7,37 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import type { Map as LeafletMap, Marker } from 'leaflet'
 import type LType from 'leaflet'
-import type { MapPin } from '@/types'
+import type { MapPin, Photo } from '@/types'
+import PhotoModal from '@/components/PhotoModal'
 // Leaflet CSS is loaded globally via <link href="/leaflet.css"> in layout.tsx
+
+// Coerce a pin photo to the full Photo shape PhotoModal expects.
+// Fields not stored on the pin (tags, EXIF, etc.) default to empty/null —
+// PhotoModal renders them all conditionally so nothing breaks.
+type PinPhoto = MapPin['photos'][number]
+function pinPhotoToFull(p: PinPhoto): Photo {
+  return {
+    _id:          p._id,
+    title:        p.title,
+    src:          p.src,
+    width:        p.width,
+    height:       p.height,
+    blurDataURL:  p.blurDataURL,
+    tags:         [],
+    aiCaption:    '',
+    location:     null,
+    camera:       null,
+    dateTaken:    null,
+    lens:         null,
+    focalLength:  null,
+    iso:          null,
+    shutterSpeed: null,
+    aperture:     null,
+    visible:      true,
+  }
+}
 
 export default function MapView({ pins }: { pins: MapPin[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -20,6 +46,9 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
   const LRef         = useRef<typeof LType | null>(null)
   const [ready, setReady]     = useState(false)
   const [selected, setSelected] = useState<MapPin | null>(null)
+  // Photo currently open in the modal (with the pin's photo list for prev/next)
+  const [modalPhoto, setModalPhoto]         = useState<Photo | null>(null)
+  const [modalPinPhotos, setModalPinPhotos] = useState<PinPhoto[]>([])
 
   // ── Initialize Leaflet + map (browser only) ───────────────────────────────
   useEffect(() => {
@@ -101,6 +130,25 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
     }
   }, [pins, selected, ready])
 
+  // ── Modal helpers ─────────────────────────────────────────────────────────
+  function openModal(pin: MapPin, photoId: string) {
+    setModalPinPhotos(pin.photos)
+    const p = pin.photos.find(ph => ph._id === photoId)
+    if (p) setModalPhoto(pinPhotoToFull(p))
+  }
+
+  function navigateModal(id: string) {
+    const p = modalPinPhotos.find(ph => ph._id === id)
+    if (p) setModalPhoto(pinPhotoToFull(p))
+  }
+
+  const modalPrevId = modalPhoto
+    ? (modalPinPhotos[modalPinPhotos.findIndex(p => p._id === modalPhoto._id) - 1]?._id ?? null)
+    : null
+  const modalNextId = modalPhoto
+    ? (modalPinPhotos[modalPinPhotos.findIndex(p => p._id === modalPhoto._id) + 1]?._id ?? null)
+    : null
+
   return (
     // position:absolute fills the nearest positioned ancestor regardless of
     // how the parent gets its height — more reliable than h-full in flex chains
@@ -143,9 +191,9 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {selected.photos.map(photo => (
-                  <Link
+                  <button
                     key={photo._id}
-                    href={`/photo/${photo._id}`}
+                    onClick={() => openModal(selected, photo._id)}
                     className="group relative aspect-square rounded-lg overflow-hidden bg-slate-800 block"
                   >
                     <Image
@@ -158,7 +206,7 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
                       blurDataURL={photo.blurDataURL ?? undefined}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                  </Link>
+                  </button>
                 ))}
               </div>
             )}
@@ -172,6 +220,17 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
             No locations added yet
           </p>
         </div>
+      )}
+
+      {/* Photo modal — rendered above everything including the slide-in panel */}
+      {modalPhoto && (
+        <PhotoModal
+          photo={modalPhoto}
+          prevId={modalPrevId}
+          nextId={modalNextId}
+          onClose={() => setModalPhoto(null)}
+          onNavigate={navigateModal}
+        />
       )}
     </div>
   )

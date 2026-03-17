@@ -46,7 +46,7 @@ export default function PhotoModal({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6 md:p-10"
+      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-6 md:p-10"
       onClick={onClose}
     >
       {/* Prev arrow — outside the panel, floating over backdrop */}
