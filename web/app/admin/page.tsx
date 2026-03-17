@@ -1,10 +1,11 @@
 // ─── Admin Page (server component) ───────────────────────────────────────────
-// Fetches all photos directly from Sanity (same pattern as the gallery page),
-// then passes them as a prop to the interactive AdminDashboard client component.
-// This avoids a client-side fetch to an API route, which was unreliable.
+// Fetches all photos and site settings directly from Sanity, then passes them
+// as props to the interactive AdminDashboard client component.
 
 import { sanityClient } from '@/lib/sanity'
+import { SITE_SETTINGS_QUERY } from '@/lib/sanity'
 import AdminDashboard, { type AdminPhoto } from '@/components/AdminDashboard'
+import { DEFAULT_SETTINGS, type SiteSettings } from '@/types'
 
 const ADMIN_PHOTOS_QUERY = `
   *[_type == "photo" && !(_id in path("drafts.**"))] | order(dateTaken desc) {
@@ -29,6 +30,14 @@ const ADMIN_PHOTOS_QUERY = `
 `
 
 export default async function AdminPage() {
-  const photos: AdminPhoto[] = await sanityClient.fetch(ADMIN_PHOTOS_QUERY)
-  return <AdminDashboard initialPhotos={photos} />
+  const [photos, settings] = await Promise.all([
+    sanityClient.fetch<AdminPhoto[]>(ADMIN_PHOTOS_QUERY),
+    sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
+  ])
+  return (
+    <AdminDashboard
+      initialPhotos={photos}
+      initialSettings={settings ?? DEFAULT_SETTINGS}
+    />
+  )
 }

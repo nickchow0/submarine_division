@@ -3,10 +3,11 @@
 // ─── Admin Dashboard (client component) ───────────────────────────────────────
 // Receives the initial photo list from the server component (admin/page.tsx),
 // then handles all interactive features client-side: visibility toggle, inline
-// editing, caption regeneration, and bulk caption generation.
+// editing, caption regeneration, bulk caption generation, and feature flags.
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
+import { type SiteSettings, DEFAULT_SETTINGS } from '@/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -61,7 +62,13 @@ const inputCls = 'w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function AdminDashboard({ initialPhotos }: { initialPhotos: AdminPhoto[] }) {
+export default function AdminDashboard({
+  initialPhotos,
+  initialSettings = DEFAULT_SETTINGS,
+}: {
+  initialPhotos: AdminPhoto[]
+  initialSettings?: SiteSettings
+}) {
   const [photos, setPhotos]               = useState<AdminPhoto[]>(initialPhotos)
   const [editingId, setEditingId]         = useState<string | null>(null)
   const [editState, setEditState]         = useState<EditState | null>(null)
@@ -78,6 +85,35 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
   const [bulkTagInput, setBulkTagInput] = useState('')
   const [bulkTagging, setBulkTagging]   = useState(false)
   const [imageLoading, setImageLoading] = useState(false)
+
+  // ── Feature flags (experiments) ───────────────────────────────────────────
+  const [settings, setSettings]         = useState<SiteSettings>(initialSettings)
+  const [settingsSaving, setSettingsSaving] = useState<keyof SiteSettings | null>(null)
+  const [settingsFeedback, setSettingsFeedback] = useState<string | null>(null)
+
+  async function toggleSetting(key: keyof SiteSettings) {
+    const newVal = !settings[key]
+    setSettings(prev => ({ ...prev, [key]: newVal }))
+    setSettingsSaving(key)
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: newVal }),
+      })
+      if (!res.ok) throw new Error('request failed')
+      setSettingsFeedback(`Saved`)
+      setTimeout(() => setSettingsFeedback(null), 2000)
+    } catch {
+      // Revert on failure
+      setSettings(prev => ({ ...prev, [key]: !newVal }))
+      setSettingsFeedback('Save failed')
+      setTimeout(() => setSettingsFeedback(null), 3000)
+    } finally {
+      setSettingsSaving(null)
+    }
+  }
 
   // ── Sort & filter ──────────────────────────────────────────────────────────
   type SortKey = 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc'
@@ -700,6 +736,77 @@ export default function AdminDashboard({ initialPhotos }: { initialPhotos: Admin
           ))}
         </div>
       )}
+
+      {/* ── Experiments / feature flags ───────────────────────────────────── */}
+      <div className="mt-16 border-t border-slate-800 pt-10">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-slate-300 text-sm font-semibold uppercase tracking-widest">Experiments</h3>
+          {settingsFeedback && (
+            <span className="text-xs text-sky-400">{settingsFeedback}</span>
+          )}
+        </div>
+        <p className="text-slate-600 text-xs mb-6">Feature flags that control behaviour across the public site. Changes take effect immediately.</p>
+
+        <div className="space-y-3">
+          {(
+            [
+              {
+                key: 'showLocations' as const,
+                label: 'Show Locations page',
+                description: 'Shows the dive-site map in the navigation and at /locations.',
+              },
+              {
+                key: 'maintenanceMode' as const,
+                label: 'Maintenance mode',
+                description: 'Replaces the public site with a "coming soon" screen. Admin access is unaffected.',
+                danger: true,
+              },
+            ] as Array<{ key: keyof SiteSettings; label: string; description: string; danger?: boolean }>
+          ).map(({ key, label, description, danger }) => {
+            const on = settings[key]
+            const saving = settingsSaving === key
+            return (
+              <div
+                key={key}
+                className={`flex items-center justify-between gap-4 bg-slate-900 border rounded-xl px-5 py-4 transition-colors ${
+                  danger && on ? 'border-amber-500/40' : 'border-slate-800'
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${danger && on ? 'text-amber-400' : 'text-slate-200'}`}>
+                    {label}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{description}</p>
+                </div>
+
+                {/* Toggle switch */}
+                <button
+                  onClick={() => toggleSetting(key)}
+                  disabled={saving}
+                  title={on ? 'Turn off' : 'Turn on'}
+                  className={`relative shrink-0 inline-flex items-center h-6 w-11 rounded-full transition-colors focus:outline-none disabled:opacity-50 ${
+                    on
+                      ? danger ? 'bg-amber-500' : 'bg-sky-500'
+                      : 'bg-slate-700'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`} />
+                  {saving && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                    </span>
+                  )}
+                </button>
+
+                {/* Status label */}
+                <span className={`text-xs font-medium w-6 shrink-0 ${on ? (danger ? 'text-amber-400' : 'text-sky-400') : 'text-slate-600'}`}>
+                  {on ? 'ON' : 'OFF'}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
 
       {/* ── Edit modal ────────────────────────────────────────────────────── */}
       {editingPhoto && editState && (

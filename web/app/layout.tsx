@@ -11,6 +11,8 @@ import { cookies } from 'next/headers'
 import './globals.css'
 import ImageProtection from '@/components/ImageProtection'
 import PageTransition from '@/components/PageTransition'
+import { sanityClient, SITE_SETTINGS_QUERY } from '@/lib/sanity'
+import { DEFAULT_SETTINGS, type SiteSettings } from '@/types'
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
@@ -23,8 +25,16 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = await cookies()
+  const [cookieStore, settings] = await Promise.all([
+    cookies(),
+    sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY).catch(() => null),
+  ])
   const isAdmin = cookieStore.get('admin_access')?.value === 'granted'
+  const { showLocations, maintenanceMode } = settings ?? DEFAULT_SETTINGS
+
+  // Maintenance mode — show a placeholder instead of the site,
+  // but admin users can still navigate normally.
+  const showMaintenance = maintenanceMode && !isAdmin
 
   return (
     <html lang="en">
@@ -51,7 +61,9 @@ export default async function RootLayout({
           <p className="text-slate-500 text-sm mt-1">Underwater Photography by Nick Chow</p>
           <nav className="mt-4 flex justify-center gap-6">
             <Link href="/gallery" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Gallery</Link>
-            <Link href="/map"     className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Map</Link>
+            {showLocations && (
+              <Link href="/map" className="text-sm text-slate-400 hover:text-sky-400 transition-colors">Map</Link>
+            )}
             <Link href="/about"   className="text-sm text-slate-400 hover:text-sky-400 transition-colors">About</Link>
             {isAdmin && (
               <Link href="/admin" className="text-sm text-slate-600 hover:text-sky-400 transition-colors">Admin</Link>
@@ -60,7 +72,14 @@ export default async function RootLayout({
         </header>
 
         {/* ── Page content ── */}
-        <PageTransition>{children}</PageTransition>
+        {showMaintenance ? (
+          <div className="flex flex-col items-center justify-center py-40 text-center px-4">
+            <p style={{ fontFamily: "'Italiana', serif" }} className="text-4xl text-sky-400 mb-4">Coming soon</p>
+            <p className="text-slate-500 text-sm max-w-xs">We&apos;re working on something new. Check back soon.</p>
+          </div>
+        ) : (
+          <PageTransition>{children}</PageTransition>
+        )}
 
         {/* ── Footer ── */}
         <footer className="text-center py-8 text-slate-600 text-xs mt-12">

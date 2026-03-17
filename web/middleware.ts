@@ -33,14 +33,19 @@ export function middleware(request: NextRequest) {
   }
 
   // ── 2. Admin-level auth (extra layer on top of site auth) ─────────────────
-  // /admin/login and its auth API are exempt so the admin can log in
-  const isAdminRoute = pathname.startsWith('/admin')
+  // Both /admin/* pages and /api/admin/* routes require the admin cookie.
+  // /admin/login and /api/admin/auth/* are exempt so the admin can log in.
+  const isAdminRoute    = pathname.startsWith('/admin') || pathname.startsWith('/api/admin')
   const isAdminLoginPage = pathname === '/admin/login'
-  const isAdminAuthApi = pathname.startsWith('/api/admin/auth')
+  const isAdminAuthApi  = pathname.startsWith('/api/admin/auth')
 
   if (isAdminRoute && !isAdminLoginPage && !isAdminAuthApi) {
     const adminCookie = request.cookies.get(ADMIN_COOKIE)
     if (adminCookie?.value !== ADMIN_VALUE) {
+      // For API routes return 401 JSON rather than redirecting to the login page
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)

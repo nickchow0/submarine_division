@@ -118,6 +118,16 @@ export const ALL_MAP_PINS_QUERY = `
   }
 `
 
+// ─── Site settings query ─────────────────────────────────────────────────────
+// Fetches the singleton siteSettings document. coalesce(..., true/false) means
+// the flag is on/off by default even before the document is first created.
+export const SITE_SETTINGS_QUERY = `
+  *[_type == "siteSettings" && _id == "siteSettings"][0] {
+    "showLocations":   coalesce(showLocations,   true),
+    "maintenanceMode": coalesce(maintenanceMode, false)
+  }
+`
+
 // ─── All photo IDs query ────────────────────────────────────────────────────
 // Returns just the _id of every visible photo in display order (newest first).
 // Used to determine prev/next navigation on the detail page.
