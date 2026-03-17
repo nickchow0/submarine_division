@@ -756,6 +756,11 @@ export default function AdminDashboard({
                 description: 'Shows the dive-site map in the navigation and at /locations.',
               },
               {
+                key: 'showCaptions' as const,
+                label: 'Show captions',
+                description: 'Displays AI-generated captions in gallery cards, the photo modal, and the photo page.',
+              },
+              {
                 key: 'maintenanceMode' as const,
                 label: 'Maintenance mode',
                 description: 'Replaces the public site with a "coming soon" screen. Admin access is unaffected.',

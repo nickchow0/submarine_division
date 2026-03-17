@@ -14,6 +14,7 @@ type Props = {
   nextId: string | null;
   onClose: () => void;
   onNavigate: (id: string) => void;
+  showCaptions?: boolean;
 };
 
 export default function PhotoModal({
@@ -22,6 +23,7 @@ export default function PhotoModal({
   nextId,
   onClose,
   onNavigate,
+  showCaptions = false,
 }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -148,7 +150,7 @@ export default function PhotoModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Caption */}
-          {photo.aiCaption && (
+          {showCaptions && photo.aiCaption && (
             <p className="text-slate-400 text-sm leading-relaxed">
               {photo.aiCaption}
             </p>

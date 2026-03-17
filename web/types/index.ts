@@ -59,13 +59,15 @@ export type MapPin = {
 
 // ─── Site-wide feature flags ──────────────────────────────────────────────────
 export type SiteSettings = {
-  showLocations:  boolean   // show map/locations page in nav
-  maintenanceMode: boolean  // replace public site with maintenance page
+  showLocations:   boolean   // show map/locations page in nav
+  maintenanceMode: boolean   // replace public site with maintenance page
+  showCaptions:    boolean   // show AI captions in the gallery, modal, and photo page
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  showLocations:  true,
+  showLocations:   true,
   maintenanceMode: false,
+  showCaptions:    false,
 }
 
 // ─── Sanity webhook payload ───────────────────────────────────────────────────

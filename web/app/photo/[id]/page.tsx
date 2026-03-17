@@ -6,10 +6,10 @@
 
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY } from '@/lib/sanity'
+import { sanityClient, PHOTO_BY_ID_QUERY, ALL_PHOTO_IDS_QUERY, SITE_SETTINGS_QUERY } from '@/lib/sanity'
 import Image from 'next/image'
 import PhotoPageClient from '@/components/PhotoPageClient'
-import type { Photo } from '@/types'
+import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from '@/types'
 import type { Metadata } from 'next'
 
 type Props = {
@@ -34,10 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhotoPage({ params }: Props) {
   const { id } = await params
-  const [photo, allIds] = await Promise.all([
+  const [photo, allIds, settings] = await Promise.all([
     sanityClient.fetch<Photo | null>(PHOTO_BY_ID_QUERY, { id }),
     sanityClient.fetch<{ _id: string }[]>(ALL_PHOTO_IDS_QUERY),
+    sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   ])
+
+  const { showCaptions } = settings ?? DEFAULT_SETTINGS
 
   if (!photo) notFound()
 
@@ -116,7 +119,7 @@ export default async function PhotoPage({ params }: Props) {
 
       {/* Metadata */}
       <div className="mt-6 space-y-4">
-        {photo.aiCaption && (
+        {showCaptions && photo.aiCaption && (
           <p className="text-slate-400">{photo.aiCaption}</p>
         )}
 

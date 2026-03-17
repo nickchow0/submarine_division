@@ -18,6 +18,13 @@ export const siteSettingsType = defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'showCaptions',
+      title: 'Show captions',
+      description: 'Displays AI-generated captions in the gallery cards, photo modal, and photo page.',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
       name: 'maintenanceMode',
       title: 'Maintenance mode',
       description: 'Replaces the public site with a "coming soon" message. Admin access is unaffected.',

@@ -124,7 +124,8 @@ export const ALL_MAP_PINS_QUERY = `
 export const SITE_SETTINGS_QUERY = `
   *[_type == "siteSettings" && _id == "siteSettings"][0] {
     "showLocations":   coalesce(showLocations,   true),
-    "maintenanceMode": coalesce(maintenanceMode, false)
+    "maintenanceMode": coalesce(maintenanceMode, false),
+    "showCaptions":    coalesce(showCaptions,    false)
   }
 `
 

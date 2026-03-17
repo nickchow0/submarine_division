@@ -20,7 +20,7 @@ import SearchBar from './SearchBar'
 import TagFilter from './TagFilter'
 import PhotoModal from './PhotoModal'
 
-export default function Gallery({ photos }: { photos: Photo[] }) {
+export default function Gallery({ photos, showCaptions = false }: { photos: Photo[]; showCaptions?: boolean }) {
   // ── State ──────────────────────────────────────────────────────────────────
   const [query, setQuery]           = useState('')
   const [activeTag, setActiveTag]   = useState<string | null>(null)
@@ -148,6 +148,7 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
           nextId={nextId}
           onClose={closeModal}
           onNavigate={navigateModal}
+          showCaptions={showCaptions}
         />
       )}
     </>
@@ -161,8 +162,6 @@ type CardProps = { photo: Photo; onOpen: (id: string) => void }
 function PhotoCard({ photo, onOpen }: CardProps) {
   return (
     <div className="break-inside-avoid mb-3 group">
-      {/* Use a button for the click target so keyboard users can activate it,
-          but wrap in a Link so right-click → "Open in new tab" still works */}
       <div
         className="overflow-hidden bg-slate-900 cursor-pointer"
         onClick={() => onOpen(photo._id)}
