@@ -57,15 +57,15 @@ export default function Gallery({
     [photos, selectedId],
   );
 
-  // Derive prev/next from the full (unfiltered) photos list so arrows work
-  // regardless of active search/tag filters
+  // Derive prev/next from the filtered list so modal arrows stay within
+  // whatever search/tag filter is currently active.
   const selectedIndex = useMemo(
-    () => photos.findIndex((p) => p._id === selectedId),
-    [photos, selectedId],
+    () => visiblePhotos.findIndex((p) => p._id === selectedId),
+    [visiblePhotos, selectedId],
   );
-  const prevId = selectedIndex > 0 ? photos[selectedIndex - 1]._id : null;
+  const prevId = selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
   const nextId =
-    selectedIndex < photos.length - 1 ? photos[selectedIndex + 1]._id : null;
+    selectedIndex < visiblePhotos.length - 1 ? visiblePhotos[selectedIndex + 1]._id : null;
 
   // Next.js patches window.history.pushState on the instance, which means
   // calling it normally triggers a Next.js navigation. The original browser
