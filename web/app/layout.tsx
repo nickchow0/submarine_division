@@ -52,6 +52,8 @@ export default async function RootLayout({
             Must be a plain <link> because @import in globals.css needs postcss-import
             and CSS imports inside next/dynamic chunks are unreliable. */}
         <link rel="stylesheet" href="/leaflet.css" />
+      </head>
+      <body className="min-h-screen">
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
             <Script
@@ -66,11 +68,9 @@ export default async function RootLayout({
                 gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
               `}
             </Script>
+            <Analytics />
           </>
         )}
-      </head>
-      <body className="min-h-screen">
-        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && <Analytics />}
         <ImageProtection />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">

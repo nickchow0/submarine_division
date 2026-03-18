@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -r NEXT_PUBLIC_GA_MEASUREMENT_ID /Users/nickchow/Claude/submarine_division_website --include=*.md --include=*.ts --include=*.tsx)",
+      "Bash(npm run:*)",
+      "Bash(grep -rn \"trackEvent\\\\|analytics\" /Users/nickchow/Claude/submarine_division_website/web/components/ /Users/nickchow/Claude/submarine_division_website/web/lib/ /Users/nickchow/Claude/submarine_division_website/web/app/ --include=*.tsx --include=*.ts)",
+      "Bash(npm install:*)",
+      "Bash(npx playwright:*)"
+    ]
+  }
+}
