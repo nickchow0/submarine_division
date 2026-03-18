@@ -5,7 +5,7 @@ import { useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Props = {
-  uploadProgress: { done: number; total: number } | null
+  uploadProgress: string | null
   reuploadingId: string | null
   onUpload: (files: FileList) => void
   onReupload: (id: string, file: File) => void
@@ -75,7 +75,7 @@ const UploadZone = forwardRef<UploadZoneHandle, Props>(function UploadZone(
         {uploadProgress ? (
           <>
             <span className="inline-block w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
-            Uploading {uploadProgress.done}/{uploadProgress.total}…
+            {uploadProgress}
           </>
         ) : (
           <>
