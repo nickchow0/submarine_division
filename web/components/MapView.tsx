@@ -12,6 +12,7 @@ import type { MapPin, Photo } from '@/types'
 import PhotoModal from '@/components/PhotoModal'
 import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
 import { createPinIcon } from '@/lib/mapUtils'
+import { XIcon } from '@/components/icons'
 // Leaflet CSS is loaded globally via <link href="/leaflet.css"> in layout.tsx
 
 // Coerce a pin photo to the full Photo shape PhotoModal expects.
@@ -144,9 +145,7 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
                 onClick={() => setSelected(null)}
                 className="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0 ml-2"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XIcon className="w-5 h-5" />
               </button>
             </div>
 
