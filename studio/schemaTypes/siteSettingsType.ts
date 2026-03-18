@@ -11,6 +11,13 @@ export const siteSettingsType = defineType({
   __experimental_actions: ['update', 'publish'],   // no create / delete in Studio UI
   fields: [
     defineField({
+      name: 'requirePassword',
+      title: 'Require site password',
+      description: 'When disabled, the site is publicly accessible without a password. Visitors skip the password page entirely.',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'showLocations',
       title: 'Show Locations / Map page',
       description: 'Displays the dive-site map in the navigation and at /locations.',

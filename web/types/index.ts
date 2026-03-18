@@ -59,6 +59,7 @@ export type MapPin = {
 
 // ─── Site-wide feature flags ──────────────────────────────────────────────────
 export type SiteSettings = {
+  requirePassword:      boolean   // when false, password gate is disabled and site is public
   showLocations:        boolean   // show map/locations page in nav
   maintenanceMode:      boolean   // replace public site with maintenance page
   showCaptions:         boolean   // show AI captions in the gallery, modal, and photo page
@@ -66,6 +67,7 @@ export type SiteSettings = {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
+  requirePassword:      true,
   showLocations:        true,
   maintenanceMode:      false,
   showCaptions:         false,
