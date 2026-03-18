@@ -202,7 +202,7 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
                     className="group relative aspect-square rounded-lg overflow-hidden bg-slate-800 block"
                   >
                     <Image
-                      src={`${photo.src}?w=300&q=70`}
+                      src={photo.src}
                       alt={photo.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
