@@ -33,9 +33,11 @@ const PHOTOS: Photo[] = [
 ]
 
 describe('buildSearchIndex', () => {
-  it('returns a usable index with a search method', () => {
+  it('returns an index that finds photos by title', () => {
     const index = buildSearchIndex(PHOTOS)
-    expect(typeof index.search).toBe('function')
+    const results = index.search('hammerhead')
+    expect(results.length).toBeGreaterThan(0)
+    expect(results[0].item._id).toBe('1')
   })
 })
 

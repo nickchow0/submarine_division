@@ -2,13 +2,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import type { Photo } from '@/types'
+import React from 'react'
 
 // Mock next/image — renders a plain <img> in jsdom
 vi.mock('next/image', () => ({
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} />
-  ),
+  default: ({ src, alt }: { src: string; alt: string }) =>
+    React.createElement('img', { src, alt }),
 }))
 
 // Mock next/link — renders a plain <a> in jsdom
@@ -21,7 +20,7 @@ vi.mock('next/link', () => ({
     href: string
     children: React.ReactNode
     [key: string]: unknown
-  }) => <a href={href} {...rest}>{children}</a>,
+  }) => React.createElement('a', { href, ...rest }, children),
 }))
 
 // Mock PhotoModal — prevents jsdom failures from its transitive dependencies

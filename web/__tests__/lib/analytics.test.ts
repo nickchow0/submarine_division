@@ -1,8 +1,13 @@
 // web/__tests__/lib/analytics.test.ts
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { trackEvent } from '@/lib/analytics'
 
 describe('trackEvent', () => {
+  beforeEach(() => {
+    // @ts-expect-error - ensure clean state before each test
+    delete window.gtag
+  })
+
   afterEach(() => {
     // Clean up any gtag set during tests
     // @ts-expect-error - deleting a declared global for test cleanup
