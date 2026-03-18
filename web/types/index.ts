@@ -50,10 +50,19 @@ export type MapPin = {
   photos: {
     _id: string
     title: string
+    tags: string[]
     src: string
     width: number
     height: number
     blurDataURL: string | null
+    location: string | null
+    dateTaken: string | null
+    camera: string | null
+    lens: string | null
+    focalLength: string | null
+    aperture: string | null
+    shutterSpeed: string | null
+    iso: string | null
   }[]
 }
 
