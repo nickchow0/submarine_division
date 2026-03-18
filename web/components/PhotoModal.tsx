@@ -138,22 +138,33 @@ export default function PhotoModal({
 
         {/* ── Photo ── */}
         <div className="flex-1 min-h-0 flex items-center justify-center px-8 pt-12 pb-8">
-          <Image
+          {/* Aspect-ratio wrapper reserves the exact photo space before the image
+              loads so the modal never jumps in size. Width is the smaller of
+              (a) the available flex width and (b) the width implied by maxHeight
+              × the photo's aspect ratio — whichever constraint binds first. */}
+          <div
             key={photo._id}
-            src={photo.src}
-            alt={photo.title}
-            width={photo.width}
-            height={photo.height}
-            // Modal panel is max-w-5xl (1024px) with px-8 padding each side,
-            // so the photo is at most ~880px on large screens.
-            sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
-            quality={90}
-            className="object-contain max-w-full max-h-full rounded photo-fade-in"
-            style={{ maxHeight: "calc(90dvh - 300px)" }}
-            placeholder={photo.blurDataURL ? "blur" : "empty"}
-            blurDataURL={photo.blurDataURL ?? undefined}
-            priority
-          />
+            className="relative rounded overflow-hidden photo-fade-in bg-slate-900"
+            style={{
+              aspectRatio: `${photo.width} / ${photo.height}`,
+              maxHeight: "calc(90dvh - 300px)",
+              width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * (90dvh - 300px)))`,
+            }}
+          >
+            <Image
+              src={photo.src}
+              alt={photo.title}
+              fill
+              // Modal panel is max-w-5xl (1024px) with px-8 padding each side,
+              // so the photo is at most ~880px on large screens.
+              sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
+              quality={90}
+              className="object-contain"
+              placeholder={photo.blurDataURL ? "blur" : "empty"}
+              blurDataURL={photo.blurDataURL ?? undefined}
+              priority
+            />
+          </div>
         </div>
 
         {/* ── Metadata strip (bottom) ── */}

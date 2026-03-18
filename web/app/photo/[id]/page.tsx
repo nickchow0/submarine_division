@@ -104,20 +104,29 @@ export default async function PhotoPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Photo */}
-      <Image
-        src={photo.src}
-        alt={photo.title}
-        width={photo.width}
-        height={photo.height}
-        // Page container is max-w-5xl (1024px) with px-4 padding.
-        sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) calc(100vw - 64px), 992px"
-        quality={90}
-        className="w-auto h-auto max-w-full max-h-[80vh] mx-auto block"
-        placeholder={photo.blurDataURL ? 'blur' : 'empty'}
-        blurDataURL={photo.blurDataURL ?? undefined}
-        priority
-      />
+      {/* Photo — aspect-ratio wrapper reserves the exact space before the image
+          loads so the page layout doesn't shift. Same technique as PhotoModal. */}
+      <div
+        className="relative mx-auto rounded overflow-hidden photo-fade-in bg-slate-900"
+        style={{
+          aspectRatio: `${photo.width} / ${photo.height}`,
+          maxHeight: '80vh',
+          width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * 80vh))`,
+        }}
+      >
+        <Image
+          src={photo.src}
+          alt={photo.title}
+          fill
+          // Page container is max-w-5xl (1024px) with px-4 padding.
+          sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) calc(100vw - 64px), 992px"
+          quality={90}
+          className="object-contain"
+          placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+          blurDataURL={photo.blurDataURL ?? undefined}
+          priority
+        />
+      </div>
 
       {/* Metadata */}
       <div className="mt-6 space-y-4">

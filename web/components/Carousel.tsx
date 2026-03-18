@@ -49,10 +49,17 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Image */}
-      <div className="relative w-full h-full transition-opacity duration-700">
+      {/* Image — aspect-ratio wrapper so fade-in covers only the photo area */}
+      <div
+        key={photo._id}
+        className="relative photo-fade-in"
+        style={{
+          aspectRatio: `${photo.width} / ${photo.height}`,
+          maxHeight: '70vh',
+          width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * 70vh))`,
+        }}
+      >
         <Image
-          key={photo._id}
           src={photo.src}
           alt={photo.title}
           fill
@@ -61,7 +68,6 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
           blurDataURL={photo.blurDataURL ?? undefined}
           priority={current === 0}
           sizes="100vw"
-          unoptimized
         />
       </div>
 
