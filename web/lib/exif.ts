@@ -3,6 +3,20 @@
 // Reads camera, lens, focal length, ISO, shutter speed, aperture, and date
 // from the binary EXIF segment embedded in JPEG files.
 
+// ─── Camera display name mapping ─────────────────────────────────────────────
+// Maps raw EXIF camera strings (Make + Model) to friendly display names.
+const CAMERA_DISPLAY_NAMES: Record<string, string> = {
+  'SONY ILCE-7RM2': 'Sony A7RII',
+  'SONY ILCE-7RM3': 'Sony A7RIII',
+  'SONY ILCE-7RM4': 'Sony A7RIV',
+  'SONY ILCE-7RM5': 'Sony A7RV',
+}
+
+export function formatCamera(camera: string | null | undefined): string | null {
+  if (!camera) return null
+  return CAMERA_DISPLAY_NAMES[camera.trim().toUpperCase()] ?? camera
+}
+
 export type ExifData = {
   camera?:       string
   lens?:         string

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
+import { formatCamera } from "@/lib/exif";
 
 type Props = {
   photo: Photo;
@@ -39,11 +40,11 @@ export default function PhotoModal({
   }, [onClose, onNavigate, prevId, nextId]);
 
   useEffect(() => {
-    trackEvent('photo_view', {
+    trackEvent("photo_view", {
       photo_id: photo._id,
       photo_title: photo.title,
       location: photo.location ?? null,
-    })
+    });
   }, [photo]);
 
   const hasExif =
@@ -118,14 +119,14 @@ export default function PhotoModal({
           key={`pf-${p._id}`}
           aria-hidden="true"
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             aspectRatio: `${p.width} / ${p.height}`,
-            maxHeight: 'calc(90dvh - 300px)',
+            maxHeight: "calc(90dvh - 300px)",
             width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * (90dvh - 300px)))`,
-            visibility: 'hidden',
-            pointerEvents: 'none',
+            visibility: "hidden",
+            pointerEvents: "none",
           }}
         >
           <Image
@@ -252,7 +253,6 @@ export default function PhotoModal({
                   {new Date(photo.dateTaken).toLocaleDateString("en-GB", {
                     year: "numeric",
                     month: "long",
-                    day: "numeric",
                   })}
                 </span>
               )}
@@ -282,7 +282,7 @@ export default function PhotoModal({
                       d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
                     />
                   </svg>
-                  {photo.camera}
+                  {formatCamera(photo.camera)}
                 </span>
               )}
               {photo.lens && <span>{photo.lens}</span>}
