@@ -41,35 +41,35 @@ Tests pure functions in `lib/` that have no external dependencies.
 
 All tests use `buildSearchIndex(photos)` — never `new Fuse(photos)` directly — so that `FUSE_OPTIONS` (threshold, weights, `minMatchCharLength`) are exercised consistently with production.
 
-| Test | Description |
-|---|---|
-| `buildSearchIndex` returns a usable index | Assert `typeof index.search === 'function'` (avoids cross-module `instanceof` fragility) |
-| `searchPhotos` returns matching photos | Query matching a known title returns that photo |
-| `searchPhotos` returns `[]` for no match | Unmatched query returns empty array |
-| `searchPhotos` returns `[]` for empty string | The function itself short-circuits: `if (!query.trim()) return []` |
-| `searchPhotos` returns `[]` for whitespace-only input | `"   "` hits the same `.trim()` branch and returns `[]` |
-| `searchPhotos` is case-insensitive | Uppercase query matches lowercase title (Fuse.js built-in, smoke test) |
-| `searchPhotos` matches on tags | Tag-based query returns photos with that tag |
+| Test                                                  | Description                                                                              |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `buildSearchIndex` returns a usable index             | Assert `typeof index.search === 'function'` (avoids cross-module `instanceof` fragility) |
+| `searchPhotos` returns matching photos                | Query matching a known title returns that photo                                          |
+| `searchPhotos` returns `[]` for no match              | Unmatched query returns empty array                                                      |
+| `searchPhotos` returns `[]` for empty string          | The function itself short-circuits: `if (!query.trim()) return []`                       |
+| `searchPhotos` returns `[]` for whitespace-only input | `"   "` hits the same `.trim()` branch and returns `[]`                                  |
+| `searchPhotos` is case-insensitive                    | Uppercase query matches lowercase title (Fuse.js built-in, smoke test)                   |
+| `searchPhotos` matches on tags                        | Tag-based query returns photos with that tag                                             |
 
 ### `lib/analytics.ts`
 
-| Test | Description |
-|---|---|
-| `trackEvent` no-ops when `window` is undefined | SSR guard: called in Node environment, throws nothing |
-| `trackEvent` no-ops when `gtag` is not a function | Guard: `window` exists but `gtag` absent, no error |
+| Test                                               | Description                                                   |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| `trackEvent` no-ops when `window` is undefined     | SSR guard: called in Node environment, throws nothing         |
+| `trackEvent` no-ops when `gtag` is not a function  | Guard: `window` exists but `gtag` absent, no error            |
 | `trackEvent` calls `window.gtag` with correct args | Happy path: verifies event name and params are passed through |
 
 ### `lib/sanityImageLoader.ts`
 
 The loader always includes a `q` parameter — it defaults to `85` when quality is not supplied. It also caps width at `2000` via `Math.min(width, 2000)`.
 
-| Test | Description |
-|---|---|
-| Builds a URL containing the Sanity CDN domain | Output URL contains the expected CDN base |
-| Includes `w` (width) parameter | Width param appears in the URL |
-| `q` defaults to `85` when quality not provided | Calling without a quality arg produces `q=85` |
-| `q` equals the supplied quality value | Passing `quality: 60` produces `q=60` |
-| Caps width at 2000px | Supplying `width: 3000` produces `w=2000`, not `w=3000` |
+| Test                                           | Description                                             |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| Builds a URL containing the Sanity CDN domain  | Output URL contains the expected CDN base               |
+| Includes `w` (width) parameter                 | Width param appears in the URL                          |
+| `q` defaults to `85` when quality not provided | Calling without a quality arg produces `q=85`           |
+| `q` equals the supplied quality value          | Passing `quality: 60` produces `q=60`                   |
+| Caps width at 2000px                           | Supplying `width: 3000` produces `w=2000`, not `w=3000` |
 
 ---
 
@@ -91,30 +91,30 @@ Tests client components in a jsdom environment using React Testing Library. Comp
 
 ### `SearchBar`
 
-| Test | Description |
-|---|---|
-| Renders a text input | Input element is present in the DOM |
+| Test                                            | Description                                                                         |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Renders a text input                            | Input element is present in the DOM                                                 |
 | Calls `onSearch` after debounce when user types | Type into input, advance fake timers 150ms, assert callback called with typed value |
-| Shows result count when provided | Result/total count text is visible |
+| Shows result count when provided                | Result/total count text is visible                                                  |
 
 ### `TagFilter`
 
-| Test | Description |
-|---|---|
-| Renders all provided tags | Each tag name appears as a button |
-| Calls `onTagClick` with tag name when clicked | Clicking a tag fires the callback |
-| Applies active styling to the selected tag | Active tag has a distinct visual state |
-| Returns null when no tags provided | Empty tags array: component returns `null`, container is empty |
+| Test                                          | Description                                                    |
+| --------------------------------------------- | -------------------------------------------------------------- |
+| Renders all provided tags                     | Each tag name appears as a button                              |
+| Calls `onTagClick` with tag name when clicked | Clicking a tag fires the callback                              |
+| Applies active styling to the selected tag    | Active tag has a distinct visual state                         |
+| Returns null when no tags provided            | Empty tags array: component returns `null`, container is empty |
 
 ### `Gallery`
 
-| Test | Description |
-|---|---|
-| Renders all photos initially | All photo alt texts are present |
-| Filters photos by search query | Type query + advance fake timers 150ms → only matching photos visible |
-| Shows "no results" message when nothing matches | Empty state message appears for unmatched query |
-| Filters photos by tag | Clicking a tag reduces visible photos to those with that tag |
-| Clearing filters restores all photos | Clicking "Clear filters" restores the full photo list |
+| Test                                            | Description                                                           |
+| ----------------------------------------------- | --------------------------------------------------------------------- |
+| Renders all photos initially                    | All photo alt texts are present                                       |
+| Filters photos by search query                  | Type query + advance fake timers 150ms → only matching photos visible |
+| Shows "no results" message when nothing matches | Empty state message appears for unmatched query                       |
+| Filters photos by tag                           | Clicking a tag reduces visible photos to those with that tag          |
+| Clearing filters restores all photos            | Clicking "Clear filters" restores the full photo list                 |
 
 ---
 
@@ -132,16 +132,16 @@ The password gate test explicitly opts out of storage state so it hits the middl
 
 ### Test flows
 
-| Flow | Auth | Steps | Assertion |
-|---|---|---|---|
-| Password gate | None | Navigate to `/gallery` | Redirected to `/password` |
-| Gallery loads | Authenticated | Navigate to `/gallery` | Photo grid visible with ≥1 photo |
-| Search filters photos | Authenticated | Type a search term | Fewer photos visible than initial count |
-| Open photo modal | Authenticated | Click a photo thumbnail | Modal overlay appears with the photo |
-| Modal navigation | Authenticated | Open modal, click next arrow | A different photo is displayed |
-| Close modal | Authenticated | Open modal, press Escape | Modal dismissed, gallery visible |
-| Direct photo page | Authenticated | Navigate to `/photo/[id]` directly | Photo and metadata rendered |
-| About page loads | Authenticated | Navigate to `/about` | Page renders without errors |
+| Flow                  | Auth          | Steps                              | Assertion                               |
+| --------------------- | ------------- | ---------------------------------- | --------------------------------------- |
+| Password gate         | None          | Navigate to `/gallery`             | Redirected to `/password`               |
+| Gallery loads         | Authenticated | Navigate to `/gallery`             | Photo grid visible with ≥1 photo        |
+| Search filters photos | Authenticated | Type a search term                 | Fewer photos visible than initial count |
+| Open photo modal      | Authenticated | Click a photo thumbnail            | Modal overlay appears with the photo    |
+| Modal navigation      | Authenticated | Open modal, click next arrow       | A different photo is displayed          |
+| Close modal           | Authenticated | Open modal, press Escape           | Modal dismissed, gallery visible        |
+| Direct photo page     | Authenticated | Navigate to `/photo/[id]` directly | Photo and metadata rendered             |
+| About page loads      | Authenticated | Navigate to `/about`               | Page renders without errors             |
 
 ### Configuration
 
@@ -195,11 +195,11 @@ Both jobs must pass before Vercel deploys. Vercel's GitHub integration respects 
 
 Added to `web/package.json`:
 
-| Script | Command | Description |
-|---|---|---|
-| `test` | `vitest run` | Run unit + component tests once |
-| `test:watch` | `vitest` | Watch mode for development |
-| `test:e2e` | `playwright test` | Run E2E tests |
+| Script        | Command                | Description                      |
+| ------------- | ---------------------- | -------------------------------- |
+| `test`        | `vitest run`           | Run unit + component tests once  |
+| `test:watch`  | `vitest`               | Watch mode for development       |
+| `test:e2e`    | `playwright test`      | Run E2E tests                    |
 | `test:e2e:ui` | `playwright test --ui` | Playwright UI mode for debugging |
 
 ---
