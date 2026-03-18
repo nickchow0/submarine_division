@@ -898,7 +898,7 @@ export function usePhotoManagement(initialPhotos: AdminPhoto[]) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // ── Sort / filter ──────────────────────────────────────────────────────────
-  const [sortBy, setSortBy]                   = useState<SortKey>('date')
+  const [sortBy, setSortBy]                   = useState<SortKey>('date-desc')
   const [filterVisibility, setFilterVisibility] = useState<FilterVisibility>('all')
   const [filterCaption, setFilterCaption]       = useState<FilterCaption>('all')
   const [filterTag, setFilterTag]               = useState<string>('')
@@ -1699,7 +1699,7 @@ function handleTriggerReupload(id: string) {
 <PhotoTable ... onTriggerReupload={handleTriggerReupload} />
 ```
 
-Also add `setReuploadingId` to the return value of `usePhotoManagement` so `AdminDashboard` can set it before opening the picker.
+Also add `setReuploadingId` to the return value of `usePhotoManagement` so `AdminDashboard` can set it before calling `uploadZoneRef.current?.openReuploadPicker()`.
 
 - [ ] Run TypeScript:
 
@@ -1955,7 +1955,7 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
 }
 ```
 
-Note: The `onTriggerReupload` wiring between `PhotoTable` row buttons and `UploadZone`'s hidden input needs a decision. The recommended approach: `UploadZone` exposes a `triggerReupload(id: string)` function via a forwarded ref (`useImperativeHandle`). `AdminDashboard` holds this ref and passes `(id) => uploadZoneRef.current?.triggerReupload(id)` as `onTriggerReupload` to `PhotoTable`.
+Note: The `onTriggerReupload` wiring between `PhotoTable` row buttons and `UploadZone`'s hidden input is implemented as follows (see Task 16 for full details): `UploadZone` exposes `openReuploadPicker()` via `useImperativeHandle`. `AdminDashboard` holds a `uploadZoneRef` and `handleTriggerReupload` calls `pm.setReuploadingId(id)` then `uploadZoneRef.current?.openReuploadPicker()`. Pass `handleTriggerReupload` as `onTriggerReupload` to `PhotoTable`.
 
 - [ ] Run TypeScript:
 
