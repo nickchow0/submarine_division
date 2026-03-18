@@ -9,38 +9,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import AdminMapPickerWrapper from "@/components/AdminMapPickerWrapper";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type AdminPin = {
-  _id: string;
-  name: string;
-  description: string | null;
-  coordinates: { lat: number; lng: number };
-  photoIds: string[];
-  photos: {
-    _id: string;
-    title: string;
-    src: string;
-    width: number;
-    height: number;
-    blurDataURL: string | null;
-  }[];
-};
-
-type AdminPhoto = {
-  _id: string;
-  title: string;
-  src: string;
-};
-
-type PinForm = {
-  name: string;
-  description: string;
-  lat: string;
-  lng: string;
-  photoIds: string[];
-};
+import type { AdminPin, PinForm, PhotoPickerItem } from "@/types";
 
 const EMPTY_FORM: PinForm = {
   name: "",
@@ -54,7 +23,7 @@ const EMPTY_FORM: PinForm = {
 
 export default function AdminLocationsPage() {
   const [pins, setPins] = useState<AdminPin[]>([]);
-  const [photos, setPhotos] = useState<AdminPhoto[]>([]);
+  const [photos, setPhotos] = useState<PhotoPickerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<PinForm>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);

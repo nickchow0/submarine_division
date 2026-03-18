@@ -130,3 +130,41 @@ export type EditState = {
   shutterSpeed: string
   aperture: string
 }
+
+// ─── Admin map pin ────────────────────────────────────────────────────────────
+// Includes resolved photos for display in the admin locations page.
+export type AdminPin = {
+  _id: string
+  name: string
+  description: string | null
+  coordinates: { lat: number; lng: number }
+  photoIds: string[]
+  photos: {
+    _id: string
+    title: string
+    src: string
+    width: number
+    height: number
+    blurDataURL: string | null
+  }[]
+}
+
+// ─── Pin form state ───────────────────────────────────────────────────────────
+// lat/lng are strings because they come from <input> text fields.
+// parseFloat() is called on save.
+export type PinForm = {
+  name: string
+  description: string
+  lat: string
+  lng: string
+  photoIds: string[]
+}
+
+// ─── Photo picker item ────────────────────────────────────────────────────────
+// Minimal photo shape used in the locations page photo picker.
+// Named PhotoPickerItem to avoid collision with the full AdminPhoto type.
+export type PhotoPickerItem = {
+  _id: string
+  title: string
+  src: string
+}
