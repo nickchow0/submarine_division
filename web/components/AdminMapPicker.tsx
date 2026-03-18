@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type LType from 'leaflet'
-import type { Map as LeafletMap, Marker } from 'leaflet'
+import type { Marker } from 'leaflet'
+import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
+import { createPinIcon } from '@/lib/mapUtils'
 
 // Minimal type — only the fields the map picker needs
 export type PinBase = {
@@ -20,11 +22,10 @@ type Props = {
 
 export default function AdminMapPicker({ pins, pendingCoords, onMapClick, onPinClick }: Props) {
   const containerRef  = useRef<HTMLDivElement>(null)
-  const mapRef        = useRef<LeafletMap | null>(null)
-  const LRef          = useRef<typeof LType | null>(null)
   const markersRef    = useRef<Map<string, Marker>>(new Map())
   const pendingRef    = useRef<Marker | null>(null)
-  const [ready, setReady] = useState(false)
+
+  const { map, isReady } = useLeafletMap(containerRef)
 
   // Store callbacks in refs so effects don't need them as dependencies
   const onMapClickRef = useRef(onMapClick)
@@ -32,128 +33,82 @@ export default function AdminMapPicker({ pins, pendingCoords, onMapClick, onPinC
   useEffect(() => { onMapClickRef.current = onMapClick }, [onMapClick])
   useEffect(() => { onPinClickRef.current = onPinClick }, [onPinClick])
 
-  // ── Initialize map once (lazy import so layout is settled first) ──────────
+  // ── Sync existing pin markers ─────────────────────────────────────────────
   useEffect(() => {
-    if (mapRef.current) return
-    let cancelled = false
+    if (!isReady || !map) return
 
-    import('leaflet').then(({ default: L }) => {
-      if (cancelled || !containerRef.current || mapRef.current) return
+    import('leaflet').then(L => {
+      const leafletL = L.default
 
-      LRef.current = L
-
-      // Fix default icon paths broken by webpack
+      // Fix broken webpack default icon (specific to AdminMapPicker)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
+      delete (leafletL.Icon.Default.prototype as any)._getIconUrl
+      leafletL.Icon.Default.mergeOptions({
         iconUrl:       '/leaflet/marker-icon.png',
         iconRetinaUrl: '/leaflet/marker-icon-2x.png',
         shadowUrl:     '/leaflet/marker-shadow.png',
       })
 
-      const map = L.map(containerRef.current, { center: [20, 0], zoom: 2 })
-      mapRef.current = map
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-        maxZoom: 19,
-      }).addTo(map)
-
       map.on('click', (e: LType.LeafletMouseEvent) => {
         onMapClickRef.current(e.latlng.lat, e.latlng.lng)
       })
 
-      // Lazy import gives layout time to settle, but call invalidateSize for
-      // any remaining off-by-one from the container's final paint.
-      requestAnimationFrame(() => {
-        map.invalidateSize()
-        setReady(true)
-      })
-    })
-
-    return () => {
-      cancelled = true
-      mapRef.current?.remove()
-      mapRef.current = null
-      LRef.current = null
+      markersRef.current.forEach(m => m.remove())
       markersRef.current.clear()
-      pendingRef.current = null
-    }
-  }, [])
 
-  // ── Sync existing pin markers ─────────────────────────────────────────────
-  useEffect(() => {
-    const map = mapRef.current
-    const L   = LRef.current
-    if (!map || !L || !ready) return
+      // Set globalThis.L before calling createPinIcon
+      ;(globalThis as unknown as { L: typeof leafletL }).L = leafletL
 
-    markersRef.current.forEach(m => m.remove())
-    markersRef.current.clear()
+      pins.forEach(pin => {
+        const marker = leafletL.marker(
+          [pin.coordinates.lat, pin.coordinates.lng],
+          { icon: createPinIcon('#0ea5e9') }
+        ).addTo(map)
 
-    const pinIcon = (color: string) => L.divIcon({
-      className: '',
-      iconAnchor: [12, 36],
-      html: `<svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z"
-          fill="${color}" opacity="0.85"/>
-        <circle cx="12" cy="12" r="5" fill="white" opacity="0.9"/>
-      </svg>`,
-    })
-
-    pins.forEach(pin => {
-      const marker = L.marker(
-        [pin.coordinates.lat, pin.coordinates.lng],
-        { icon: pinIcon('#0ea5e9') }
-      ).addTo(map)
-
-      marker.on('click', (e: LType.LeafletMouseEvent) => {
-        L.DomEvent.stopPropagation(e)
-        onPinClickRef.current(pin)
+        marker.on('click', (e: LType.LeafletMouseEvent) => {
+          leafletL.DomEvent.stopPropagation(e)
+          onPinClickRef.current(pin)
+        })
+        markersRef.current.set(pin._id, marker)
       })
-      markersRef.current.set(pin._id, marker)
-    })
 
-    if (pins.length === 1) {
-      map.setView([pins[0].coordinates.lat, pins[0].coordinates.lng], 6)
-    } else if (pins.length > 1) {
-      const bounds = L.latLngBounds(pins.map(p => [p.coordinates.lat, p.coordinates.lng]))
-      map.fitBounds(bounds, { padding: [40, 40] })
-    }
-  }, [pins, ready])
+      if (pins.length === 1) {
+        map.setView([pins[0].coordinates.lat, pins[0].coordinates.lng], 6)
+      } else if (pins.length > 1) {
+        const bounds = leafletL.latLngBounds(pins.map(p => [p.coordinates.lat, p.coordinates.lng]))
+        map.fitBounds(bounds, { padding: [40, 40] })
+      }
+    })
+  }, [isReady, map, pins])
 
   // ── Sync pending (unsaved) pin marker ────────────────────────────────────
   useEffect(() => {
-    const map = mapRef.current
-    const L   = LRef.current
-    if (!map || !L || !ready) return
+    if (!isReady || !map) return
 
-    pendingRef.current?.remove()
-    pendingRef.current = null
+    import('leaflet').then(L => {
+      const leafletL = L.default
 
-    if (!pendingCoords) return
+      pendingRef.current?.remove()
+      pendingRef.current = null
 
-    const pendingIcon = L.divIcon({
-      className: '',
-      iconAnchor: [12, 36],
-      html: `<svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z"
-          fill="#f59e0b" opacity="0.85"/>
-        <circle cx="12" cy="12" r="5" fill="white" opacity="0.9"/>
-      </svg>`,
+      if (!pendingCoords) return
+
+      // Set globalThis.L before calling createPinIcon
+      ;(globalThis as unknown as { L: typeof leafletL }).L = leafletL
+
+      const marker = leafletL.marker([pendingCoords.lat, pendingCoords.lng], {
+        icon: createPinIcon('#f59e0b'),
+        draggable: true,
+      }).addTo(map)
+
+      marker.on('dragend', () => {
+        const { lat, lng } = marker.getLatLng()
+        onMapClickRef.current(lat, lng)
+      })
+
+      pendingRef.current = marker
     })
-
-    const marker = L.marker([pendingCoords.lat, pendingCoords.lng], {
-      icon: pendingIcon,
-      draggable: true,
-    }).addTo(map)
-
-    marker.on('dragend', () => {
-      const { lat, lng } = marker.getLatLng()
-      onMapClickRef.current(lat, lng)
-    })
-
-    pendingRef.current = marker
-  }, [pendingCoords, ready])
+  }, [isReady, map, pendingCoords])
 
   return (
     <div className="absolute inset-0 flex">
