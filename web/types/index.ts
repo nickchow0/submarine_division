@@ -89,3 +89,44 @@ export type SanityWebhookPayload = {
   _type: string
   image?: SanityPhotoDocument['image']
 }
+
+// ─── Admin photo (used in AdminDashboard) ─────────────────────────────────────
+// Same fields as Photo but intentionally omits blurDataURL (admin grid uses
+// raw Sanity CDN URLs and never needs blur placeholders). Adds imageRef for
+// caption generation and reupload operations.
+export type AdminPhoto = {
+  _id: string
+  title: string
+  tags: string[]
+  aiCaption: string
+  location: string | null
+  camera: string | null
+  dateTaken: string | null
+  lens: string | null
+  focalLength: string | null
+  iso: string | null
+  shutterSpeed: string | null
+  aperture: string | null
+  visible: boolean
+  src: string
+  width: number
+  height: number
+  imageRef: string
+}
+
+// ─── Admin edit form state ─────────────────────────────────────────────────────
+// All fields are strings because they come from <input> elements.
+// Null fields from AdminPhoto become empty strings here.
+export type EditState = {
+  title: string
+  tags: string        // comma-separated string, split on save
+  aiCaption: string
+  location: string
+  camera: string
+  dateTaken: string
+  lens: string
+  focalLength: string
+  iso: string
+  shutterSpeed: string
+  aperture: string
+}
