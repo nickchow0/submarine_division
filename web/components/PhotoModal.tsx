@@ -13,6 +13,7 @@ type Props = {
   photo: Photo;
   prevId: string | null;
   nextId: string | null;
+  prefetchPhotos?: Photo[];
   onClose: () => void;
   onNavigate: (id: string) => void;
   showCaptions?: boolean;
@@ -22,6 +23,7 @@ export default function PhotoModal({
   photo,
   prevId,
   nextId,
+  prefetchPhotos = [],
   onClose,
   onNavigate,
   showCaptions = false,
@@ -109,6 +111,32 @@ export default function PhotoModal({
           </svg>
         </button>
       )}
+
+      {/* Hidden prefetch images for the next 3 photos */}
+      {prefetchPhotos.map((p) => (
+        <div
+          key={`pf-${p._id}`}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            aspectRatio: `${p.width} / ${p.height}`,
+            maxHeight: 'calc(90dvh - 300px)',
+            width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * (90dvh - 300px)))`,
+            visibility: 'hidden',
+            pointerEvents: 'none',
+          }}
+        >
+          <Image
+            src={p.src}
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
+          />
+        </div>
+      ))}
 
       {/* Modal panel */}
       <div

@@ -67,6 +67,10 @@ export default function Gallery({
   const prevId = selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
   const nextId =
     selectedIndex < visiblePhotos.length - 1 ? visiblePhotos[selectedIndex + 1]._id : null;
+  const prefetchPhotos = useMemo(
+    () => (selectedIndex >= 0 ? visiblePhotos.slice(selectedIndex + 1, selectedIndex + 4) : []),
+    [selectedIndex, visiblePhotos],
+  );
 
   // Next.js patches window.history.pushState on the instance, which means
   // calling it normally triggers a Next.js navigation. The original browser
@@ -180,6 +184,7 @@ export default function Gallery({
           photo={selectedPhoto}
           prevId={prevId}
           nextId={nextId}
+          prefetchPhotos={prefetchPhotos}
           onClose={closeModal}
           onNavigate={navigateModal}
           showCaptions={showCaptions}
