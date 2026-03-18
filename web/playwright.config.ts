@@ -8,6 +8,12 @@ import path from 'path'
 // for the dev server, but Playwright runs outside of Next.js).
 config({ path: path.resolve(__dirname, '.env.local') })
 
+// CI fallbacks — .env.local won't exist in GitHub Actions.
+// REQUIRE_PASSWORD=true ensures the auth redirect test works.
+// SITE_PASSWORD just needs to match what global-setup POSTs to /api/auth.
+process.env.REQUIRE_PASSWORD ??= 'true'
+process.env.SITE_PASSWORD ??= 'e2e-test-password'
+
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
