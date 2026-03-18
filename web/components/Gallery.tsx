@@ -215,14 +215,18 @@ function PhotoCard({ photo, onOpen }: CardProps) {
       >
         <div className="relative overflow-hidden">
           <Image
-            src={`${photo.src}?w=1200&fm=jpg`}
+            src={photo.src}
             alt={photo.title}
             width={photo.width}
             height={photo.height}
+            // Gallery is 1 col on mobile, 2 on sm, 3 on xl.
+            // These sizes tell the browser the rendered width so it picks the
+            // right srcset entry — mobile gets ~400px, desktop gets ~600px.
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            quality={75}
             className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
             placeholder={photo.blurDataURL ? "blur" : "empty"}
             blurDataURL={photo.blurDataURL ?? undefined}
-            unoptimized
             loading="lazy"
           />
         </div>
