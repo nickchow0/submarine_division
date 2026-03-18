@@ -22,6 +22,10 @@ let cachedRequirePassword: boolean | null = null
 let cacheExpiry = 0
 
 async function isPasswordRequired(): Promise<boolean> {
+  // Env var override — useful for testing and environments without Sanity access
+  if (process.env.REQUIRE_PASSWORD === 'true')  return true
+  if (process.env.REQUIRE_PASSWORD === 'false') return false
+
   if (Date.now() < cacheExpiry && cachedRequirePassword !== null) {
     return cachedRequirePassword
   }
