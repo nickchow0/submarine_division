@@ -1,5 +1,12 @@
 // web/playwright.config.ts
 import { defineConfig, devices } from '@playwright/test'
+import { config } from 'dotenv'
+import path from 'path'
+
+// Load .env.local so SITE_PASSWORD and Sanity vars are available to
+// globalSetup and the test process (Next.js loads this automatically
+// for the dev server, but Playwright runs outside of Next.js).
+config({ path: path.resolve(__dirname, '.env.local') })
 
 export default defineConfig({
   testDir: './e2e',
