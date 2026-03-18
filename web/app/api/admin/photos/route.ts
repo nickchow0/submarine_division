@@ -5,6 +5,67 @@
 import { NextResponse } from 'next/server'
 import { sanityWriteClient } from '@/lib/sanity'
 
+// ─── Recursively find all paths in a document where a specific _ref appears ───
+// Returns Sanity patch path strings, e.g. ["photos[_ref==\"id\"]", "hero._ref"]
+// Array items that ARE the reference use the filter syntax so the whole element
+// is removed; plain reference fields are returned as-is so the caller can unset them.
+function findRefPaths(node: unknown, photoId: string, path = ''): string[] {
+  if (!node || typeof node !== 'object') return []
+
+  if (Array.isArray(node)) {
+    const paths: string[] = []
+    // Check if any element in the array is a direct reference to photoId
+    const hasDirectRef = node.some(
+      item => item && typeof item === 'object' && (item as Record<string, unknown>)._ref === photoId
+    )
+    if (hasDirectRef) {
+      // Unset all matching elements in one expression
+      paths.push(`${path}[_ref == "${photoId}"]`)
+    }
+    // Also recurse into non-reference array elements (e.g. arrays of objects)
+    for (const item of node) {
+      if (item && typeof item === 'object' && !('_ref' in (item as object))) {
+        paths.push(...findRefPaths(item, photoId, path))
+      }
+    }
+    return paths
+  }
+
+  const record = node as Record<string, unknown>
+
+  // Direct reference field
+  if (record._ref === photoId) return [path]
+
+  // Recurse into object fields (skip Sanity metadata keys)
+  const paths: string[] = []
+  for (const [key, val] of Object.entries(record)) {
+    if (key.startsWith('_')) continue
+    const childPath = path ? `${path}.${key}` : key
+    paths.push(...findRefPaths(val, photoId, childPath))
+  }
+  return paths
+}
+
+// ─── Remove all references to a photo across every document that holds one ────
+async function removeAllReferences(photoId: string): Promise<void> {
+  // Find every document (of any type) that references this photo
+  const referencing = await sanityWriteClient.fetch<{ _id: string }[]>(
+    `*[references($photoId) && !(_id in path("drafts.**"))]{ _id }`,
+    { photoId }
+  )
+
+  await Promise.all(referencing.map(async ({ _id }) => {
+    // Fetch the full document so we can walk its structure
+    const doc = await sanityWriteClient.getDocument(_id)
+    if (!doc) return
+
+    const paths = findRefPaths(doc, photoId)
+    if (!paths.length) return
+
+    await sanityWriteClient.patch(_id).unset(paths).commit()
+  }))
+}
+
 export async function PATCH(request: Request) {
   try {
     const { id, fields } = await request.json() as {
@@ -63,18 +124,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ ok: false, error: 'Missing photo id' }, { status: 400 })
     }
 
-    // Remove this photo from any map pins that reference it, so Sanity's
-    // referential integrity check doesn't block the document deletion.
-    const referencingPins = await sanityWriteClient.fetch<{ _id: string }[]>(
-      `*[_type == "mapPin" && references($photoId)]{ _id }`,
-      { photoId: id }
-    )
-    for (const pin of referencingPins) {
-      await sanityWriteClient
-        .patch(pin._id)
-        .unset([`photos[_ref == "${id}"]`])
-        .commit()
-    }
+    // Remove all references to this photo across any document type, so Sanity's
+    // referential integrity check doesn't block the deletion.
+    await removeAllReferences(id)
 
     // Delete the photo document
     await sanityWriteClient.delete(id)
