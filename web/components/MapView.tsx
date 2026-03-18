@@ -1,16 +1,17 @@
 'use client'
 
 // ─── MapView ──────────────────────────────────────────────────────────────────
-// Leaflet is imported dynamically inside useEffect so it never runs during SSR
+// Leaflet is imported dynamically inside useLeafletMap so it never runs during SSR
 // (Leaflet accesses window/navigator at module-evaluation time, which throws in
 // Node). This also eliminates the need for next/dynamic with ssr:false.
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import type { Map as LeafletMap, Marker } from 'leaflet'
-import type LType from 'leaflet'
+import type { Marker } from 'leaflet'
 import type { MapPin, Photo } from '@/types'
 import PhotoModal from '@/components/PhotoModal'
+import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
+import { createPinIcon } from '@/lib/mapUtils'
 // Leaflet CSS is loaded globally via <link href="/leaflet.css"> in layout.tsx
 
 // Coerce a pin photo to the full Photo shape PhotoModal expects.
@@ -41,99 +42,57 @@ function pinPhotoToFull(p: PinPhoto): Photo {
 
 export default function MapView({ pins }: { pins: MapPin[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef       = useRef<LeafletMap | null>(null)
   const markersRef   = useRef<Map<string, Marker>>(new Map())
-  const LRef         = useRef<typeof LType | null>(null)
-  const [ready, setReady]     = useState(false)
+  const { map, isReady } = useLeafletMap(containerRef)
   const [selected, setSelected] = useState<MapPin | null>(null)
   // Photo currently open in the modal (with the pin's photo list for prev/next)
   const [modalPhoto, setModalPhoto]         = useState<Photo | null>(null)
   const [modalPinPhotos, setModalPinPhotos] = useState<PinPhoto[]>([])
 
-  // ── Initialize Leaflet + map (browser only) ───────────────────────────────
-  useEffect(() => {
-    if (mapRef.current) return   // already initialized (StrictMode double-mount guard)
-    let cancelled = false
-
-    import('leaflet').then(({ default: L }) => {
-      if (cancelled || !containerRef.current || mapRef.current) return
-
-      LRef.current = L
-
-      const map = L.map(containerRef.current, {
-        center: [20, 0],
-        zoom: 2,
-        zoomControl: true,
-      })
-      mapRef.current = map
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-        maxZoom: 19,
-      }).addTo(map)
-
-      // Force Leaflet to remeasure the container after the browser has painted.
-      // Without this, the map is often offset when the container's final size
-      // wasn't settled at the moment L.map() was called.
-      requestAnimationFrame(() => map.invalidateSize())
-
-      setReady(true)
-    })
-
-    return () => {
-      cancelled = true
-      mapRef.current?.remove()
-      mapRef.current = null
-      markersRef.current.clear()
-      LRef.current = null
-    }
-  }, [])
-
   // ── Sync markers when pins / selection changes ────────────────────────────
   useEffect(() => {
-    const map = mapRef.current
-    const L   = LRef.current
-    if (!map || !L || !ready) return
+    if (!isReady || !map) return
 
-    // Remove stale markers
-    markersRef.current.forEach(m => m.remove())
-    markersRef.current.clear()
+    // Leaflet is already loaded at this point (isReady guarantees it); re-import
+    // hits the module cache synchronously on the next tick.
+    import('leaflet').then(({ default: L }) => {
+      // createPinIcon reads globalThis.L — make sure it's set before calling it
+      ;(globalThis as unknown as { L: typeof L }).L = L
 
-    if (pins.length === 0) return
+      // Remove stale markers
+      markersRef.current.forEach(m => m.remove())
+      markersRef.current.clear()
 
-    const makePinIcon = (active = false) =>
-      L.divIcon({
-        className: '',
-        iconAnchor: [12, 36],
-        html: `<svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24C24 5.373 18.627 0 12 0z"
-            fill="${active ? '#38bdf8' : '#0ea5e9'}" opacity="${active ? '1' : '0.85'}"/>
-          <circle cx="12" cy="12" r="5" fill="white" opacity="0.9"/>
-        </svg>`,
+      if (pins.length === 0) return
+
+      pins.forEach(pin => {
+        const isActive = selected?._id === pin._id
+        // createPinIcon: active pin uses #38bdf8/opacity 1, inactive uses #0ea5e9/opacity 0.85
+        const icon = createPinIcon(
+          isActive ? '#38bdf8' : '#0ea5e9',
+          isActive ? 1 : 0.85,
+        )
+
+        const marker = L.marker([pin.coordinates.lat, pin.coordinates.lng], { icon }).addTo(map)
+
+        marker.on('click', () => {
+          setSelected(prev => (prev?._id === pin._id ? null : pin))
+        })
+
+        markersRef.current.set(pin._id, marker)
       })
 
-    pins.forEach(pin => {
-      const marker = L.marker([pin.coordinates.lat, pin.coordinates.lng], {
-        icon: makePinIcon(selected?._id === pin._id),
-      }).addTo(map)
-
-      marker.on('click', () => {
-        setSelected(prev => (prev?._id === pin._id ? null : pin))
-      })
-
-      markersRef.current.set(pin._id, marker)
+      // Fit bounds on first load (or re-fit when pins change)
+      if (pins.length === 1) {
+        map.setView([pins[0].coordinates.lat, pins[0].coordinates.lng], 8)
+      } else if (pins.length > 1) {
+        const bounds = L.latLngBounds(
+          pins.map(p => [p.coordinates.lat, p.coordinates.lng] as [number, number])
+        )
+        map.fitBounds(bounds, { padding: [60, 60] })
+      }
     })
-
-    // Fit bounds on first load (or re-fit when pins change)
-    if (pins.length === 1) {
-      map.setView([pins[0].coordinates.lat, pins[0].coordinates.lng], 8)
-    } else if (pins.length > 1) {
-      const bounds = L.latLngBounds(
-        pins.map(p => [p.coordinates.lat, p.coordinates.lng] as [number, number])
-      )
-      map.fitBounds(bounds, { padding: [60, 60] })
-    }
-  }, [pins, selected, ready])
+  }, [isReady, map, pins, selected])
 
   // ── Modal helpers ─────────────────────────────────────────────────────────
   function openModal(pin: MapPin, photoId: string) {
