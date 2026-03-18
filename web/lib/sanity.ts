@@ -49,6 +49,28 @@ export function urlFor(source: SanityImageSource) {
 
 // visible != false means photos where visible is true OR the field doesn't exist
 // yet — so existing photos without the field set still appear by default.
+export const CAROUSEL_PHOTOS_QUERY = `
+  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) [0...8] {
+    _id,
+    title,
+    "tags": coalesce(tags, []),
+    "aiCaption": coalesce(aiCaption, ""),
+    "location": coalesce(location, null),
+    "camera": coalesce(camera, null),
+    "dateTaken": coalesce(dateTaken, null),
+    "lens": coalesce(lens, null),
+    "focalLength": coalesce(focalLength, null),
+    "iso": coalesce(iso, null),
+    "shutterSpeed": coalesce(shutterSpeed, null),
+    "aperture": coalesce(aperture, null),
+    "visible": coalesce(visible, true),
+    "src": image.asset->url,
+    "width": image.asset->metadata.dimensions.width,
+    "height": image.asset->metadata.dimensions.height,
+    "blurDataURL": image.asset->metadata.lqip
+  }
+`;
+
 export const ALL_PHOTOS_QUERY = `
   *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) {
     _id,
