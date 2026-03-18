@@ -6,7 +6,6 @@ import {
   updatePhoto,
   deletePhoto as apiDeletePhoto,
   uploadPhoto as apiUploadPhoto,
-  reuploadPhoto as apiReuploadPhoto,
 } from '@/lib/adminApi'
 
 // ─── Sort key ─────────────────────────────────────────────────────────────────
@@ -38,8 +37,6 @@ export function usePhotoManagement(initialPhotos: AdminPhoto[]) {
 
   // ── Selection state ─────────────────────────────────────────────────────────
   const [selectedIds, setSelectedIds]     = useState<Set<string>>(new Set())
-  const [imageLoading, setImageLoading]   = useState(false)
-
   // ── Sort / filter state ─────────────────────────────────────────────────────
   const [sortBy,           setSortBy]           = useState<SortKey>('date-desc')
   const [filterVisibility, setFilterVisibility] = useState<'all' | 'visible' | 'hidden'>('all')
@@ -75,7 +72,6 @@ export function usePhotoManagement(initialPhotos: AdminPhoto[]) {
   // ── Edit actions ────────────────────────────────────────────────────────────
 
   const startEdit = useCallback((photo: AdminPhoto) => {
-    setImageLoading(true)
     setEditingId(photo._id)
     setEditState({
       title:        photo.title,
@@ -231,8 +227,6 @@ export function usePhotoManagement(initialPhotos: AdminPhoto[]) {
     reuploadingId,
     setReuploadingId,
     selectedIds,
-    imageLoading,
-    setImageLoading,
 
     // Sort / filter
     sortBy,
