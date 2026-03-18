@@ -7,43 +7,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import Image from 'next/image'
-import { type SiteSettings, DEFAULT_SETTINGS } from '@/types'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export type AdminPhoto = {
-  _id: string
-  title: string
-  tags: string[]
-  aiCaption: string
-  location: string | null
-  camera: string | null
-  dateTaken: string | null
-  lens: string | null
-  focalLength: string | null
-  iso: string | null
-  shutterSpeed: string | null
-  aperture: string | null
-  visible: boolean
-  src: string
-  width: number
-  height: number
-  imageRef: string
-}
-
-type EditState = {
-  title: string
-  tags: string
-  aiCaption: string
-  location: string
-  camera: string
-  dateTaken: string
-  lens: string
-  focalLength: string
-  iso: string
-  shutterSpeed: string
-  aperture: string
-}
+import { type SiteSettings, DEFAULT_SETTINGS, type AdminPhoto, type EditState } from '@/types'
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 

@@ -4,8 +4,8 @@
 
 import { sanityClient } from '@/lib/sanity'
 import { SITE_SETTINGS_QUERY } from '@/lib/sanity'
-import AdminDashboard, { type AdminPhoto } from '@/components/AdminDashboard'
-import { DEFAULT_SETTINGS, type SiteSettings } from '@/types'
+import AdminDashboard from '@/components/AdminDashboard'
+import { DEFAULT_SETTINGS, type SiteSettings, type AdminPhoto } from '@/types'
 
 const ADMIN_PHOTOS_QUERY = `
   *[_type == "photo" && !(_id in path("drafts.**"))] | order(dateTaken desc) {
