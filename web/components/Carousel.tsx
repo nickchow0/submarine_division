@@ -67,9 +67,41 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
           placeholder={photo.blurDataURL ? 'blur' : 'empty'}
           blurDataURL={photo.blurDataURL ?? undefined}
           priority={current === 0}
-          sizes="100vw"
+          // The rendered width is min(100vw, aspectRatio × 70vh) — portrait
+          // photos are narrower than the viewport so we tell the browser the
+          // true width so it doesn't over-fetch.
+          sizes={`(max-width: 768px) min(100vw, calc(${(photo.width / photo.height).toFixed(4)} * 70vh)), min(100vw, calc(${(photo.width / photo.height).toFixed(4)} * 70vh))`}
         />
       </div>
+
+      {/* Hidden prefetch images for all non-current photos */}
+      {photos.map((p, i) => {
+        if (i === current) return null
+        return (
+          <div
+            key={`pf-${p._id}`}
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              aspectRatio: `${p.width} / ${p.height}`,
+              maxHeight: '70vh',
+              width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * 70vh))`,
+              visibility: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            <Image
+              src={p.src}
+              alt=""
+              fill
+              priority
+              sizes={`(max-width: 768px) min(100vw, calc(${(p.width / p.height).toFixed(4)} * 70vh)), min(100vw, calc(${(p.width / p.height).toFixed(4)} * 70vh))`}
+            />
+          </div>
+        )
+      })}
 
       {/* Prev / Next arrows */}
       <button
