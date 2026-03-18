@@ -1,6 +1,6 @@
-import { createClient } from '@sanity/client'
-import imageUrlBuilder from '@sanity/image-url'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
+import { createClient } from "@sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 // ─── Sanity client ────────────────────────────────────────────────────────────
 // useCdn: true  → fast cached reads  (use in the frontend / page.tsx)
@@ -8,22 +8,21 @@ import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 
 export const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
-  apiVersion: '2024-01-01',  // pin to a date so the API never changes under you
-  token: process.env.SANITY_READ_TOKEN,  // required for private datasets
-  useCdn: false,  // token-authenticated requests can't use the CDN
-})
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
+  apiVersion: "2024-01-01", // pin to a date so the API never changes under you
+  useCdn: true, // dataset is public — no token needed, CDN caching applies
+});
 
 // A second client with write access — used only server-side in API routes.
 // Falls back to the read token if no dedicated write token is set; this works
 // as long as the token was created with Editor (not Viewer) permissions.
 export const sanityWriteClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_WRITE_TOKEN ?? process.env.SANITY_READ_TOKEN,
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
+  apiVersion: "2024-01-01",
+  token: process.env.SANITY_WRITE_TOKEN,
   useCdn: false,
-})
+});
 
 // ─── Image URL builder ────────────────────────────────────────────────────────
 // Use this to build optimised image URLs from Sanity asset references.
@@ -33,10 +32,10 @@ export const sanityWriteClient = createClient({
 //
 // Sanity resizes and converts on-the-fly on their CDN — no local processing needed.
 
-const builder = imageUrlBuilder(sanityClient)
+const builder = imageUrlBuilder(sanityClient);
 
 export function urlFor(source: SanityImageSource) {
-  return builder.image(source)
+  return builder.image(source);
 }
 
 // ─── GROQ query ───────────────────────────────────────────────────────────────
@@ -70,7 +69,7 @@ export const ALL_PHOTOS_QUERY = `
     "height": image.asset->metadata.dimensions.height,
     "blurDataURL": image.asset->metadata.lqip
   }
-`
+`;
 // lqip = Low Quality Image Placeholder — Sanity generates a tiny base64
 // blurred version of every image automatically. Next.js uses it while
 // the full image loads (the blur-up effect).
@@ -97,7 +96,7 @@ export const PHOTO_BY_ID_QUERY = `
     "height": image.asset->metadata.dimensions.height,
     "blurDataURL": image.asset->metadata.lqip
   }
-`
+`;
 
 // ─── Map pins query ──────────────────────────────────────────────────────────
 // Fetches all map pin documents with their referenced photos expanded.
@@ -125,7 +124,7 @@ export const ALL_MAP_PINS_QUERY = `
       "blurDataURL": image.asset->metadata.lqip
     }
   }
-`
+`;
 
 // ─── Site settings query ─────────────────────────────────────────────────────
 // Fetches the singleton siteSettings document. coalesce(..., true/false) means
@@ -138,11 +137,11 @@ export const SITE_SETTINGS_QUERY = `
     "showCaptions":         coalesce(showCaptions,         false),
     "autoGenerateCaptions": coalesce(autoGenerateCaptions, true)
   }
-`
+`;
 
 // ─── All photo IDs query ────────────────────────────────────────────────────
 // Returns just the _id of every visible photo in display order (newest first).
 // Used to determine prev/next navigation on the detail page.
 export const ALL_PHOTO_IDS_QUERY = `
   *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) { _id }
-`
+`;
