@@ -58,6 +58,28 @@ export default function BulkOperations({
         Add tags
       </button>
       <button
+        onClick={onBulkCaptions}
+        disabled={bulkRunning}
+        className="text-sm bg-sky-500/10 hover:bg-sky-500/20 disabled:opacity-40 disabled:cursor-not-allowed text-sky-400 border border-sky-500/30 rounded-lg px-4 py-1.5 transition-colors shrink-0 flex items-center gap-2"
+      >
+        {bulkRunning ? (
+          <>
+            <span className="inline-block w-3.5 h-3.5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+            Regenerating…
+          </>
+        ) : (
+          <>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            Regenerate captions
+          </>
+        )}
+      </button>
+      {bulkDone !== null && (
+        <span className="text-sm text-sky-400">✓ {bulkDone} captions generated</span>
+      )}
+      <button
         onClick={onClearSelection}
         className="text-sm text-slate-500 hover:text-slate-300 transition-colors shrink-0"
       >
