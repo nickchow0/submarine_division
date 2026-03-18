@@ -168,3 +168,86 @@ export type PhotoPickerItem = {
   title: string
   src: string
 }
+
+// ─── Admin API request / response types ──────────────────────────────────────
+
+export type UpdatePhotoRequest = {
+  id: string
+  fields: {
+    title?: string
+    tags?: string[]
+    aiCaption?: string
+    location?: string | null
+    camera?: string | null
+    dateTaken?: string | null
+    lens?: string | null
+    focalLength?: string | null
+    iso?: string | null
+    shutterSpeed?: string | null
+    aperture?: string | null
+    visible?: boolean
+  }
+}
+
+export type UpdateCaptionRequest = {
+  photoId: string
+  imageRef: string
+}
+
+export type BulkCaptionRequest = {
+  photos: { _id: string; imageRef: string }[]
+}
+
+export type BulkCaptionResult = {
+  id: string
+  ok: boolean
+  caption?: string
+  error?: string
+}
+
+export type CreatePinRequest = {
+  name: string
+  description: string | null
+  coordinates: { lat: number; lng: number }
+  photoIds: string[]
+}
+
+export type UpdatePinRequest = CreatePinRequest & { id: string }
+
+export type UpdateSettingRequest = {
+  [key: string]: boolean
+}
+
+export type UploadPhotoResponse = {
+  photo: AdminPhoto
+}
+
+// Returned by POST /api/admin/reupload — fields that change when an image is replaced
+export type ReuploadPhotoUpdates = {
+  src: string
+  width: number
+  height: number
+  imageRef: string
+  camera: string | null
+  lens: string | null
+  focalLength: string | null
+  iso: string | null
+  shutterSpeed: string | null
+  aperture: string | null
+  dateTaken: string | null
+}
+
+export type ReuploadPhotoResponse = {
+  ok: boolean
+  updates: ReuploadPhotoUpdates
+}
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
