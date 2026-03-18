@@ -63,7 +63,20 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ ok: false, error: 'Missing photo id' }, { status: 400 })
     }
 
-    // Delete the photo document first
+    // Remove this photo from any map pins that reference it, so Sanity's
+    // referential integrity check doesn't block the document deletion.
+    const referencingPins = await sanityWriteClient.fetch<{ _id: string }[]>(
+      `*[_type == "mapPin" && references($photoId)]{ _id }`,
+      { photoId: id }
+    )
+    for (const pin of referencingPins) {
+      await sanityWriteClient
+        .patch(pin._id)
+        .unset([`photos[_ref == "${id}"]`])
+        .commit()
+    }
+
+    // Delete the photo document
     await sanityWriteClient.delete(id)
 
     // Also delete the underlying image asset so it doesn't pile up in the media library.
@@ -80,7 +93,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('Admin photo delete error:', err)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    return NextResponse.json({ ok: false, error: String(err), stack: err instanceof Error ? err.stack : undefined }, { status: 500 })
   }
 }
 

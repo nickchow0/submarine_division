@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     })
   } catch (err) {
     console.error('Photo upload error:', err)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    return NextResponse.json({ ok: false, error: String(err), stack: err instanceof Error ? err.stack : undefined }, { status: 500 })
   }
 }
 
