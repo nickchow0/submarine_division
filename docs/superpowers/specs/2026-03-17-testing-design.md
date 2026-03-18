@@ -15,7 +15,7 @@ Three-layer testing strategy:
 3. **End-to-end tests (Playwright)** — key user flows against a live dev server
 4. **Production monitoring (UptimeRobot)** — uptime alerts, no code changes needed
 
-CI: GitHub Actions workflow runs unit + E2E tests on every push, blocking Vercel deploys on failure.
+CI: GitHub Actions workflow runs unit tests first, then E2E tests (gated on unit tests passing), blocking Vercel deploys on failure.
 
 ---
 
@@ -39,12 +39,16 @@ Tests pure functions in `lib/` that have no external dependencies.
 
 ### `lib/search.ts`
 
+All tests use `buildSearchIndex(photos)` — never `new Fuse(photos)` directly — so that `FUSE_OPTIONS` (threshold, weights, `minMatchCharLength`) are exercised consistently with production.
+
 | Test | Description |
 |---|---|
-| `buildSearchIndex` returns a Fuse instance | Smoke test that the index builds without error |
+| `buildSearchIndex` returns a usable index | Assert `typeof index.search === 'function'` (avoids cross-module `instanceof` fragility) |
 | `searchPhotos` returns matching photos | Query matching a known title returns that photo |
-| `searchPhotos` returns empty array for no match | Query with no results returns `[]` |
-| `searchPhotos` is case-insensitive | Uppercase query matches lowercase title |
+| `searchPhotos` returns `[]` for no match | Unmatched query returns empty array |
+| `searchPhotos` returns `[]` for empty string | The function itself short-circuits: `if (!query.trim()) return []` |
+| `searchPhotos` returns `[]` for whitespace-only input | `"   "` hits the same `.trim()` branch and returns `[]` |
+| `searchPhotos` is case-insensitive | Uppercase query matches lowercase title (Fuse.js built-in, smoke test) |
 | `searchPhotos` matches on tags | Tag-based query returns photos with that tag |
 
 ### `lib/analytics.ts`
@@ -57,11 +61,15 @@ Tests pure functions in `lib/` that have no external dependencies.
 
 ### `lib/sanityImageLoader.ts`
 
+The loader always includes a `q` parameter — it defaults to `85` when quality is not supplied. It also caps width at `2000` via `Math.min(width, 2000)`.
+
 | Test | Description |
 |---|---|
-| Builds a URL with correct base | Output contains the Sanity CDN domain |
+| Builds a URL containing the Sanity CDN domain | Output URL contains the expected CDN base |
 | Includes `w` (width) parameter | Width param appears in the URL |
-| Includes `q` (quality) parameter when provided | Quality param appears when specified |
+| `q` defaults to `85` when quality not provided | Calling without a quality arg produces `q=85` |
+| `q` equals the supplied quality value | Passing `quality: 60` produces `q=60` |
+| Caps width at 2000px | Supplying `width: 3000` produces `w=2000`, not `w=3000` |
 
 ---
 
@@ -69,14 +77,24 @@ Tests pure functions in `lib/` that have no external dependencies.
 
 **Location:** `web/__tests__/components/`
 
-Tests client components in a jsdom environment using React Testing Library. Sanity and external API calls are not involved — components receive all data via props.
+Tests client components in a jsdom environment using React Testing Library. Components receive all data via props — no Sanity calls involved.
+
+### Implementation notes
+
+**`SearchBar` debounce:** `SearchBar` debounces `onSearch` by 150ms. All tests that assert the callback was called must use `vi.useFakeTimers()` and advance by 150ms (`vi.advanceTimersByTime(150)`) before asserting. Restore real timers in `afterEach`.
+
+**`Gallery` search debounce:** `Gallery` renders `SearchBar` as a child. Typing into the gallery search input also requires 150ms of fake timer advancement before `query` state updates and photo filtering occurs.
+
+**`Gallery` history mock:** `Gallery` calls `Object.getPrototypeOf(window.history).pushState` (the History prototype, not the instance). Mock with `vi.spyOn(Object.getPrototypeOf(window.history), 'pushState')` in test setup. The pushState call itself is not asserted — it is intentionally covered by E2E tests only.
+
+**Analytics in jsdom:** `trackEvent` calls in components will silently no-op in jsdom (`window.gtag` is undefined). This is expected — no mocking needed.
 
 ### `SearchBar`
 
 | Test | Description |
 |---|---|
 | Renders a text input | Input element is present in the DOM |
-| Calls `onSearch` when user types | Typing triggers the callback with the typed value |
+| Calls `onSearch` after debounce when user types | Type into input, advance fake timers 150ms, assert callback called with typed value |
 | Shows result count when provided | Result/total count text is visible |
 
 ### `TagFilter`
@@ -86,17 +104,17 @@ Tests client components in a jsdom environment using React Testing Library. Sani
 | Renders all provided tags | Each tag name appears as a button |
 | Calls `onTagClick` with tag name when clicked | Clicking a tag fires the callback |
 | Applies active styling to the selected tag | Active tag has a distinct visual state |
-| Renders nothing when no tags provided | Empty tags array produces no buttons |
+| Returns null when no tags provided | Empty tags array: component returns `null`, container is empty |
 
 ### `Gallery`
 
 | Test | Description |
 |---|---|
-| Renders all photos initially | All photo titles/images are present |
-| Filters photos by search query | Searching reduces visible photos to matches |
+| Renders all photos initially | All photo alt texts are present |
+| Filters photos by search query | Type query + advance fake timers 150ms → only matching photos visible |
 | Shows "no results" message when nothing matches | Empty state message appears for unmatched query |
-| Filters photos by tag | Clicking a tag filters the visible photos |
-| Clearing filters restores all photos | Reset brings back the full photo list |
+| Filters photos by tag | Clicking a tag reduces visible photos to those with that tag |
+| Clearing filters restores all photos | Clicking "Clear filters" restores the full photo list |
 
 ---
 
@@ -106,25 +124,33 @@ Tests client components in a jsdom environment using React Testing Library. Sani
 
 Tests run against a live `next dev` server (Playwright starts it automatically via `webServer` config). Tests run headlessly in CI and can be run headed locally for debugging.
 
+### Authentication strategy
+
+The site is password-protected via middleware (cookie: `site_access=granted`). E2E tests authenticate via a Playwright `globalSetup` file that POSTs directly to `POST /api/auth` with `{ password: process.env.SITE_PASSWORD }`. This sets the `site_access` cookie, which is saved to a storage state file (`playwright/.auth/user.json`). All authenticated tests load this storage state via `storageState` in `playwright.config.ts`.
+
+The password gate test explicitly opts out of storage state so it hits the middleware unauthenticated.
+
 ### Test flows
 
-| Flow | Steps | Assertion |
-|---|---|---|
-| Gallery loads | Navigate to `/gallery` | Photo grid is visible with at least one photo |
-| Search filters photos | Navigate to `/gallery`, type a search term | Fewer photos visible than initial count |
-| Open photo modal | Click a photo thumbnail | Modal overlay appears with the photo |
-| Modal navigation | Open modal, click next arrow | A different photo is displayed |
-| Close modal | Open modal, press Escape | Modal is dismissed, gallery is visible |
-| Direct photo page | Navigate to `/photo/[id]` directly | Photo and metadata are rendered |
-| About page loads | Navigate to `/about` | Page renders without errors |
-| Password gate | Navigate to `/gallery` without auth cookie | Redirected to password entry page |
+| Flow | Auth | Steps | Assertion |
+|---|---|---|---|
+| Password gate | None | Navigate to `/gallery` | Redirected to `/password` |
+| Gallery loads | Authenticated | Navigate to `/gallery` | Photo grid visible with ≥1 photo |
+| Search filters photos | Authenticated | Type a search term | Fewer photos visible than initial count |
+| Open photo modal | Authenticated | Click a photo thumbnail | Modal overlay appears with the photo |
+| Modal navigation | Authenticated | Open modal, click next arrow | A different photo is displayed |
+| Close modal | Authenticated | Open modal, press Escape | Modal dismissed, gallery visible |
+| Direct photo page | Authenticated | Navigate to `/photo/[id]` directly | Photo and metadata rendered |
+| About page loads | Authenticated | Navigate to `/about` | Page renders without errors |
 
 ### Configuration
 
 - `playwright.config.ts` at `web/playwright.config.ts`
+- `globalSetup` at `web/e2e/global-setup.ts` — POSTs to `/api/auth`, saves `playwright/.auth/user.json`
 - `webServer` config starts `next dev` on port 3000 before tests run
+- `storageState: 'playwright/.auth/user.json'` set as default in config; password gate test overrides with `storageState: undefined`
 - Screenshots and traces captured on failure
-- Tests run in Chromium only (no multi-browser — personal project, not worth the overhead)
+- Tests run in Chromium only (no multi-browser — personal project)
 
 ---
 
@@ -141,19 +167,24 @@ Tests run against a live `next dev` server (Playwright starts it automatically v
 
 **File:** `.github/workflows/test.yml`
 
-Triggers on every push to `main` and on pull requests.
+Triggers on every push to `main` and on pull requests. All steps run from `web/` (`working-directory: web`). `e2e-tests` declares `needs: unit-tests` so it only runs when unit tests pass — avoids wasting CI minutes starting a dev server when logic is already broken.
 
 ```
 Jobs:
   unit-tests:
-    - Install dependencies
-    - Run: npm run test (Vitest)
+    working-directory: web
+    steps:
+      - Install dependencies (npm ci)
+      - Run: npm run test
 
   e2e-tests:
-    - Install dependencies
-    - Install Playwright browsers
-    - Run: npm run test:e2e (Playwright)
-    - Upload traces/screenshots on failure
+    needs: unit-tests
+    working-directory: web
+    steps:
+      - Install dependencies (npm ci)
+      - Install Playwright browsers (npx playwright install --with-deps chromium)
+      - Run: npm run test:e2e
+      - Upload traces/screenshots as artifacts on failure
 ```
 
 Both jobs must pass before Vercel deploys. Vercel's GitHub integration respects failing checks.
@@ -161,6 +192,8 @@ Both jobs must pass before Vercel deploys. Vercel's GitHub integration respects 
 ---
 
 ## npm Scripts
+
+Added to `web/package.json`:
 
 | Script | Command | Description |
 |---|---|---|
