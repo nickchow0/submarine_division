@@ -61,8 +61,7 @@ test.describe('Gallery', () => {
     await expect(nextButton).toBeVisible()
     await nextButton.click()
 
-    const secondAlt = await modalImg.getAttribute('alt')
-    expect(secondAlt).not.toBe(firstAlt)
+    await expect(modalImg).not.toHaveAttribute('alt', firstAlt!)
   })
 
   test('closes the modal when Escape is pressed', async ({ page }) => {

@@ -1,5 +1,6 @@
 // web/e2e/global-setup.ts
 import { chromium, type FullConfig } from '@playwright/test'
+import fs from 'fs'
 
 async function globalSetup(config: FullConfig) {
   const { baseURL } = config.projects[0].use
@@ -26,6 +27,9 @@ async function globalSetup(config: FullConfig) {
       'Check that SITE_PASSWORD is correct.'
     )
   }
+
+  // Ensure the directory exists (it's gitignored and won't exist on fresh clone/CI)
+  fs.mkdirSync('playwright/.auth', { recursive: true })
 
   // Save cookies to storage state file for use by authenticated tests
   await context.storageState({ path: 'playwright/.auth/user.json' })
