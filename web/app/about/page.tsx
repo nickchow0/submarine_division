@@ -22,7 +22,7 @@ export default function AboutPage() {
         <p className="text-slate-400 leading-relaxed">
           My work is driven by curiosity and a focus on conservation. I
           photograph a range of subjects, from macro and animal behavior to
-          wrecks and reefs.
+          wrecks and coral reefs.
         </p>
         <p className="text-slate-400 leading-relaxed">
           Recently, I’ve been focusing on technical diving, including cold water
