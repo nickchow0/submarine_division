@@ -177,7 +177,7 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
         onEdit={photos.startEdit}
         onDelete={(id) => {
           const photo = photos.photos.find(p => p._id === id)
-          if (photo) photos.deletePhoto(id, photo.imageRef)
+          if (photo) photos.deletePhoto(id, photo.imageRef, photo.shopifyProductId ?? null)
         }}
         onToggleVisibility={photos.toggleVisibility}
         onReupload={handleReuploadTrigger}

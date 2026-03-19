@@ -51,10 +51,14 @@ export async function updatePhoto(
   })
 }
 
-export async function deletePhoto(id: string, imageRef: string): Promise<void> {
+export async function deletePhoto(
+  id: string,
+  imageRef: string,
+  shopifyProductId: string | null,
+): Promise<void> {
   await apiFetch('/api/admin/photos', {
     method: 'DELETE',
-    body: JSON.stringify({ id, imageRef }),
+    body: JSON.stringify({ id, imageRef, shopifyProductId }),
   })
 }
 

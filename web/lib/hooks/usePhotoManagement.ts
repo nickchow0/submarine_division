@@ -135,12 +135,12 @@ export function usePhotoManagement(initialPhotos: AdminPhoto[]) {
     setConfirmDeleteId(null)
   }, [])
 
-  const deletePhoto = useCallback(async (id: string, imageRef: string) => {
+  const deletePhoto = useCallback(async (id: string, imageRef: string, shopifyProductId: string | null) => {
     setDeletingId(id)
     setConfirmDeleteId(null)
 
     try {
-      await apiDeletePhoto(id, imageRef)
+      await apiDeletePhoto(id, imageRef, shopifyProductId)
       setPhotos(prev => prev.filter(p => p._id !== id))
     } catch (err) {
       const detail = err instanceof Error ? err.message : undefined
