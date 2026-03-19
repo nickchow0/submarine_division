@@ -16,7 +16,7 @@ export default async function GalleryPage() {
     sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   ])
 
-  const { showCaptions } = settings ?? DEFAULT_SETTINGS
+  const { showCaptions, enablePrintSales } = settings ?? DEFAULT_SETTINGS
 
   // Shuffle using Fisher-Yates so the gallery order is random on each
   // cache revalidation (every 60 seconds) rather than always newest-first.
@@ -27,6 +27,6 @@ export default async function GalleryPage() {
   }
 
   return (
-    <Gallery photos={shuffled} showCaptions={showCaptions} />
+    <Gallery photos={shuffled} showCaptions={showCaptions} showBuyButton={enablePrintSales} />
   )
 }

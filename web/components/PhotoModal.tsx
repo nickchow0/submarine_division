@@ -19,6 +19,7 @@ type Props = {
   onClose: () => void;
   onNavigate: (id: string) => void;
   showCaptions?: boolean;
+  showBuyButton?: boolean;
 };
 
 export default function PhotoModal({
@@ -29,6 +30,7 @@ export default function PhotoModal({
   onClose,
   onNavigate,
   showCaptions = false,
+  showBuyButton = false,
 }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

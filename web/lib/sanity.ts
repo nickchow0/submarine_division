@@ -125,7 +125,8 @@ export const SITE_SETTINGS_QUERY = `
     "showLocations":        coalesce(showLocations,        true),
     "maintenanceMode":      coalesce(maintenanceMode,      false),
     "showCaptions":         coalesce(showCaptions,         false),
-    "autoGenerateCaptions": coalesce(autoGenerateCaptions, true)
+    "autoGenerateCaptions": coalesce(autoGenerateCaptions, true),
+    "enablePrintSales":     coalesce(enablePrintSales,     false)
   }
 `;
 
