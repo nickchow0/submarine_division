@@ -14,7 +14,22 @@
       "Bash(curl:*)",
       "Bash(ls /Users/nickchow/Claude/submarine_division_website/.env*)",
       "Bash(python3 -m json.tool)",
-      "Bash(node -e \"const p = require\\(''./node_modules/@playwright/test/package.json''\\); console.log\\(''Playwright:'', p.version\\)\")"
+      "Bash(node -e \"const p = require\\(''./node_modules/@playwright/test/package.json''\\); console.log\\(''Playwright:'', p.version\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); deps={**d.get\\(''''dependencies'''',{}\\), **d.get\\(''''devDependencies'''',{}\\)}; print\\(json.dumps\\(deps, indent=2\\)\\)\")",
+      "Bash(npm info:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(''''Latest:'''', d.get\\(''''dist-tags'''',{}\\).get\\(''''latest''''\\)\\); print\\(''''Deprecated:'''', d.get\\(''''deprecated'''',''''no''''\\)\\); print\\(''''Last publish:'''', d.get\\(''''time'''',{}\\).get\\(d.get\\(''''dist-tags'''',{}\\).get\\(''''latest'''',''''''''\\),''''unknown''''\\)\\)\")",
+      "Bash(npx vitest:*)",
+      "Read(//Users/nickchow/.config/superpowers/worktrees/submarine_division_website/feature/shopify-print-sales/studio/**)",
+      "Bash(npx sanity@latest schema deploy)",
+      "Bash(npx sanity:*)",
+      "Bash(awk:*)",
+      "Bash(grep -o \"\"text\"\":\"\"[^\"\"]*\"\" /Users/nickchow/.claude/projects/-Users-nickchow-Claude-submarine-division-website/4348998a-dee5-4fd8-af50-c7ecaa89e011/tool-results/bu2os63dp.txt)",
+      "Bash(node -e \"const t = require\\(''''@sanity/client''''\\); console.log\\(Object.keys\\(t\\)\\)\")",
+      "Bash(grep -r RawQuerylessQueryResponse /Users/nickchow/.config/superpowers/worktrees/submarine_division_website/feature/shopify-print-sales/web/node_modules/@sanity/client/dist/*.d.ts)",
+      "Bash(npm test:*)",
+      "Bash(gh pr:*)",
+      "Bash(brew list:*)",
+      "Bash(git worktree:*)"
     ]
   }
 }
