@@ -44,6 +44,11 @@ export default function SettingsPanel({
               description: 'Automatically generates an AI caption for each photo when it is uploaded.',
             },
             {
+              key: 'enablePrintSales' as const,
+              label: 'Enable print sales',
+              description: 'Shows the "Buy Print" button on photo pages and the gallery modal. Only photos synced to Shopify will show the button.',
+            },
+            {
               key: 'requirePassword' as const,
               label: 'Require site password',
               description: 'When OFF, the site is publicly accessible without a password. Visitors skip the password page entirely.',

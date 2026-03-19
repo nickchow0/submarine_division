@@ -61,6 +61,10 @@ export interface PhotoTableProps {
 
   /** Reupload spinner state */
   reuploadingId: string | null
+
+  /** Shopify sync */
+  onSync: (id: string) => void
+  syncingIds: Set<string>
 }
 
 // ─── PhotoTable ───────────────────────────────────────────────────────────────
@@ -90,6 +94,8 @@ export default function PhotoTable({
   setConfirmDeleteId,
   deletingId,
   reuploadingId,
+  onSync,
+  syncingIds,
 }: PhotoTableProps) {
   // ── Stats (derived from allPhotos) ─────────────────────────────────────────
   const totalPhotos  = allPhotos.length
@@ -238,6 +244,41 @@ export default function PhotoTable({
                     )}
                   </div>
                 )}
+                {/* Shopify sync status */}
+                <div className="mt-2 flex items-center justify-between">
+                  {photo.shopifyProductId ? (
+                    <span className="text-xs text-emerald-500 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      synced
+                    </span>
+                  ) : (
+                    <span className="text-xs text-amber-500 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                      </svg>
+                      not synced
+                    </span>
+                  )}
+                  {!photo.shopifyProductId && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onSync(photo._id) }}
+                      disabled={syncingIds.has(photo._id)}
+                      title="Sync to Shopify"
+                      className="text-xs text-slate-500 hover:text-sky-400 disabled:opacity-40 transition-colors flex items-center gap-1"
+                    >
+                      {syncingIds.has(photo._id) ? (
+                        <span className="inline-block w-3 h-3 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                      )}
+                      Sync
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Action bar — stop propagation so these don't open the edit modal */}

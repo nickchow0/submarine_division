@@ -24,9 +24,11 @@ import PhotoModal from "./PhotoModal";
 export default function Gallery({
   photos,
   showCaptions = false,
+  showBuyButton = false,
 }: {
   photos: Photo[];
   showCaptions?: boolean;
+  showBuyButton?: boolean;
 }) {
   // ── State ──────────────────────────────────────────────────────────────────
   const [query, setQuery] = useState("");
@@ -188,6 +190,7 @@ export default function Gallery({
           onClose={closeModal}
           onNavigate={navigateModal}
           showCaptions={showCaptions}
+          showBuyButton={showBuyButton}
         />
       )}
       {/* Search + tag filter */}

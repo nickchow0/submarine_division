@@ -16,7 +16,7 @@ export default function AboutPage() {
         <h2 className="text-2xl text-slate-100 font-semibold">About Me</h2>
         <p className="text-slate-400 leading-relaxed">
           Hi, I’m Nick Chow — an underwater and nature photographer based in San
-          Francisco. I’ve been diving since 2013, when I first drawn by the
+          Francisco. I’ve been diving since 2013, when I was first drawn by the
           unique creatures in the ocean.
         </p>
         <p className="text-slate-400 leading-relaxed">

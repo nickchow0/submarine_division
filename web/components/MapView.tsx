@@ -38,6 +38,7 @@ function pinPhotoToFull(p: PinPhoto): Photo {
     shutterSpeed: p.shutterSpeed,
     aperture:     p.aperture,
     visible:      true,
+    shopifyProductId: null,
   }
 }
 

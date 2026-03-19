@@ -45,6 +45,13 @@ export const siteSettingsType = defineType({
       type: 'boolean',
       initialValue: false,
     }),
+    defineField({
+      name: 'enablePrintSales',
+      title: 'Enable print sales',
+      description: 'Shows the "Buy Print" button on photo pages and the gallery modal. Requires photos to be synced to Shopify first.',
+      type: 'boolean',
+      initialValue: false,
+    }),
   ],
   preview: {
     prepare: () => ({ title: 'Site Settings' }),

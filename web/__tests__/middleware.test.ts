@@ -90,4 +90,18 @@ describe('middleware – requirePassword bypass', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(response.headers.get('location')).toBeNull()
   })
+
+  it('allows /api/webhooks/* through without a cookie', async () => {
+    mockSanityFetch(true)
+    const { middleware } = await import('@/middleware')
+    const response = await middleware(makeRequest('/api/webhooks/sanity'))
+    expect(response.headers.get('location')).toBeNull()
+  })
+
+  it('allows /api/generate-caption through without a cookie', async () => {
+    mockSanityFetch(true)
+    const { middleware } = await import('@/middleware')
+    const response = await middleware(makeRequest('/api/generate-caption'))
+    expect(response.headers.get('location')).toBeNull()
+  })
 })

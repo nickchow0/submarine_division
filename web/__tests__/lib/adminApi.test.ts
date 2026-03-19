@@ -46,14 +46,25 @@ describe('adminApi', () => {
   })
 
   describe('deletePhoto', () => {
-    it('sends DELETE to /api/admin/photos with id and imageRef', async () => {
+    it('sends DELETE to /api/admin/photos with id, imageRef, and shopifyProductId', async () => {
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) })
       const { deletePhoto } = await import('@/lib/adminApi')
-      await deletePhoto('photo-123', 'image-abc')
+      await deletePhoto('photo-123', 'image-asset-ref', 'shopify-product-999')
       expect(mockFetch).toHaveBeenCalledWith('/api/admin/photos', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: 'photo-123', imageRef: 'image-abc' }),
+        body: JSON.stringify({ id: 'photo-123', imageRef: 'image-asset-ref', shopifyProductId: 'shopify-product-999' }),
+      })
+    })
+
+    it('sends null shopifyProductId when not synced', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+      const { deletePhoto } = await import('@/lib/adminApi')
+      await deletePhoto('photo-123', 'image-asset-ref', null)
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/photos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'photo-123', imageRef: 'image-asset-ref', shopifyProductId: null }),
       })
     })
   })

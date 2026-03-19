@@ -118,22 +118,31 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { id, imageRef } = await request.json() as { id: string; imageRef: string }
+    const { id, imageRef, shopifyProductId } = await request.json() as {
+      id: string
+      imageRef: string
+      shopifyProductId: string | null
+    }
 
     if (!id) {
       return NextResponse.json({ ok: false, error: 'Missing photo id' }, { status: 400 })
     }
 
-    // Remove all references to this photo across any document type, so Sanity's
-    // referential integrity check doesn't block the deletion.
-    await removeAllReferences(id)
+    // Archive Shopify product before deleting from Sanity.
+    // Failure here is non-fatal — an orphaned unarchived product is preferable
+    // to an orphaned Sanity document.
+    if (shopifyProductId) {
+      try {
+        const { archiveShopifyProduct } = await import('@/lib/shopify')
+        await archiveShopifyProduct(shopifyProductId)
+      } catch (err) {
+        console.error('Failed to archive Shopify product — continuing with Sanity delete:', err)
+      }
+    }
 
-    // Delete the photo document
+    await removeAllReferences(id)
     await sanityWriteClient.delete(id)
 
-    // Also delete the underlying image asset so it doesn't pile up in the media library.
-    // image.asset._ref is the asset document's _id, so we can delete it directly.
-    // If the asset is referenced by other documents this will fail silently — that's fine.
     if (imageRef) {
       try {
         await sanityWriteClient.delete(imageRef)

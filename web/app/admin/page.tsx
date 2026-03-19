@@ -24,7 +24,8 @@ const ADMIN_PHOTOS_QUERY = `
     "src": image.asset->url,
     "width": image.asset->metadata.dimensions.width,
     "height": image.asset->metadata.dimensions.height,
-    "imageRef": image.asset._ref
+    "imageRef": image.asset._ref,
+    "shopifyProductId": coalesce(shopifyProductId, null)
   }
 `
 
