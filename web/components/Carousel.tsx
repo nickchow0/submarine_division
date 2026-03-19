@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import type { Photo } from '@/types'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 
 type Props = {
   photos: Photo[]
@@ -109,18 +110,14 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
         className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
         aria-label="Previous photo"
       >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-        </svg>
+        <ChevronLeftIcon className="w-6 h-6" />
       </button>
       <button
         onClick={next}
         className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
         aria-label="Next photo"
       >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
+        <ChevronRightIcon className="w-6 h-6" />
       </button>
 
       {/* Dot indicators */}

@@ -47,77 +47,44 @@ export function urlFor(source: SanityImageSource) {
 //
 // The @ symbol refers to the current document being iterated.
 
-// visible != false means photos where visible is true OR the field doesn't exist
-// yet — so existing photos without the field set still appear by default.
-export const CAROUSEL_PHOTOS_QUERY = `
-  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) [0...8] {
-    _id,
-    title,
-    "tags": coalesce(tags, []),
-    "aiCaption": coalesce(aiCaption, ""),
-    "location": coalesce(location, null),
-    "camera": coalesce(camera, null),
-    "dateTaken": coalesce(dateTaken, null),
-    "lens": coalesce(lens, null),
-    "focalLength": coalesce(focalLength, null),
-    "iso": coalesce(iso, null),
-    "shutterSpeed": coalesce(shutterSpeed, null),
-    "aperture": coalesce(aperture, null),
-    "visible": coalesce(visible, true),
-    "src": image.asset->url,
-    "width": image.asset->metadata.dimensions.width,
-    "height": image.asset->metadata.dimensions.height,
-    "blurDataURL": image.asset->metadata.lqip
-  }
-`;
-
-export const ALL_PHOTOS_QUERY = `
-  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) {
-    _id,
-    title,
-    "tags": coalesce(tags, []),
-    "aiCaption": coalesce(aiCaption, ""),
-    "location": coalesce(location, null),
-    "camera": coalesce(camera, null),
-    "dateTaken": coalesce(dateTaken, null),
-    "lens": coalesce(lens, null),
-    "focalLength": coalesce(focalLength, null),
-    "iso": coalesce(iso, null),
-    "shutterSpeed": coalesce(shutterSpeed, null),
-    "aperture": coalesce(aperture, null),
-    "visible": coalesce(visible, true),
-    "src": image.asset->url,
-    "width": image.asset->metadata.dimensions.width,
-    "height": image.asset->metadata.dimensions.height,
-    "blurDataURL": image.asset->metadata.lqip
-  }
-`;
+// Shared photo projection used across all photo queries.
 // lqip = Low Quality Image Placeholder — Sanity generates a tiny base64
 // blurred version of every image automatically. Next.js uses it while
 // the full image loads (the blur-up effect).
+const PHOTO_PROJECTION = `{
+  _id,
+  title,
+  "tags": coalesce(tags, []),
+  "aiCaption": coalesce(aiCaption, ""),
+  "location": coalesce(location, null),
+  "camera": coalesce(camera, null),
+  "dateTaken": coalesce(dateTaken, null),
+  "lens": coalesce(lens, null),
+  "focalLength": coalesce(focalLength, null),
+  "iso": coalesce(iso, null),
+  "shutterSpeed": coalesce(shutterSpeed, null),
+  "aperture": coalesce(aperture, null),
+  "visible": coalesce(visible, true),
+  "src": image.asset->url,
+  "width": image.asset->metadata.dimensions.width,
+  "height": image.asset->metadata.dimensions.height,
+  "blurDataURL": image.asset->metadata.lqip
+}`;
+
+// visible != false means photos where visible is true OR the field doesn't exist
+// yet — so existing photos without the field set still appear by default.
+export const CAROUSEL_PHOTOS_QUERY = `
+  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) [0...8] ${PHOTO_PROJECTION}
+`;
+
+export const ALL_PHOTOS_QUERY = `
+  *[_type == "photo" && !(_id in path("drafts.**")) && visible != false] | order(dateTaken desc) ${PHOTO_PROJECTION}
+`;
 
 // ─── Single photo query ─────────────────────────────────────────────────────
 // Fetches one photo by its Sanity _id. Used by the /photo/[id] detail page.
 export const PHOTO_BY_ID_QUERY = `
-  *[_type == "photo" && _id == $id][0] {
-    _id,
-    title,
-    "tags": coalesce(tags, []),
-    "aiCaption": coalesce(aiCaption, ""),
-    "location": coalesce(location, null),
-    "camera": coalesce(camera, null),
-    "dateTaken": coalesce(dateTaken, null),
-    "lens": coalesce(lens, null),
-    "focalLength": coalesce(focalLength, null),
-    "iso": coalesce(iso, null),
-    "shutterSpeed": coalesce(shutterSpeed, null),
-    "aperture": coalesce(aperture, null),
-    "visible": coalesce(visible, true),
-    "src": image.asset->url,
-    "width": image.asset->metadata.dimensions.width,
-    "height": image.asset->metadata.dimensions.height,
-    "blurDataURL": image.asset->metadata.lqip
-  }
+  *[_type == "photo" && _id == $id][0] ${PHOTO_PROJECTION}
 `;
 
 // ─── Map pins query ──────────────────────────────────────────────────────────

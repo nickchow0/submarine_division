@@ -13,7 +13,7 @@ import './globals.css'
 import ImageProtection from '@/components/ImageProtection'
 import PageTransition from '@/components/PageTransition'
 import Analytics from '@/components/Analytics'
-import { sanityClient, SITE_SETTINGS_QUERY } from '@/lib/sanity'
+import { sanityWriteClient, SITE_SETTINGS_QUERY } from '@/lib/sanity'
 import { DEFAULT_SETTINGS, type SiteSettings } from '@/types'
 
 // Metadata is used by search engines and social media previews
@@ -29,7 +29,7 @@ export default async function RootLayout({
 }) {
   const [cookieStore, settings] = await Promise.all([
     cookies(),
-    sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY).catch(() => null),
+    sanityWriteClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY).catch(() => null),
   ])
   const isAdmin = cookieStore.get('admin_access')?.value === 'granted'
   const { showLocations, maintenanceMode } = settings ?? DEFAULT_SETTINGS

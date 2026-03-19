@@ -9,6 +9,7 @@ import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
 import { formatCamera } from "@/lib/exif";
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 
 type Props = {
   photo: Photo;
@@ -71,19 +72,7 @@ export default function PhotoModal({
           className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors p-2 z-10"
           aria-label="Previous photo"
         >
-          <svg
-            className="w-7 h-7"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
-          </svg>
+          <ChevronLeftIcon className="w-7 h-7" />
         </button>
       )}
 
@@ -97,19 +86,7 @@ export default function PhotoModal({
           className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors p-2 z-10"
           aria-label="Next photo"
         >
-          <svg
-            className="w-7 h-7"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
+          <ChevronRightIcon className="w-7 h-7" />
         </button>
       )}
 
@@ -150,19 +127,7 @@ export default function PhotoModal({
           className="absolute top-3.5 right-4 z-10 text-slate-500 hover:text-white transition-colors"
           aria-label="Close"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <XIcon className="w-5 h-5" />
         </button>
 
         {/* ── Photo ── */}
