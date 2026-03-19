@@ -33,7 +33,6 @@ export default function PhotoModal({
   onClose,
   onNavigate,
   showCaptions = false,
-  // showBuyButton: used in Task 10 to conditionally render BuyPrintButton
   showBuyButton = false,
 }: Props) {
   useEffect(() => {

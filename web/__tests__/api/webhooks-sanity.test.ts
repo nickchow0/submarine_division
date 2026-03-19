@@ -82,7 +82,7 @@ describe('POST /api/webhooks/sanity', () => {
       aiCaption: 'A fish',
       tags: ['ocean'],
       src: 'https://cdn.sanity.io/img.jpg',
-    })
+    } as never)
     vi.mocked(sanityWriteClient.patch).mockReturnValueOnce(mockPatch as never)
     vi.mocked(upsertShopifyProduct).mockResolvedValueOnce({ shopifyProductId: '99001' })
 
@@ -108,7 +108,7 @@ describe('POST /api/webhooks/sanity', () => {
       aiCaption: '',
       tags: [],
       src: null,
-    })
+    } as never)
     vi.mocked(upsertShopifyProduct).mockResolvedValueOnce({ rateLimited: true })
 
     const body = { _id: 'photo-1', _type: 'photo' }

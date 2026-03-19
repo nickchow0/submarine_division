@@ -33,7 +33,7 @@ describe('POST /api/admin/sync-shopify', () => {
 
   it('returns 404 when photo does not exist in Sanity', async () => {
     const { sanityWriteClient } = await import('@/lib/sanity')
-    vi.mocked(sanityWriteClient.fetch).mockResolvedValueOnce(null)
+    vi.mocked(sanityWriteClient.fetch).mockResolvedValueOnce(null as never)
 
     const { POST } = await import('@/app/api/admin/sync-shopify/route')
     const res = await POST(new Request('http://localhost/api/admin/sync-shopify', {
@@ -55,7 +55,7 @@ describe('POST /api/admin/sync-shopify', () => {
       aiCaption: '',
       tags: [],
       src: null,
-    })
+    } as never)
     vi.mocked(sanityWriteClient.patch).mockReturnValueOnce(mockPatch as never)
     vi.mocked(upsertShopifyProduct).mockResolvedValueOnce({ shopifyProductId: '77001' })
 
