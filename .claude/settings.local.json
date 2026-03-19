@@ -1,20 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(npx tsc:*)",
-      "Bash(grep -r NEXT_PUBLIC_GA_MEASUREMENT_ID /Users/nickchow/Claude/submarine_division_website --include=*.md --include=*.ts --include=*.tsx)",
-      "Bash(npm run:*)",
-      "Bash(grep -rn \"trackEvent\\\\|analytics\" /Users/nickchow/Claude/submarine_division_website/web/components/ /Users/nickchow/Claude/submarine_division_website/web/lib/ /Users/nickchow/Claude/submarine_division_website/web/app/ --include=*.tsx --include=*.ts)",
-      "Bash(npm install:*)",
-      "Bash(npx playwright:*)",
-      "Bash(git remote:*)",
-      "Bash(xargs kill:*)",
-      "Bash(curl:*)",
-      "Bash(ls /Users/nickchow/Claude/submarine_division_website/.env*)",
-      "Bash(python3 -m json.tool)",
-      "Bash(node -e \"const p = require\\(''./node_modules/@playwright/test/package.json''\\); console.log\\(''Playwright:'', p.version\\)\")"
-    ]
+    "allow": ["Bash(*)"]
   }
 }

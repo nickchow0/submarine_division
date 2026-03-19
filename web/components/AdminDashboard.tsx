@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 import { type AdminPhoto, type SiteSettings } from '@/types'
 import { usePhotoManagement } from '@/lib/hooks/usePhotoManagement'
 import { useCaptionGeneration } from '@/lib/hooks/useCaptionGeneration'
@@ -151,9 +152,16 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
 
   // ── Edit modal: find current photo and editing state ──────────────────────
 
+  const [imageLoading, setImageLoading] = useState(false)
+
   const editingPhoto = photos.editingId
     ? photos.photos.find(p => p._id === photos.editingId) ?? null
     : null
+
+  const visiblePhotos = photos.photos
+  const editingIdx = editingPhoto ? visiblePhotos.findIndex(p => p._id === editingPhoto._id) : -1
+  const prevPhoto = editingIdx > 0 ? visiblePhotos[editingIdx - 1] : null
+  const nextPhoto = editingIdx < visiblePhotos.length - 1 ? visiblePhotos[editingIdx + 1] : null
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
@@ -228,7 +236,7 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
         setFilterTag={photos.setFilterTag}
         selectedIds={photos.selectedIds}
         onSelectId={photos.toggleSelectId}
-        onEdit={photos.startEdit}
+        onEdit={(photo) => { setImageLoading(true); photos.startEdit(photo) }}
         onDelete={(id) => {
           const photo = photos.photos.find(p => p._id === id)
           if (photo) photos.deletePhoto(id, photo.imageRef, photo.shopifyProductId ?? null)
@@ -246,22 +254,74 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
         syncingIds={syncingIds}
       />
 
-      {/* Edit modal (rendered inline; PhotoEditModal returns null when no editingId) */}
+      {/* Edit modal */}
       {editingPhoto && photos.editState && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-800">
-              <h3 className="text-slate-200 text-sm font-semibold">Edit photo</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={photos.cancelEdit}
+        >
+          {/* Prev arrow */}
+          {prevPhoto && (
+            <button
+              onClick={e => { e.stopPropagation(); setImageLoading(true); photos.startEdit(prevPhoto) }}
+              className="absolute left-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-10"
+              title="Previous photo (←)"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+
+          {/* Next arrow */}
+          {nextPhoto && (
+            <button
+              onClick={e => { e.stopPropagation(); setImageLoading(true); photos.startEdit(nextPhoto) }}
+              className="absolute right-4 bg-black/40 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-2.5 transition-colors z-10"
+              title="Next photo (→)"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          )}
+
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Photo preview */}
+            <div className="relative bg-slate-950">
+              <Image
+                key={editingPhoto._id}
+                src={`${editingPhoto.src}?w=1400&q=75&fm=jpg&auto=format`}
+                alt={editingPhoto.title}
+                width={editingPhoto.width}
+                height={editingPhoto.height}
+                className={`w-full h-auto max-h-[60vh] object-contain block transition-opacity duration-200 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                unoptimized
+                onLoad={() => setImageLoading(false)}
+              />
+              {imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center min-h-[200px]">
+                  <span className="w-8 h-8 border-2 border-slate-600 border-t-sky-400 rounded-full animate-spin" />
+                </div>
+              )}
               <button
                 onClick={photos.cancelEdit}
-                className="text-slate-500 hover:text-slate-300 transition-colors"
+                className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-slate-300 hover:text-white rounded-full p-1.5 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
+
+            {/* Title bar */}
+            <div className={`px-6 pt-4 pb-3 border-b border-slate-800 transition-opacity duration-150 ${imageLoading ? 'opacity-40' : 'opacity-100'}`}>
+              <p className="text-slate-200 text-sm font-medium truncate">{editingPhoto.title}</p>
+            </div>
+
             <PhotoEditModal
               editingId={photos.editingId}
               editState={photos.editState}
