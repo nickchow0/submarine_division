@@ -15,6 +15,7 @@ export type Photo = {
   shutterSpeed: string | null
   aperture: string | null
   visible: boolean           // false = hidden from gallery (default true)
+  shopifyProductId: string | null
 
   // Image fields projected from the Sanity asset
   src: string                // Full CDN URL from Sanity
@@ -108,6 +109,7 @@ export type AdminPhoto = {
   shutterSpeed: string | null
   aperture: string | null
   visible: boolean
+  shopifyProductId: string | null
   src: string
   width: number
   height: number

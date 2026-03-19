@@ -48,6 +48,7 @@ function makePhoto(overrides: Partial<Photo> = {}): Photo {
     shutterSpeed: null,
     aperture: null,
     visible: true,
+    shopifyProductId: null,
     src: 'https://cdn.sanity.io/images/abc/production/test.jpg',
     width: 800,
     height: 600,

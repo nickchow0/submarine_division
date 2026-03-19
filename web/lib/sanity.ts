@@ -68,7 +68,8 @@ const PHOTO_PROJECTION = `{
   "src": image.asset->url,
   "width": image.asset->metadata.dimensions.width,
   "height": image.asset->metadata.dimensions.height,
-  "blurDataURL": image.asset->metadata.lqip
+  "blurDataURL": image.asset->metadata.lqip,
+  "shopifyProductId": coalesce(shopifyProductId, null)
 }`;
 
 // visible != false means photos where visible is true OR the field doesn't exist

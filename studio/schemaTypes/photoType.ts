@@ -109,5 +109,13 @@ export const photoType = defineType({
       description: 'Uncheck to hide this photo from the public gallery without deleting it.',
       initialValue: true,
     }),
+
+    defineField({
+      name: 'shopifyProductId',
+      title: 'Shopify Product ID',
+      type: 'string',
+      readOnly: true,
+      description: 'Set automatically when the photo is synced to Shopify. Do not edit manually.',
+    }),
   ],
 })
