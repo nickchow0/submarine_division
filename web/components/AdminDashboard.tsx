@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { type AdminPhoto, type SiteSettings } from '@/types'
 import { usePhotoManagement } from '@/lib/hooks/usePhotoManagement'
 import { useCaptionGeneration } from '@/lib/hooks/useCaptionGeneration'
@@ -23,6 +23,57 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
   const photos   = usePhotoManagement(initialPhotos)
   const captions = useCaptionGeneration()
   const settings = useAdminSettings(initialSettings)
+
+  const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set())
+  const [syncAllRunning, setSyncAllRunning] = useState(false)
+  const [syncAllProgress, setSyncAllProgress] = useState<{ current: number; total: number } | null>(null)
+
+  // ── Shopify sync (single photo) ────────────────────────────────────────────
+
+  async function handleSync(id: string) {
+    setSyncingIds(prev => new Set(prev).add(id))
+    try {
+      const res = await fetch('/api/admin/sync-shopify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId: id }),
+      })
+      if (res.ok) {
+        const { shopifyProductId } = await res.json() as { shopifyProductId: string }
+        photos.setPhotos(prev => prev.map(p => p._id === id ? { ...p, shopifyProductId } : p))
+      }
+    } catch {
+      // non-fatal
+    } finally {
+      setSyncingIds(prev => { const next = new Set(prev); next.delete(id); return next })
+    }
+  }
+
+  // ── Shopify sync (all unsynced) ────────────────────────────────────────────
+
+  async function handleSyncAll() {
+    const unsynced = photos.photos.filter(p => !p.shopifyProductId)
+    if (!unsynced.length) return
+    setSyncAllRunning(true)
+    setSyncAllProgress({ current: 0, total: unsynced.length })
+    for (let i = 0; i < unsynced.length; i++) {
+      const photo = unsynced[i]
+      setSyncAllProgress({ current: i + 1, total: unsynced.length })
+      try {
+        const res = await fetch('/api/admin/sync-shopify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoId: photo._id }),
+        })
+        if (res.ok) {
+          const { shopifyProductId } = await res.json() as { shopifyProductId: string }
+          photos.setPhotos(prev => prev.map(p => p._id === photo._id ? { ...p, shopifyProductId } : p))
+        }
+      } catch { /* continue */ }
+    }
+    setSyncAllRunning(false)
+    setSyncAllProgress(null)
+  }
 
   // ── Upload: upload each file, then optionally auto-generate caption ────────
 
@@ -158,6 +209,9 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
         onBulkTags={handleBulkTags}
         onBulkCaptions={handleBulkCaptions}
         onClearSelection={photos.clearSelection}
+        onSyncAll={handleSyncAll}
+        syncAllRunning={syncAllRunning}
+        syncAllProgress={syncAllProgress}
       />
 
       {/* Photo grid with stats and filters */}
@@ -188,6 +242,8 @@ export default function AdminDashboard({ initialPhotos, initialSettings }: Props
         setConfirmDeleteId={(id) => id === null ? photos.cancelDelete() : photos.confirmDelete(id)}
         deletingId={photos.deletingId}
         reuploadingId={photos.reuploadingId}
+        onSync={handleSync}
+        syncingIds={syncingIds}
       />
 
       {/* Edit modal (rendered inline; PhotoEditModal returns null when no editingId) */}
