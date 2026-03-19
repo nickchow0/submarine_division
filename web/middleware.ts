@@ -59,6 +59,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname === '/password' ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/webhooks') ||
+    pathname.startsWith('/api/generate-caption') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon')
   ) {
