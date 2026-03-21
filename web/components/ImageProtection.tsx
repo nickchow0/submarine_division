@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
 export default function ImageProtection() {
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).tagName === 'IMG') {
-        e.preventDefault()
+      if ((e.target as HTMLElement).tagName === "IMG") {
+        e.preventDefault();
       }
-    }
+    };
 
-    document.addEventListener('contextmenu', handleContextMenu)
-    return () => document.removeEventListener('contextmenu', handleContextMenu)
-  }, [])
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
 
-  return null
+  return null;
 }

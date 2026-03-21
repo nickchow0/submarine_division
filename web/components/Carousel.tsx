@@ -1,48 +1,48 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
-import type { Photo } from '@/types'
-import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import type { Photo } from "@/types";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 
 type Props = {
-  photos: Photo[]
+  photos: Photo[];
   /** Time in ms between auto-advances (default 5000) */
-  interval?: number
-}
+  interval?: number;
+};
 
 export default function Carousel({ photos, interval = 5000 }: Props) {
-  const [current, setCurrent] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const next = useCallback(() => {
-    setCurrent((i) => (i + 1) % photos.length)
-  }, [photos.length])
+    setCurrent((i) => (i + 1) % photos.length);
+  }, [photos.length]);
 
   const prev = useCallback(() => {
-    setCurrent((i) => (i - 1 + photos.length) % photos.length)
-  }, [photos.length])
+    setCurrent((i) => (i - 1 + photos.length) % photos.length);
+  }, [photos.length]);
 
   // Auto-advance
   useEffect(() => {
-    if (isPaused || photos.length <= 1) return
-    const timer = setInterval(next, interval)
-    return () => clearInterval(timer)
-  }, [isPaused, next, interval, photos.length])
+    if (isPaused || photos.length <= 1) return;
+    const timer = setInterval(next, interval);
+    return () => clearInterval(timer);
+  }, [isPaused, next, interval, photos.length]);
 
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') next()
-      if (e.key === 'ArrowLeft') prev()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [next, prev])
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [next, prev]);
 
-  if (photos.length === 0) return null
+  if (photos.length === 0) return null;
 
-  const photo = photos[current]
+  const photo = photos[current];
 
   return (
     <div
@@ -56,7 +56,7 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
         className="relative photo-fade-in"
         style={{
           aspectRatio: `${photo.width} / ${photo.height}`,
-          maxHeight: '70vh',
+          maxHeight: "70vh",
           width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * 70vh))`,
         }}
       >
@@ -65,7 +65,7 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
           alt={photo.title}
           fill
           className="object-contain"
-          placeholder={photo.blurDataURL ? 'blur' : 'empty'}
+          placeholder={photo.blurDataURL ? "blur" : "empty"}
           blurDataURL={photo.blurDataURL ?? undefined}
           priority={current === 0}
           // The rendered width is min(100vw, aspectRatio × 70vh) — portrait
@@ -77,20 +77,20 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
 
       {/* Hidden prefetch images for all non-current photos */}
       {photos.map((p, i) => {
-        if (i === current) return null
+        if (i === current) return null;
         return (
           <div
             key={`pf-${p._id}`}
             aria-hidden="true"
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               aspectRatio: `${p.width} / ${p.height}`,
-              maxHeight: '70vh',
+              maxHeight: "70vh",
               width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * 70vh))`,
-              visibility: 'hidden',
-              pointerEvents: 'none',
+              visibility: "hidden",
+              pointerEvents: "none",
             }}
           >
             <Image
@@ -101,7 +101,7 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
               sizes={`(max-width: 768px) min(100vw, calc(${(p.width / p.height).toFixed(4)} * 70vh)), min(100vw, calc(${(p.width / p.height).toFixed(4)} * 70vh))`}
             />
           </div>
-        )
+        );
       })}
 
       {/* Prev / Next arrows */}
@@ -127,12 +127,12 @@ export default function Carousel({ photos, interval = 5000 }: Props) {
             key={i}
             onClick={() => setCurrent(i)}
             className={`w-2 h-2 rounded-full transition-colors ${
-              i === current ? 'bg-sky-400' : 'bg-white/30 hover:bg-white/50'
+              i === current ? "bg-sky-400" : "bg-white/30 hover:bg-white/50"
             }`}
             aria-label={`Go to photo ${i + 1}`}
           />
         ))}
       </div>
     </div>
-  )
+  );
 }

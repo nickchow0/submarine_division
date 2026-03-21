@@ -162,9 +162,14 @@ export default function AdminLocationsPage() {
           </a>
         </div>
       </div>
-
       {/* Map — full width, same structure as the public map page */}
-      <div style={{ position: "relative", height: "calc(80vh - 160px)", marginBottom: "1.5rem" }}>
+      <div
+        style={{
+          position: "relative",
+          height: "calc(80vh - 160px)",
+          marginBottom: "1.5rem",
+        }}
+      >
         {!loading && (
           <AdminMapPickerWrapper
             pins={pins}
@@ -174,177 +179,179 @@ export default function AdminLocationsPage() {
           />
         )}
       </div>
-
       {/* Content below map — constrained width */}
       <div className="max-w-5xl mx-auto px-4 pb-10">
+        {/* Form */}
+        {isFormOpen && (
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 mb-6">
+            <h3 className="text-slate-200 font-medium mb-4">
+              {editingId ? "Edit location" : "New location"}
+            </h3>
 
-      {/* Form */}
-      {isFormOpen && (
-        <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 mb-6">
-          <h3 className="text-slate-200 font-medium mb-4">
-            {editingId ? "Edit location" : "New location"}
-          </h3>
-
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="col-span-2">
-              <label className="text-xs text-slate-500 mb-1 block">
-                Name *
-              </label>
-              <input
-                value={form.name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, name: e.target.value }))
-                }
-                placeholder="e.g. Truk Lagoon"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs text-slate-500 mb-1 block">
-                Description
-              </label>
-              <input
-                value={form.description}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, description: e.target.value }))
-                }
-                placeholder="Optional short description"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-500 mb-1 block">
-                Latitude *
-              </label>
-              <input
-                value={form.lat}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, lat: e.target.value }))
-                }
-                placeholder="e.g. 7.3522"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-slate-500 mb-1 block">
-                Longitude *
-              </label>
-              <input
-                value={form.lng}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, lng: e.target.value }))
-                }
-                placeholder="e.g. 151.8474"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-          </div>
-
-          {/* Photo picker */}
-          <div className="mb-4">
-            <label className="text-xs text-slate-500 mb-2 block">
-              Tagged photos ({form.photoIds.length} selected)
-            </label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-160 overflow-y-auto">
-              {photos.map((photo) => {
-                const selected = form.photoIds.includes(photo._id);
-                return (
-                  <button
-                    key={photo._id}
-                    onClick={() => togglePhoto(photo._id)}
-                    title={photo.title}
-                    className={`relative aspect-square rounded overflow-hidden border-2 transition-all ${
-                      selected
-                        ? "border-sky-400"
-                        : "border-transparent opacity-50 hover:opacity-80"
-                    }`}
-                  >
-                    <Image
-                      src={photo.src}
-                      alt={photo.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 30vw, 180px"
-                      quality={75}
-                    />
-                    {selected && (
-                      <div className="absolute inset-0 bg-sky-400/20 flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-sky-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={savePin}
-              disabled={saving || !isFormReady}
-              className="text-sm bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-medium rounded-lg px-4 py-2 transition-colors"
-            >
-              {saving ? "Saving…" : editingId ? "Save changes" : "Add pin"}
-            </button>
-            <button
-              onClick={cancelForm}
-              className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
-            >
-              Cancel
-            </button>
-            {editingId && (
-              <button
-                onClick={() => deletePin(editingId)}
-                className="ml-auto text-sm text-red-500 hover:text-red-400 transition-colors px-3 py-2"
-              >
-                Delete location
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Pin list */}
-      {!loading && pins.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-slate-600 uppercase tracking-widest mb-3">
-            {pins.length} location{pins.length !== 1 ? "s" : ""}
-          </p>
-          {pins.map((pin) => (
-            <div
-              key={pin._id}
-              className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-slate-200 text-sm font-medium">{pin.name}</p>
-                <p className="text-slate-600 text-xs mt-0.5">
-                  {pin.coordinates.lat.toFixed(4)},{" "}
-                  {pin.coordinates.lng.toFixed(4)}
-                  {" · "}
-                  {pin.photos.length} photo{pin.photos.length !== 1 ? "s" : ""}
-                </p>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="col-span-2">
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Name *
+                </label>
+                <input
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  placeholder="e.g. Truk Lagoon"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                />
               </div>
-              <button
-                onClick={() => startEdit(pin)}
-                className="text-slate-500 hover:text-sky-400 transition-colors text-sm"
-              >
-                Edit
-              </button>
+              <div className="col-span-2">
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Description
+                </label>
+                <input
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  placeholder="Optional short description"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Latitude *
+                </label>
+                <input
+                  value={form.lat}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, lat: e.target.value }))
+                  }
+                  placeholder="e.g. 7.3522"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">
+                  Longitude *
+                </label>
+                <input
+                  value={form.lng}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, lng: e.target.value }))
+                  }
+                  placeholder="e.g. 151.8474"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
+                />
+              </div>
             </div>
-          ))}
-        </div>
-      )}
-      </div> {/* end constrained content */}
+
+            {/* Photo picker */}
+            <div className="mb-4">
+              <label className="text-xs text-slate-500 mb-2 block">
+                Tagged photos ({form.photoIds.length} selected)
+              </label>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-160 overflow-y-auto">
+                {photos.map((photo) => {
+                  const selected = form.photoIds.includes(photo._id);
+                  return (
+                    <button
+                      key={photo._id}
+                      onClick={() => togglePhoto(photo._id)}
+                      title={photo.title}
+                      className={`relative aspect-square rounded overflow-hidden border-2 transition-all ${
+                        selected
+                          ? "border-sky-400"
+                          : "border-transparent opacity-50 hover:opacity-80"
+                      }`}
+                    >
+                      <Image
+                        src={photo.src}
+                        alt={photo.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 30vw, 180px"
+                        quality={75}
+                      />
+                      {selected && (
+                        <div className="absolute inset-0 bg-sky-400/20 flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-sky-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={savePin}
+                disabled={saving || !isFormReady}
+                className="text-sm bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-medium rounded-lg px-4 py-2 transition-colors"
+              >
+                {saving ? "Saving…" : editingId ? "Save changes" : "Add pin"}
+              </button>
+              <button
+                onClick={cancelForm}
+                className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
+              >
+                Cancel
+              </button>
+              {editingId && (
+                <button
+                  onClick={() => deletePin(editingId)}
+                  className="ml-auto text-sm text-red-500 hover:text-red-400 transition-colors px-3 py-2"
+                >
+                  Delete location
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Pin list */}
+        {!loading && pins.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-slate-600 uppercase tracking-widest mb-3">
+              {pins.length} location{pins.length !== 1 ? "s" : ""}
+            </p>
+            {pins.map((pin) => (
+              <div
+                key={pin._id}
+                className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-slate-200 text-sm font-medium">
+                    {pin.name}
+                  </p>
+                  <p className="text-slate-600 text-xs mt-0.5">
+                    {pin.coordinates.lat.toFixed(4)},{" "}
+                    {pin.coordinates.lng.toFixed(4)}
+                    {" · "}
+                    {pin.photos.length} photo
+                    {pin.photos.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <button
+                  onClick={() => startEdit(pin)}
+                  className="text-slate-500 hover:text-sky-400 transition-colors text-sm"
+                >
+                  Edit
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>{" "}
+      {/* end constrained content */}
     </div>
   );
 }

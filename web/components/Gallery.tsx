@@ -64,11 +64,17 @@ export default function Gallery({
     () => visiblePhotos.findIndex((p) => p._id === selectedId),
     [visiblePhotos, selectedId],
   );
-  const prevId = selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
+  const prevId =
+    selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
   const nextId =
-    selectedIndex < visiblePhotos.length - 1 ? visiblePhotos[selectedIndex + 1]._id : null;
+    selectedIndex < visiblePhotos.length - 1
+      ? visiblePhotos[selectedIndex + 1]._id
+      : null;
   const prefetchPhotos = useMemo(
-    () => (selectedIndex >= 0 ? visiblePhotos.slice(selectedIndex + 1, selectedIndex + 4) : []),
+    () =>
+      selectedIndex >= 0
+        ? visiblePhotos.slice(selectedIndex + 1, selectedIndex + 4)
+        : [],
     [selectedIndex, visiblePhotos],
   );
 

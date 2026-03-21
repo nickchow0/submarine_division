@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git switch:*)",
+      "Bash(git merge:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(npx playwright:*)",
+      "Bash(wc -l /Users/nickchow/Claude/submarine_division_website/web/components/*.tsx)",
+      "Bash(wc -l /Users/nickchow/Claude/submarine_division_website/web/lib/*.ts)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(find /Users/nickchow/Claude/submarine_division_website/web -type f \\\\\\(-name *review* -o -name *issue* \\\\\\))",
+      "Bash(git checkout:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr:*)",
+      "Bash(find /Users/nickchow/Claude/submarine_division_website/web/app/api -name *.ts)",
+      "mcp__Sanity__get_schema",
+      "mcp__Sanity__query_documents",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm install:*)"
+    ]
+  }
+}

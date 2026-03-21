@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { type AdminPhoto } from '@/types'
+import { useState } from "react";
+import { type AdminPhoto } from "@/types";
 
 export interface BulkOperationsProps {
-  selectedIds: Set<string>
-  photos: AdminPhoto[]
-  bulkRunning: boolean
-  bulkDone: boolean
-  uploadProgress: string | null
-  onBulkTags: (tags: string[]) => void
-  onBulkCaptions: () => void
-  onClearSelection: () => void
+  selectedIds: Set<string>;
+  photos: AdminPhoto[];
+  bulkRunning: boolean;
+  bulkDone: boolean;
+  uploadProgress: string | null;
+  onBulkTags: (tags: string[]) => void;
+  onBulkCaptions: () => void;
+  onClearSelection: () => void;
 }
 
 export default function BulkOperations({
@@ -24,29 +24,34 @@ export default function BulkOperations({
   onBulkCaptions,
   onClearSelection,
 }: BulkOperationsProps) {
-  const [bulkTagInput, setBulkTagInput] = useState('')
+  const [bulkTagInput, setBulkTagInput] = useState("");
 
   const handleBulkAddTags = () => {
-    const newTags = bulkTagInput.split(',').map(t => t.trim()).filter(Boolean)
+    const newTags = bulkTagInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     if (newTags.length) {
-      onBulkTags(newTags)
-      setBulkTagInput('')
+      onBulkTags(newTags);
+      setBulkTagInput("");
     }
-  }
+  };
 
   if (selectedIds.size === 0) {
-    return null
+    return null;
   }
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4 bg-slate-900 border border-sky-500/30 rounded-xl px-4 py-3">
       <span className="text-sm text-sky-400 font-medium shrink-0">
-        {selectedIds.size} photo{selectedIds.size !== 1 ? 's' : ''} selected
+        {selectedIds.size} photo{selectedIds.size !== 1 ? "s" : ""} selected
       </span>
       <input
         value={bulkTagInput}
-        onChange={e => setBulkTagInput(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter') handleBulkAddTags() }}
+        onChange={(e) => setBulkTagInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleBulkAddTags();
+        }}
         placeholder="Tags to add (comma-separated)"
         className="flex-1 min-w-[200px] bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-sky-500"
       />
@@ -69,15 +74,27 @@ export default function BulkOperations({
           </>
         ) : (
           <>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+              />
             </svg>
             Regenerate captions
           </>
         )}
       </button>
       {bulkDone !== null && (
-        <span className="text-sm text-sky-400">✓ {bulkDone} captions generated</span>
+        <span className="text-sm text-sky-400">
+          ✓ {bulkDone} captions generated
+        </span>
       )}
       <button
         onClick={onClearSelection}
@@ -86,5 +103,5 @@ export default function BulkOperations({
         Clear selection
       </button>
     </div>
-  )
+  );
 }

@@ -1,29 +1,33 @@
-'use client'
+"use client";
 
 // ─── SearchBar ────────────────────────────────────────────────────────────────
 // A controlled input that calls onSearch whenever the user types.
 // We debounce the callback so Fuse doesn't re-run on every single keystroke.
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef } from "react";
 
 type Props = {
-  onSearch: (query: string) => void
-  resultCount: number
-  totalCount: number
-}
+  onSearch: (query: string) => void;
+  resultCount: number;
+  totalCount: number;
+};
 
-export default function SearchBar({ onSearch, resultCount, totalCount }: Props) {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+export default function SearchBar({
+  onSearch,
+  resultCount,
+  totalCount,
+}: Props) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce: wait 150ms after the user stops typing before running search
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(() => onSearch(value), 150)
+      const value = e.target.value;
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => onSearch(value), 150);
     },
-    [onSearch]
-  )
+    [onSearch],
+  );
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
@@ -32,10 +36,16 @@ export default function SearchBar({ onSearch, resultCount, totalCount }: Props) 
         {/* Search icon */}
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"
-          fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round"
-            d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+          />
         </svg>
 
         <input
@@ -57,5 +67,5 @@ export default function SearchBar({ onSearch, resultCount, totalCount }: Props) 
         {resultCount} of {totalCount} photos
       </p>
     </div>
-  )
+  );
 }

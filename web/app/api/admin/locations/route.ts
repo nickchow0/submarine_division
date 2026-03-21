@@ -4,8 +4,8 @@
 // PATCH  — update an existing map pin
 // DELETE — delete a map pin
 
-import { NextResponse } from 'next/server'
-import { sanityClient, sanityWriteClient } from '@/lib/sanity'
+import { NextResponse } from "next/server";
+import { sanityClient, sanityWriteClient } from "@/lib/sanity";
 
 const LOCATIONS_QUERY = `
   *[_type == "mapPin"] | order(name asc) {
@@ -23,75 +23,99 @@ const LOCATIONS_QUERY = `
       "blurDataURL": image.asset->metadata.lqip
     }
   }
-`
+`;
 
 export async function GET() {
   try {
-    const pins = await sanityClient.fetch(LOCATIONS_QUERY)
-    return NextResponse.json({ pins })
+    const pins = await sanityClient.fetch(LOCATIONS_QUERY);
+    return NextResponse.json({ pins });
   } catch (err) {
-    return NextResponse.json({ pins: [], error: String(err) }, { status: 500 })
+    return NextResponse.json({ pins: [], error: String(err) }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { name, description, coordinates, photoIds } = await request.json()
+    const { name, description, coordinates, photoIds } = await request.json();
 
     if (!name || !coordinates?.lat || !coordinates?.lng) {
-      return NextResponse.json({ ok: false, error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json(
+        { ok: false, error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
     const doc = await sanityWriteClient.create({
-      _type: 'mapPin',
+      _type: "mapPin",
       name,
       description: description || undefined,
       coordinates,
       photos: (photoIds ?? []).map((id: string) => ({
-        _type: 'reference',
+        _type: "reference",
         _ref: id,
         _key: id,
       })),
-    })
+    });
 
-    return NextResponse.json({ ok: true, id: doc._id })
+    return NextResponse.json({ ok: true, id: doc._id });
   } catch (err) {
-    console.error('Create location error:', err)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    console.error("Create location error:", err);
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 },
+    );
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const { id, name, description, coordinates, photoIds } = await request.json()
+    const { id, name, description, coordinates, photoIds } =
+      await request.json();
 
-    if (!id) return NextResponse.json({ ok: false, error: 'Missing id' }, { status: 400 })
+    if (!id)
+      return NextResponse.json(
+        { ok: false, error: "Missing id" },
+        { status: 400 },
+      );
 
-    const updates: Record<string, unknown> = {}
-    if (name        !== undefined) updates.name        = name
-    if (description !== undefined) updates.description = description
-    if (coordinates !== undefined) updates.coordinates = coordinates
-    if (photoIds    !== undefined) updates.photos      = photoIds.map((pid: string) => ({
-      _type: 'reference', _ref: pid, _key: pid,
-    }))
+    const updates: Record<string, unknown> = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (coordinates !== undefined) updates.coordinates = coordinates;
+    if (photoIds !== undefined)
+      updates.photos = photoIds.map((pid: string) => ({
+        _type: "reference",
+        _ref: pid,
+        _key: pid,
+      }));
 
-    await sanityWriteClient.patch(id).set(updates).commit()
-    return NextResponse.json({ ok: true })
+    await sanityWriteClient.patch(id).set(updates).commit();
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('Update location error:', err)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    console.error("Update location error:", err);
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const { id } = await request.json()
-    if (!id) return NextResponse.json({ ok: false, error: 'Missing id' }, { status: 400 })
+    const { id } = await request.json();
+    if (!id)
+      return NextResponse.json(
+        { ok: false, error: "Missing id" },
+        { status: 400 },
+      );
 
-    await sanityWriteClient.delete(id)
-    return NextResponse.json({ ok: true })
+    await sanityWriteClient.delete(id);
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('Delete location error:', err)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    console.error("Delete location error:", err);
+    return NextResponse.json(
+      { ok: false, error: String(err) },
+      { status: 500 },
+    );
   }
 }

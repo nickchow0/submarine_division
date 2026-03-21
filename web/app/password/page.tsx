@@ -1,36 +1,36 @@
-'use client'
+"use client";
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent } from "react";
 
 export default function PasswordPage() {
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(false)
+    e.preventDefault();
+    setLoading(true);
+    setError(false);
 
     try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
-      })
+      });
 
       if (res.ok) {
-        window.location.href = '/'
+        window.location.href = "/";
       } else {
-        setError(true)
-        setPassword('')
+        setError(true);
+        setPassword("");
       }
     } catch {
-      setError(true)
+      setError(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md">
@@ -42,7 +42,9 @@ export default function PasswordPage() {
         >
           SubmarineDivision
         </h1>
-        <p className="text-slate-500 text-sm mb-10">Enter the password to continue</p>
+        <p className="text-slate-500 text-sm mb-10">
+          Enter the password to continue
+        </p>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,8 +52,8 @@ export default function PasswordPage() {
             type="password"
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value)
-              setError(false)
+              setPassword(e.target.value);
+              setError(false);
             }}
             placeholder="Password"
             autoFocus
@@ -60,7 +62,9 @@ export default function PasswordPage() {
                        transition-colors text-center tracking-wider"
           />
           {error && (
-            <p className="text-red-400 text-sm">Incorrect password. Please try again.</p>
+            <p className="text-red-400 text-sm">
+              Incorrect password. Please try again.
+            </p>
           )}
           <button
             type="submit"
@@ -68,10 +72,10 @@ export default function PasswordPage() {
             className="w-full py-3 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50
                        text-white font-medium transition-colors tracking-wide"
           >
-            {loading ? 'Checking...' : 'Enter'}
+            {loading ? "Checking..." : "Enter"}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }

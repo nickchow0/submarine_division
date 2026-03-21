@@ -1,20 +1,20 @@
-'use client'
+"use client";
 
-import { useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Props = {
-  uploadProgress: string | null
-  reuploadingId: string | null
-  onUpload: (files: FileList) => void
-  onReupload: (id: string, file: File) => void
-  onReuploadCancel: () => void
-}
+  uploadProgress: string | null;
+  reuploadingId: string | null;
+  onUpload: (files: FileList) => void;
+  onReupload: (id: string, file: File) => void;
+  onReuploadCancel: () => void;
+};
 
 export type UploadZoneHandle = {
-  openReuploadPicker: () => void
-}
+  openReuploadPicker: () => void;
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -22,23 +22,23 @@ const UploadZone = forwardRef<UploadZoneHandle, Props>(function UploadZone(
   { uploadProgress, reuploadingId, onUpload, onReupload, onReuploadCancel },
   ref,
 ) {
-  const uploadInputRef   = useRef<HTMLInputElement>(null)
-  const reuploadInputRef = useRef<HTMLInputElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null);
+  const reuploadInputRef = useRef<HTMLInputElement>(null);
 
   // Expose openReuploadPicker so AdminDashboard can trigger the picker
   // after setting reuploadingId in the hook.
   useImperativeHandle(ref, () => ({
     openReuploadPicker: () => reuploadInputRef.current?.click(),
-  }))
+  }));
 
   // Attach cancel listener — resets reuploadingId when OS file picker is dismissed
   useEffect(() => {
-    const input = reuploadInputRef.current
-    if (!input) return
-    const handleCancel = () => onReuploadCancel()
-    input.addEventListener('cancel', handleCancel)
-    return () => input.removeEventListener('cancel', handleCancel)
-  }, [onReuploadCancel])
+    const input = reuploadInputRef.current;
+    if (!input) return;
+    const handleCancel = () => onReuploadCancel();
+    input.addEventListener("cancel", handleCancel);
+    return () => input.removeEventListener("cancel", handleCancel);
+  }, [onReuploadCancel]);
 
   return (
     <>
@@ -49,7 +49,9 @@ const UploadZone = forwardRef<UploadZoneHandle, Props>(function UploadZone(
         multiple
         accept="image/*"
         className="hidden"
-        onChange={e => { if (e.target.files?.length) onUpload(e.target.files) }}
+        onChange={(e) => {
+          if (e.target.files?.length) onUpload(e.target.files);
+        }}
       />
 
       {/* Hidden file input — per-photo reupload */}
@@ -58,11 +60,11 @@ const UploadZone = forwardRef<UploadZoneHandle, Props>(function UploadZone(
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={e => {
-          const file = e.target.files?.[0]
-          if (file && reuploadingId) onReupload(reuploadingId, file)
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && reuploadingId) onReupload(reuploadingId, file);
           // Reset so the same file can be re-selected
-          if (reuploadInputRef.current) reuploadInputRef.current.value = ''
+          if (reuploadInputRef.current) reuploadInputRef.current.value = "";
         }}
       />
 
@@ -79,15 +81,25 @@ const UploadZone = forwardRef<UploadZoneHandle, Props>(function UploadZone(
           </>
         ) : (
           <>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
             </svg>
             Upload photos
           </>
         )}
       </button>
     </>
-  )
-})
+  );
+});
 
-export default UploadZone
+export default UploadZone;

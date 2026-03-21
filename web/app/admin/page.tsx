@@ -2,9 +2,13 @@
 // Fetches all photos and site settings directly from Sanity, then passes them
 // as props to the interactive AdminDashboard client component.
 
-import { sanityClient, sanityWriteClient, SITE_SETTINGS_QUERY } from '@/lib/sanity'
-import AdminDashboard from '@/components/AdminDashboard'
-import { DEFAULT_SETTINGS, type SiteSettings, type AdminPhoto } from '@/types'
+import {
+  sanityClient,
+  sanityWriteClient,
+  SITE_SETTINGS_QUERY,
+} from "@/lib/sanity";
+import AdminDashboard from "@/components/AdminDashboard";
+import { DEFAULT_SETTINGS, type SiteSettings, type AdminPhoto } from "@/types";
 
 const ADMIN_PHOTOS_QUERY = `
   *[_type == "photo" && !(_id in path("drafts.**"))] | order(dateTaken desc) {
@@ -26,17 +30,17 @@ const ADMIN_PHOTOS_QUERY = `
     "height": image.asset->metadata.dimensions.height,
     "imageRef": image.asset._ref
   }
-`
+`;
 
 export default async function AdminPage() {
   const [photos, settings] = await Promise.all([
     sanityClient.fetch<AdminPhoto[]>(ADMIN_PHOTOS_QUERY),
     sanityWriteClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
-  ])
+  ]);
   return (
     <AdminDashboard
       initialPhotos={photos}
       initialSettings={settings ?? DEFAULT_SETTINGS}
     />
-  )
+  );
 }
