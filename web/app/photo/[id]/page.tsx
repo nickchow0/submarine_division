@@ -12,6 +12,7 @@ import PhotoPageClient from '@/components/PhotoPageClient'
 import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from '@/types'
 import { formatCamera } from '@/lib/exif'
 import type { Metadata } from 'next'
+import BuyPrintButton from '@/components/BuyPrintButton'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -41,7 +42,7 @@ export default async function PhotoPage({ params }: Props) {
     sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   ])
 
-  const { showCaptions } = settings ?? DEFAULT_SETTINGS
+  const { showCaptions, enablePrintSales } = settings ?? DEFAULT_SETTINGS
 
   if (!photo) notFound()
 
@@ -108,7 +109,7 @@ export default async function PhotoPage({ params }: Props) {
       {/* Photo — aspect-ratio wrapper reserves the exact space before the image
           loads so the page layout doesn't shift. Same technique as PhotoModal. */}
       <div
-        className="relative mx-auto rounded overflow-hidden photo-fade-in bg-slate-900"
+        className="relative mx-auto overflow-hidden photo-fade-in"
         style={{
           aspectRatio: `${photo.width} / ${photo.height}`,
           maxHeight: '80vh',
@@ -188,6 +189,13 @@ export default async function PhotoPage({ params }: Props) {
             {photo.aperture && <span>{photo.aperture}</span>}
             {photo.shutterSpeed && <span>{photo.shutterSpeed}s</span>}
             {photo.iso && <span>ISO {photo.iso}</span>}
+          </div>
+        )}
+
+        {/* Buy print */}
+        {enablePrintSales && photo.shopifyProductId && (
+          <div className="pt-4 border-t border-slate-800">
+            <BuyPrintButton shopifyProductId={photo.shopifyProductId} />
           </div>
         )}
       </div>
