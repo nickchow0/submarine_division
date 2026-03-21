@@ -17,7 +17,6 @@ import PhotoPageClient from "@/components/PhotoPageClient";
 import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from "@/types";
 import { formatCamera } from "@/lib/exif";
 import type { Metadata } from "next";
-import BuyPrintButton from "@/components/BuyPrintButton";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -49,7 +48,7 @@ export default async function PhotoPage({ params }: Props) {
     sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   ]);
 
-  const { showCaptions, enablePrintSales } = settings ?? DEFAULT_SETTINGS;
+  const { showCaptions } = settings ?? DEFAULT_SETTINGS;
 
   if (!photo) notFound();
 

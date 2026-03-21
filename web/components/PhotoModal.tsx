@@ -6,15 +6,10 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
 import { formatCamera } from "@/lib/exif";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
-
-const BuyPrintButton = dynamic(() => import("./BuyPrintButton"), {
-  ssr: false,
-});
 
 type Props = {
   photo: Photo;
@@ -24,7 +19,6 @@ type Props = {
   onClose: () => void;
   onNavigate: (id: string) => void;
   showCaptions?: boolean;
-  showBuyButton?: boolean;
 };
 
 export default function PhotoModal({
@@ -35,7 +29,6 @@ export default function PhotoModal({
   onClose,
   onNavigate,
   showCaptions = false,
-  showBuyButton = false,
 }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -265,12 +258,6 @@ export default function PhotoModal({
             </div>
           )}
 
-          {/* Buy print */}
-          {showBuyButton && photo.shopifyProductId && (
-            <div className="pt-2.5 border-t border-slate-800">
-              <BuyPrintButton shopifyProductId={photo.shopifyProductId} />
-            </div>
-          )}
         </div>
       </div>
     </div>
