@@ -138,7 +138,7 @@ export default function PhotoModal({
               × the photo's aspect ratio — whichever constraint binds first. */}
           <div
             key={photo._id}
-            className="relative rounded overflow-hidden photo-fade-in bg-slate-900"
+            className="relative rounded overflow-hidden photo-fade-in"
             style={{
               aspectRatio: `${photo.width} / ${photo.height}`,
               maxHeight: "calc(90dvh - 300px)",
