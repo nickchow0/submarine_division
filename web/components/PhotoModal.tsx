@@ -6,10 +6,15 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
 import { formatCamera } from "@/lib/exif";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
+
+const BuyPrintButton = dynamic(() => import("./BuyPrintButton"), {
+  ssr: false,
+});
 
 type Props = {
   photo: Photo;
@@ -19,6 +24,7 @@ type Props = {
   onClose: () => void;
   onNavigate: (id: string) => void;
   showCaptions?: boolean;
+  showBuyButton?: boolean;
 };
 
 export default function PhotoModal({
@@ -29,6 +35,7 @@ export default function PhotoModal({
   onClose,
   onNavigate,
   showCaptions = false,
+  showBuyButton = false,
 }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -138,7 +145,7 @@ export default function PhotoModal({
               × the photo's aspect ratio — whichever constraint binds first. */}
           <div
             key={photo._id}
-            className="relative rounded overflow-hidden photo-fade-in"
+            className="relative overflow-hidden photo-fade-in bg-slate-900"
             style={{
               aspectRatio: `${photo.width} / ${photo.height}`,
               maxHeight: "calc(90dvh - 300px)",
@@ -255,6 +262,13 @@ export default function PhotoModal({
               {photo.aperture && <span>{photo.aperture}</span>}
               {photo.shutterSpeed && <span>{photo.shutterSpeed}s</span>}
               {photo.iso && <span>ISO {photo.iso}</span>}
+            </div>
+          )}
+
+          {/* Buy print */}
+          {showBuyButton && photo.shopifyProductId && (
+            <div className="pt-2.5 border-t border-slate-800">
+              <BuyPrintButton shopifyProductId={photo.shopifyProductId} />
             </div>
           )}
         </div>

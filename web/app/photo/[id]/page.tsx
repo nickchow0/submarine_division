@@ -108,7 +108,7 @@ export default async function PhotoPage({ params }: Props) {
       {/* Photo — aspect-ratio wrapper reserves the exact space before the image
           loads so the page layout doesn't shift. Same technique as PhotoModal. */}
       <div
-        className="relative mx-auto rounded overflow-hidden photo-fade-in bg-slate-900"
+        className="relative mx-auto overflow-hidden photo-fade-in"
         style={{
           aspectRatio: `${photo.width} / ${photo.height}`,
           maxHeight: '80vh',
@@ -190,6 +190,7 @@ export default async function PhotoPage({ params }: Props) {
             {photo.iso && <span>ISO {photo.iso}</span>}
           </div>
         )}
+
       </div>
     </div>
     </PhotoPageClient>
