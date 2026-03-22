@@ -10,6 +10,8 @@ import {
 } from "@/lib/sanity";
 import { DEFAULT_SETTINGS, type SiteSettings } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const settings = await sanityClient.fetch<SiteSettings | null>(

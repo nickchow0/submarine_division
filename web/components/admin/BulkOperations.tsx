@@ -16,10 +16,8 @@ export interface BulkOperationsProps {
 
 export default function BulkOperations({
   selectedIds,
-  photos,
   bulkRunning,
   bulkDone,
-  uploadProgress,
   onBulkTags,
   onBulkCaptions,
   onClearSelection,

@@ -1,7 +1,6 @@
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 // Full-width hero carousel that cycles through photos, with a CTA to the gallery.
 
-import Link from "next/link";
 import { sanityClient, CAROUSEL_PHOTOS_QUERY } from "@/lib/sanity";
 import Carousel from "@/components/Carousel";
 import type { Photo } from "@/types";

@@ -11,6 +11,12 @@ import { NextResponse } from "next/server";
 import { sanityWriteClient } from "@/lib/sanity";
 import { parseExif } from "@/lib/exif";
 
+interface SanityAsset {
+  _id: string;
+  url: string;
+  metadata?: { dimensions?: { width?: number; height?: number } };
+}
+
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -66,8 +72,8 @@ export async function POST(request: Request) {
       ok: true,
       updates: {
         src: asset.url,
-        width: (asset as any).metadata?.dimensions?.width ?? 0,
-        height: (asset as any).metadata?.dimensions?.height ?? 0,
+        width: (asset as SanityAsset).metadata?.dimensions?.width ?? 0,
+        height: (asset as SanityAsset).metadata?.dimensions?.height ?? 0,
         imageRef: asset._id,
         camera: exif.camera ?? null,
         lens: exif.lens ?? null,

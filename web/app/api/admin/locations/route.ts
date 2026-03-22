@@ -7,6 +7,8 @@
 import { NextResponse } from "next/server";
 import { sanityClient, sanityWriteClient } from "@/lib/sanity";
 
+export const dynamic = "force-dynamic";
+
 const LOCATIONS_QUERY = `
   *[_type == "mapPin"] | order(name asc) {
     _id,

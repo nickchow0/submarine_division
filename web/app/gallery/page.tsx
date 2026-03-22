@@ -26,6 +26,7 @@ export default async function GalleryPage() {
   // cache revalidation (every 60 seconds) rather than always newest-first.
   const shuffled = [...photos];
   for (let i = shuffled.length - 1; i > 0; i--) {
+    // eslint-disable-next-line react-hooks/purity
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }

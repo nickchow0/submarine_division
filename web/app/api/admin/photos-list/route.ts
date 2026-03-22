@@ -14,6 +14,8 @@ const PHOTOS_LIST_QUERY = `
   }
 `;
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const photos = await sanityClient.fetch(PHOTOS_LIST_QUERY);
