@@ -1,8 +1,8 @@
 "use client";
 
 // ─── PhotoModal ───────────────────────────────────────────────────────────────
-// Full-screen photo viewer overlay used by the Gallery component.
-// No Next.js navigation — the gallery stays mounted in the background.
+// Full-screen photo viewer overlay used by the Portfolio component.
+// No Next.js navigation — the portfolio stays mounted in the background.
 
 import { useEffect } from "react";
 import Image from "next/image";

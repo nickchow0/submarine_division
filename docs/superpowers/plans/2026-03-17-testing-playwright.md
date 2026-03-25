@@ -22,7 +22,7 @@
 | `web/playwright.config.ts` | **Create** | Playwright config: webServer, storageState, Chromium only |
 | `web/e2e/global-setup.ts` | **Create** | Authenticates via POST /api/auth, saves storage state |
 | `web/e2e/auth.spec.ts` | **Create** | Password gate test (unauthenticated) |
-| `web/e2e/gallery.spec.ts` | **Create** | Gallery load, search, modal open/navigate/close |
+| `web/e2e/portfolio.spec.ts` | **Create** | Portfolio load, search, modal open/navigate/close |
 | `web/e2e/photo.spec.ts` | **Create** | Direct photo page + about page |
 | `web/playwright/.auth/` | **Create (gitignore)** | Directory for saved auth state (not committed) |
 | `.github/workflows/test.yml` | **Create** | CI: unit tests then E2E tests |
@@ -183,7 +183,7 @@ import { test, expect } from '@playwright/test'
 test.use({ storageState: undefined })
 
 test('redirects to /password when not authenticated', async ({ page }) => {
-  await page.goto('/gallery')
+  await page.goto('/portfolio')
   await expect(page).toHaveURL('/password')
   await expect(page.getByText('Enter the password to continue')).toBeVisible()
 })
@@ -206,29 +206,29 @@ git commit -m "test(e2e): add password gate test"
 
 ---
 
-## Task 3: Gallery E2E tests
+## Task 3: Portfolio E2E tests
 
 **Files:**
-- Create: `web/e2e/gallery.spec.ts`
+- Create: `web/e2e/portfolio.spec.ts`
 
-These tests run with the authenticated storage state (default). The gallery page loads photos from Sanity — the E2E tests run against `next dev` which connects to the real Sanity dataset, so photos must exist for tests to pass.
+These tests run with the authenticated storage state (default). The portfolio page loads photos from Sanity — the E2E tests run against `next dev` which connects to the real Sanity dataset, so photos must exist for tests to pass.
 
 - [ ] **Step 1: Create the test file**
 
 ```typescript
-// web/e2e/gallery.spec.ts
+// web/e2e/portfolio.spec.ts
 import { test, expect } from '@playwright/test'
 
-test.describe('Gallery', () => {
+test.describe('Portfolio', () => {
   test('loads and shows at least one photo', async ({ page }) => {
-    await page.goto('/gallery')
+    await page.goto('/portfolio')
     // Wait for at least one photo image to appear
     const photos = page.locator('img[alt]').first()
     await expect(photos).toBeVisible({ timeout: 15_000 })
   })
 
   test('filters photos when a search query is typed', async ({ page }) => {
-    await page.goto('/gallery')
+    await page.goto('/portfolio')
 
     // Wait for photos to load
     await page.locator('img[alt]').first().waitFor({ timeout: 15_000 })
@@ -250,7 +250,7 @@ test.describe('Gallery', () => {
   })
 
   test('opens the photo modal when a photo is clicked', async ({ page }) => {
-    await page.goto('/gallery')
+    await page.goto('/portfolio')
     await page.locator('img[alt]').first().waitFor({ timeout: 15_000 })
 
     // Click the first photo card (the wrapping div, not the img itself)
@@ -261,7 +261,7 @@ test.describe('Gallery', () => {
   })
 
   test('navigates to the next photo in the modal', async ({ page }) => {
-    await page.goto('/gallery')
+    await page.goto('/portfolio')
 
     // Wait for at least 2 photos — navigation requires a next photo to exist
     await page.locator('img[alt]').nth(1).waitFor({ timeout: 15_000 })
@@ -284,7 +284,7 @@ test.describe('Gallery', () => {
   })
 
   test('closes the modal when Escape is pressed', async ({ page }) => {
-    await page.goto('/gallery')
+    await page.goto('/portfolio')
     await page.locator('img[alt]').first().waitFor({ timeout: 15_000 })
 
     // Open modal
@@ -303,7 +303,7 @@ test.describe('Gallery', () => {
 - [ ] **Step 2: Run the tests**
 
 ```bash
-cd web && npm run test:e2e -- e2e/gallery.spec.ts
+cd web && npm run test:e2e -- e2e/portfolio.spec.ts
 ```
 
 Expected: `5 passed`. If photos aren't loading, verify the Sanity dataset has photos and `NEXT_PUBLIC_SANITY_PROJECT_ID` is set in `.env.local`.
@@ -311,8 +311,8 @@ Expected: `5 passed`. If photos aren't loading, verify the Sanity dataset has ph
 - [ ] **Step 3: Commit**
 
 ```bash
-git add web/e2e/gallery.spec.ts
-git commit -m "test(e2e): add gallery flow tests"
+git add web/e2e/portfolio.spec.ts
+git commit -m "test(e2e): add portfolio flow tests"
 ```
 
 ---
@@ -322,7 +322,7 @@ git commit -m "test(e2e): add gallery flow tests"
 **Files:**
 - Create: `web/e2e/photo.spec.ts`
 
-The direct photo page test needs a real photo `_id` from Sanity. Rather than hardcoding an ID, the test navigates to the gallery first, clicks a photo to find its ID from the URL, then navigates directly to that URL.
+The direct photo page test needs a real photo `_id` from Sanity. Rather than hardcoding an ID, the test navigates to the portfolio first, clicks a photo to find its ID from the URL, then navigates directly to that URL.
 
 - [ ] **Step 1: Create the test file**
 
@@ -332,8 +332,8 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Photo page', () => {
   test('renders the photo and metadata when visited directly', async ({ page }) => {
-    // First, find a real photo ID by opening the gallery and clicking a photo
-    await page.goto('/gallery')
+    // First, find a real photo ID by opening the portfolio and clicking a photo
+    await page.goto('/portfolio')
     await page.locator('img[alt]').first().waitFor({ timeout: 15_000 })
     await page.locator('img[alt]').first().click()
 
@@ -350,8 +350,8 @@ test.describe('Photo page', () => {
     const photoImg = page.locator('main img, article img, .max-w-5xl img').first()
     await expect(photoImg).toBeVisible({ timeout: 10_000 })
 
-    // Back to gallery link should be present
-    await expect(page.getByText('Back to gallery')).toBeVisible()
+    // Back to portfolio link should be present
+    await expect(page.getByText('Back to portfolio')).toBeVisible()
   })
 })
 

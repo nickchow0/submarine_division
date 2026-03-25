@@ -1,6 +1,6 @@
-// ─── Gallery Page ─────────────────────────────────────────────────────────────
+// ─── Portfolio Page ───────────────────────────────────────────────────────────
 // This is a SERVER Component. It runs at build time (or on the server)
-// to fetch all photos from Sanity, then passes them to the Gallery
+// to fetch all photos from Sanity, then passes them to the Portfolio
 // client component which handles all the interactive stuff.
 
 import {
@@ -8,13 +8,13 @@ import {
   ALL_PHOTOS_QUERY,
   SITE_SETTINGS_QUERY,
 } from "@/lib/sanity";
-import Gallery from "@/components/Gallery";
+import Portfolio from "@/components/Portfolio";
 import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from "@/types";
 
 // Tell Next.js to revalidate this page every 60 seconds.
 export const revalidate = 60;
 
-export default async function GalleryPage() {
+export default async function PortfolioPage() {
   const [photos, settings] = await Promise.all([
     sanityClient.fetch<Photo[]>(ALL_PHOTOS_QUERY),
     sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
@@ -22,7 +22,7 @@ export default async function GalleryPage() {
 
   const { showCaptions } = settings ?? DEFAULT_SETTINGS;
 
-  // Shuffle using Fisher-Yates so the gallery order is random on each
+  // Shuffle using Fisher-Yates so the portfolio order is random on each
   // cache revalidation (every 60 seconds) rather than always newest-first.
   const shuffled = [...photos];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -31,5 +31,5 @@ export default async function GalleryPage() {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return <Gallery photos={shuffled} showCaptions={showCaptions} />;
+  return <Portfolio photos={shuffled} showCaptions={showCaptions} />;
 }

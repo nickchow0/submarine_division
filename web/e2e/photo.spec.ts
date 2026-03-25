@@ -5,8 +5,8 @@ test.describe("Photo page", () => {
   test("renders the photo and metadata when visited directly", async ({
     page,
   }) => {
-    // First, find a real photo ID by opening the gallery and clicking a photo
-    await page.goto("/gallery");
+    // First, find a real photo ID by opening the portfolio and clicking a photo
+    await page.goto("/portfolio");
     await page.locator("img[alt]").first().waitFor({ timeout: 15_000 });
     await page.locator("img[alt]").first().click();
 
@@ -27,8 +27,8 @@ test.describe("Photo page", () => {
       .first();
     await expect(photoImg).toBeVisible({ timeout: 10_000 });
 
-    // Back to gallery link should be present
-    await expect(page.getByText("Back to gallery")).toBeVisible();
+    // Back to portfolio link should be present
+    await expect(page.getByText("Back to portfolio")).toBeVisible();
   });
 });
 

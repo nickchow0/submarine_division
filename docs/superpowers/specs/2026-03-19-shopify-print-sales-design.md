@@ -7,7 +7,7 @@
 
 ## Overview
 
-Add print-on-demand sales to the portfolio site via a Shopify + Printful integration. Every photo in Sanity automatically gets a corresponding Shopify product. Visitors can purchase prints directly from the photo detail page and gallery modal without leaving the site. Shopify handles checkout; Printful handles printing and shipping.
+Add print-on-demand sales to the portfolio site via a Shopify + Printful integration. Every photo in Sanity automatically gets a corresponding Shopify product. Visitors can purchase prints directly from the photo detail page and portfolio modal without leaving the site. Shopify handles checkout; Printful handles printing and shipping.
 
 ---
 
@@ -42,7 +42,7 @@ Photo deleted via admin panel
     → Shopify Admin API: archive product (before Sanity delete)
     → Sanity: delete document + asset
 
-Visitor on /photo/[id] or gallery modal
+Visitor on /photo/[id] or portfolio modal
     → shopifyProductId present on photo?
         yes → BuyPrintButton renders Shopify Buy Button SDK
               → buyer clicks → Shopify checkout drawer (iframe overlay)
@@ -82,7 +82,7 @@ Add to `PHOTO_PROJECTION` in `web/lib/sanity.ts` (used by `ALL_PHOTOS_QUERY`, `P
 "shopifyProductId": coalesce(shopifyProductId, null),
 ```
 
-Updating `PHOTO_PROJECTION` once propagates `shopifyProductId` to the gallery, photo detail page, `PhotoModal`, and admin dashboard without separate query changes.
+Updating `PHOTO_PROJECTION` once propagates `shopifyProductId` to the portfolio, photo detail page, `PhotoModal`, and admin dashboard without separate query changes.
 
 ---
 

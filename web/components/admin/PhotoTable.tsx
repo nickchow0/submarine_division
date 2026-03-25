@@ -310,7 +310,7 @@ export default function PhotoTable({
                   <button
                     onClick={() => onToggleVisibility(photo._id)}
                     title={
-                      photo.visible ? "Hide from gallery" : "Show in gallery"
+                      photo.visible ? "Hide from portfolio" : "Show in portfolio"
                     }
                     className={`transition-colors ${photo.visible ? "text-slate-500 hover:text-slate-300" : "text-slate-600 hover:text-sky-400"}`}
                   >

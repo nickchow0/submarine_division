@@ -1,10 +1,10 @@
 "use client";
 
-// ─── Gallery ──────────────────────────────────────────────────────────────────
+// ─── Portfolio ─────────────────────────────────────────────────────────────────
 // Handles search, tag filtering, and the photo modal.
 //
 // When a photo is clicked we use window.history.pushState to update the URL to
-// /photo/[id] WITHOUT triggering a Next.js navigation — so the gallery page
+// /photo/[id] WITHOUT triggering a Next.js navigation — so the portfolio page
 // stays completely mounted in the background and the modal overlays it.
 //
 // Visiting /photo/[id] directly (shared link, hard navigation) bypasses this
@@ -20,7 +20,7 @@ import SearchBar from "./SearchBar";
 import TagFilter from "./TagFilter";
 import PhotoModal from "./PhotoModal";
 
-export default function Gallery({
+export default function Portfolio({
   photos,
   showCaptions = false,
 }: {
@@ -99,10 +99,10 @@ export default function Gallery({
     [nativePush],
   );
 
-  // Close modal: restore gallery URL
+  // Close modal: restore portfolio URL
   const closeModal = useCallback(() => {
     setSelectedId(null);
-    nativePush("/gallery");
+    nativePush("/portfolio");
   }, [nativePush]);
 
   // Navigate within modal: update URL to the new photo
@@ -135,7 +135,7 @@ export default function Gallery({
     setQuery("");
   }, []);
 
-  // Fire gallery_search 500ms after the user stops typing.
+  // Fire portfolio_search 500ms after the user stops typing.
   // Only [query] is in the dep array so the debounce resets only when the
   // query changes — not when the result count shifts. visiblePhotos.length is
   // captured inside the closure and will be current when the timer fires.
@@ -183,7 +183,7 @@ export default function Gallery({
         </div>
       )}
 
-      {/* Photo modal — rendered over the gallery, no page navigation */}
+      {/* Photo modal — rendered over the portfolio, no page navigation */}
       {selectedPhoto && (
         <PhotoModal
           photo={selectedPhoto}
@@ -229,7 +229,7 @@ function PhotoCard({ photo, onOpen }: CardProps) {
             alt={photo.title}
             width={photo.width}
             height={photo.height}
-            // Gallery is 1 col on mobile, 2 on sm, 3 on xl.
+            // Portfolio is 1 col on mobile, 2 on sm, 3 on xl.
             // These sizes tell the browser the rendered width so it picks the
             // right srcset entry — mobile gets ~400px, desktop gets ~600px.
             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"

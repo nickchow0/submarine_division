@@ -1,6 +1,6 @@
-# Building a Searchable Photo Gallery Website
+# Building a Searchable Photo Portfolio Website
 
-A practical guide to building a site like amustard.com — a CMS-managed photo gallery with both manual tags and AI-powered search.
+A practical guide to building a site like amustard.com — a CMS-managed photo portfolio with both manual tags and AI-powered search.
 
 ---
 
@@ -205,7 +205,7 @@ export function urlFor(source: any) {
 ```ts
 // app/page.tsx
 import { client, urlFor } from '@/lib/sanity'
-import Gallery from '@/components/Gallery'
+import Portfolio from '@/components/Portfolio'
 
 // This runs at build time (SSG) — your site is a static HTML file
 export default async function Home() {
@@ -219,14 +219,14 @@ export default async function Home() {
     }
   `)
 
-  return <Gallery photos={photos} />
+  return <Portfolio photos={photos} />
 }
 ```
 
-### The Gallery Component with Search
+### The Portfolio Component with Search
 
 ```tsx
-// components/Gallery.tsx
+// components/Portfolio.tsx
 "use client";
 import { useState, useMemo } from "react";
 import Fuse from "fuse.js";
@@ -242,7 +242,7 @@ type Photo = {
   height: number;
 };
 
-export default function Gallery({ photos }: { photos: Photo[] }) {
+export default function Portfolio({ photos }: { photos: Photo[] }) {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
@@ -397,14 +397,14 @@ Sync your Sanity data to Algolia with a webhook or scheduled script, then use Al
 ```
 submarine-division/
 ├── app/
-│   ├── page.tsx              # Main gallery (SSG)
+│   ├── page.tsx              # Main portfolio (SSG)
 │   ├── photo/[id]/page.tsx   # Individual photo page (SEO)
 │   ├── api/
 │   │   └── generate-caption/
 │   │       └── route.ts      # AI caption webhook
 │   └── layout.tsx
 ├── components/
-│   ├── Gallery.tsx            # Grid + search + filters
+│   ├── Portfolio.tsx            # Grid + search + filters
 │   ├── Lightbox.tsx           # Full-screen photo viewer
 │   ├── SearchBar.tsx
 │   └── TagFilter.tsx
@@ -425,14 +425,14 @@ submarine-division/
 
 1. **CMS-first**: Sanity gives you a proper dashboard to upload, tag, and manage photos without touching code
 2. **Dual search**: Manual tags give you precision ("hammerhead", "macro"), AI captions give you natural language depth ("diver exploring a wreck covered in coral")
-3. **Static output**: Next.js SSG means your gallery loads instantly — no server needed at runtime
+3. **Static output**: Next.js SSG means your portfolio loads instantly — no server needed at runtime
 4. **Progressive enhancement**: Start with the HTML prototype (included), then layer on Next.js + Sanity when ready
 
 ---
 
 ## Getting Started Checklist
 
-- [ ] Open `photo-gallery-demo.html` to see the working prototype
+- [ ] Open `photo-portfolio-demo.html` to see the working prototype
 - [ ] Create a free Sanity account at sanity.io
 - [ ] Create a free Vercel account at vercel.com
 - [ ] Get an Anthropic API key for AI captions at console.anthropic.com

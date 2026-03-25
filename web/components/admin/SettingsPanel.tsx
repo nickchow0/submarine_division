@@ -38,7 +38,7 @@ export default function SettingsPanel({
               key: "showCaptions" as const,
               label: "Show captions",
               description:
-                "Displays AI-generated captions in gallery cards, the photo modal, and the photo page.",
+                "Displays AI-generated captions in portfolio cards, the photo modal, and the photo page.",
             },
             {
               key: "autoGenerateCaptions" as const,

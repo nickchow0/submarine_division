@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Set up Vitest and add unit tests for `lib/` utilities and component tests for `SearchBar`, `TagFilter`, and `Gallery`.
+**Goal:** Set up Vitest and add unit tests for `lib/` utilities and component tests for `SearchBar`, `TagFilter`, and `Portfolio`.
 
-**Architecture:** Vitest runs in a jsdom environment with React Testing Library for component tests. `@vitejs/plugin-react` handles JSX. `next/image` and `next/link` are mocked at the test-file level. Fake timers handle SearchBar's 150ms debounce. `History.prototype.pushState` is spied on in Gallery tests to prevent jsdom errors.
+**Architecture:** Vitest runs in a jsdom environment with React Testing Library for component tests. `@vitejs/plugin-react` handles JSX. `next/image` and `next/link` are mocked at the test-file level. Fake timers handle SearchBar's 150ms debounce. `History.prototype.pushState` is spied on in Portfolio tests to prevent jsdom errors.
 
 **Tech Stack:** Vitest, @testing-library/react, @testing-library/user-event, @testing-library/jest-dom, jsdom, @vitejs/plugin-react
 
@@ -24,7 +24,7 @@
 | `web/__tests__/lib/sanityImageLoader.test.ts` | **Create** | Unit tests for the Sanity image loader |
 | `web/__tests__/components/SearchBar.test.tsx` | **Create** | Component tests for `SearchBar` |
 | `web/__tests__/components/TagFilter.test.tsx` | **Create** | Component tests for `TagFilter` |
-| `web/__tests__/components/Gallery.test.tsx` | **Create** | Component tests for `Gallery` |
+| `web/__tests__/components/Portfolio.test.tsx` | **Create** | Component tests for `Portfolio` |
 
 ---
 
@@ -482,17 +482,17 @@ git commit -m "test: add component tests for TagFilter"
 
 ---
 
-## Task 7: Component tests for `Gallery`
+## Task 7: Component tests for `Portfolio`
 
 **Files:**
-- Create: `web/__tests__/components/Gallery.test.tsx`
+- Create: `web/__tests__/components/Portfolio.test.tsx`
 
-Gallery renders `next/image` and `next/link` which must be mocked at the module level. It also calls `Object.getPrototypeOf(window.history).pushState` (History prototype, not instance) which must be spied on. Search uses the SearchBar 150ms debounce — tests use `fireEvent.change` + fake timer advancement.
+Portfolio renders `next/image` and `next/link` which must be mocked at the module level. It also calls `Object.getPrototypeOf(window.history).pushState` (History prototype, not instance) which must be spied on. Search uses the SearchBar 150ms debounce — tests use `fireEvent.change` + fake timer advancement.
 
 - [ ] **Step 1: Create the test file**
 
 ```tsx
-// web/__tests__/components/Gallery.test.tsx
+// web/__tests__/components/Portfolio.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { Photo } from '@/types'
@@ -523,8 +523,8 @@ vi.mock('@/components/PhotoModal', () => ({
   default: () => null,
 }))
 
-// Import Gallery AFTER mocks are registered
-import Gallery from '@/components/Gallery'
+// Import Portfolio AFTER mocks are registered
+import Portfolio from '@/components/Portfolio'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -559,10 +559,10 @@ const PHOTOS: Photo[] = [
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-describe('Gallery', () => {
+describe('Portfolio', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    // Gallery calls Object.getPrototypeOf(window.history).pushState directly.
+    // Portfolio calls Object.getPrototypeOf(window.history).pushState directly.
     // Spy on the History prototype to prevent jsdom navigation errors.
     vi.spyOn(Object.getPrototypeOf(window.history), 'pushState').mockImplementation(() => {})
   })
@@ -573,14 +573,14 @@ describe('Gallery', () => {
   })
 
   it('renders all photos initially', () => {
-    render(<Gallery photos={PHOTOS} />)
+    render(<Portfolio photos={PHOTOS} />)
     expect(screen.getByAltText('Hammerhead Shark')).toBeInTheDocument()
     expect(screen.getByAltText('Manta Ray')).toBeInTheDocument()
     expect(screen.getByAltText('Coral Garden')).toBeInTheDocument()
   })
 
   it('filters photos by search query after the 150ms debounce', () => {
-    render(<Gallery photos={PHOTOS} />)
+    render(<Portfolio photos={PHOTOS} />)
 
     const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: 'hammerhead' } })
@@ -592,7 +592,7 @@ describe('Gallery', () => {
   })
 
   it('shows the "no results" message when the query matches nothing', () => {
-    render(<Gallery photos={PHOTOS} />)
+    render(<Portfolio photos={PHOTOS} />)
 
     const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: 'zzznomatch' } })
@@ -602,7 +602,7 @@ describe('Gallery', () => {
   })
 
   it('filters photos by tag when a tag is clicked', () => {
-    render(<Gallery photos={PHOTOS} />)
+    render(<Portfolio photos={PHOTOS} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'coral' }))
 
@@ -612,7 +612,7 @@ describe('Gallery', () => {
   })
 
   it('restores all photos when "Clear filters" is clicked', () => {
-    render(<Gallery photos={PHOTOS} />)
+    render(<Portfolio photos={PHOTOS} />)
 
     // Trigger no-results state
     const input = screen.getByRole('textbox')
@@ -631,7 +631,7 @@ describe('Gallery', () => {
 - [ ] **Step 2: Run the tests**
 
 ```bash
-cd web && npm run test -- __tests__/components/Gallery.test.tsx
+cd web && npm run test -- __tests__/components/Portfolio.test.tsx
 ```
 
 Expected: `5 tests passed`.
@@ -647,6 +647,6 @@ Expected: all tests across all files pass (20 total).
 - [ ] **Step 4: Commit**
 
 ```bash
-git add web/__tests__/components/Gallery.test.tsx
-git commit -m "test: add component tests for Gallery"
+git add web/__tests__/components/Portfolio.test.tsx
+git commit -m "test: add component tests for Portfolio"
 ```

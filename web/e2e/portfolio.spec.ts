@@ -1,16 +1,16 @@
-// web/e2e/gallery.spec.ts
+// web/e2e/portfolio.spec.ts
 import { test, expect } from "@playwright/test";
 
-test.describe("Gallery", () => {
+test.describe("Portfolio", () => {
   test("loads and shows at least one photo", async ({ page }) => {
-    await page.goto("/gallery");
+    await page.goto("/portfolio");
     // Wait for at least one photo image to appear
     const photos = page.locator("img[alt]").first();
     await expect(photos).toBeVisible({ timeout: 15_000 });
   });
 
   test("filters photos when a search query is typed", async ({ page }) => {
-    await page.goto("/gallery");
+    await page.goto("/portfolio");
 
     // Wait for photos to load
     await page.locator("img[alt]").first().waitFor({ timeout: 15_000 });
@@ -32,7 +32,7 @@ test.describe("Gallery", () => {
   });
 
   test("opens the photo modal when a photo is clicked", async ({ page }) => {
-    await page.goto("/gallery");
+    await page.goto("/portfolio");
     await page.locator("img[alt]").first().waitFor({ timeout: 15_000 });
 
     // Click the first photo card (the wrapping div, not the img itself)
@@ -43,7 +43,7 @@ test.describe("Gallery", () => {
   });
 
   test("navigates to the next photo in the modal", async ({ page }) => {
-    await page.goto("/gallery");
+    await page.goto("/portfolio");
 
     // Wait for at least 2 photos — navigation requires a next photo to exist
     await page.locator("img[alt]").nth(1).waitFor({ timeout: 15_000 });
@@ -65,7 +65,7 @@ test.describe("Gallery", () => {
   });
 
   test("closes the modal when Escape is pressed", async ({ page }) => {
-    await page.goto("/gallery");
+    await page.goto("/portfolio");
     await page.locator("img[alt]").first().waitFor({ timeout: 15_000 });
 
     // Open modal

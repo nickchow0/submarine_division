@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Wire every Sanity photo to a Shopify product so visitors can buy prints directly from the photo detail page and gallery modal, with automatic sync on publish and manual fallback in the admin panel.
+**Goal:** Wire every Sanity photo to a Shopify product so visitors can buy prints directly from the photo detail page and portfolio modal, with automatic sync on publish and manual fallback in the admin panel.
 
-**Architecture:** A server-side Shopify helper (`web/lib/shopify.ts`) centralises all Shopify Admin API calls. A Sanity webhook (`POST /api/webhooks/sanity`) creates/updates Shopify products on publish. The admin panel extends with a sync badge, per-photo sync button, "Sync All Unsynced", and a feature toggle to gate the buy button on the public site. A `BuyPrintButton` client component (loaded with `ssr: false`) renders the Shopify Buy Button SDK in the photo detail page and gallery modal — only when the `enablePrintSales` setting is ON.
+**Architecture:** A server-side Shopify helper (`web/lib/shopify.ts`) centralises all Shopify Admin API calls. A Sanity webhook (`POST /api/webhooks/sanity`) creates/updates Shopify products on publish. The admin panel extends with a sync badge, per-photo sync button, "Sync All Unsynced", and a feature toggle to gate the buy button on the public site. A `BuyPrintButton` client component (loaded with `ssr: false`) renders the Shopify Buy Button SDK in the photo detail page and portfolio modal — only when the `enablePrintSales` setting is ON.
 
 **Tech Stack:** Next.js 15 App Router, Sanity (GROQ + write client), Shopify Admin REST API (2024-01), `@shopify/buy-button-js` (browser-only), Vitest for unit tests.
 
@@ -37,8 +37,8 @@ These are external setup steps with no code equivalent. Complete them before Tas
 | `web/lib/sanity.ts` | Modify | Add `shopifyProductId` to `PHOTO_PROJECTION`; add `enablePrintSales` to `SITE_SETTINGS_QUERY` |
 | `web/app/admin/page.tsx` | Modify | Add `shopifyProductId` to `ADMIN_PHOTOS_QUERY` |
 | `web/components/admin/SettingsPanel.tsx` | Modify | Add `enablePrintSales` toggle entry |
-| `web/app/gallery/page.tsx` | Modify | Extract `enablePrintSales` and pass to `Gallery` |
-| `web/components/Gallery.tsx` | Modify | Accept and forward `showBuyButton` prop to `PhotoModal` |
+| `web/app/portfolio/page.tsx` | Modify | Extract `enablePrintSales` and pass to `Portfolio` |
+| `web/components/Portfolio.tsx` | Modify | Accept and forward `showBuyButton` prop to `PhotoModal` |
 | `web/components/PhotoModal.tsx` | Modify | Accept `showBuyButton` prop and gate `BuyPrintButton` on it |
 | `web/middleware.ts` | Modify | Bypass `/api/webhooks` and `/api/generate-caption` |
 | `web/lib/shopify.ts` | **Create** | Shopify Admin API helper |
@@ -155,13 +155,13 @@ These are structural changes with no testable logic. After this task, TypeScript
 - Modify: `web/types/index.ts`
 - Modify: `web/lib/sanity.ts`
 - Modify: `web/components/admin/SettingsPanel.tsx`
-- Modify: `web/app/gallery/page.tsx`
-- Modify: `web/components/Gallery.tsx`
+- Modify: `web/app/portfolio/page.tsx`
+- Modify: `web/components/Portfolio.tsx`
 - Modify: `web/components/PhotoModal.tsx`
 
 The toggle controls whether the buy button renders on the public site. Admin sync functionality is always visible regardless of this setting — you still need to sync photos to Shopify before enabling the toggle.
 
-**Data flow:** Sanity `siteSettings.enablePrintSales` → fetched on server → passed as `showBuyButton` prop to `Gallery` → forwarded to `PhotoModal`. The photo detail page checks it directly since it already fetches settings. Default is `false` so the feature is invisible until deliberately turned on.
+**Data flow:** Sanity `siteSettings.enablePrintSales` → fetched on server → passed as `showBuyButton` prop to `Portfolio` → forwarded to `PhotoModal`. The photo detail page checks it directly since it already fetches settings. Default is `false` so the feature is invisible until deliberately turned on.
 
 - [ ] **Step 1: Add `enablePrintSales` field to `studio/schemaTypes/siteSettingsType.ts`**
 
@@ -171,7 +171,7 @@ The toggle controls whether the buy button renders on the public site. Admin syn
   defineField({
     name: 'enablePrintSales',
     title: 'Enable print sales',
-    description: 'Shows the "Buy Print" button on photo pages and the gallery modal. Requires photos to be synced to Shopify first.',
+    description: 'Shows the "Buy Print" button on photo pages and the portfolio modal. Requires photos to be synced to Shopify first.',
     type: 'boolean',
     initialValue: false,
   }),
@@ -181,7 +181,7 @@ The toggle controls whether the buy button renders on the public site. Admin syn
 
   In `SiteSettings`, add:
   ```typescript
-  enablePrintSales: boolean   // show buy print button on photo pages and gallery modal
+  enablePrintSales: boolean   // show buy print button on photo pages and portfolio modal
   ```
 
   In `DEFAULT_SETTINGS`, add:
@@ -204,18 +204,18 @@ The toggle controls whether the buy button renders on the public site. Admin syn
   {
     key: 'enablePrintSales' as const,
     label: 'Enable print sales',
-    description: 'Shows the "Buy Print" button on photo pages and the gallery modal. Only photos synced to Shopify will show the button.',
+    description: 'Shows the "Buy Print" button on photo pages and the portfolio modal. Only photos synced to Shopify will show the button.',
   },
   ```
 
-- [ ] **Step 5: Add `showBuyButton` prop to `web/components/Gallery.tsx`**
+- [ ] **Step 5: Add `showBuyButton` prop to `web/components/Portfolio.tsx`**
 
   In the component's props interface, add:
   ```typescript
   showBuyButton?: boolean
   ```
 
-  In the `Gallery` function signature, add `showBuyButton = false` to the destructured props.
+  In the `Portfolio` function signature, add `showBuyButton = false` to the destructured props.
 
   Pass it through to `<PhotoModal>`:
   ```tsx
@@ -236,7 +236,7 @@ The toggle controls whether the buy button renders on the public site. Admin syn
 
   The buy button rendering in Task 10 will use this prop to gate display.
 
-- [ ] **Step 7: Extract `enablePrintSales` in `web/app/gallery/page.tsx`**
+- [ ] **Step 7: Extract `enablePrintSales` in `web/app/portfolio/page.tsx`**
 
   Change the settings destructure from:
   ```typescript
@@ -247,9 +247,9 @@ The toggle controls whether the buy button renders on the public site. Admin syn
   const { showCaptions, enablePrintSales } = settings ?? DEFAULT_SETTINGS
   ```
 
-  Pass it to `<Gallery>`:
+  Pass it to `<Portfolio>`:
   ```tsx
-  <Gallery photos={shuffled} showCaptions={showCaptions} showBuyButton={enablePrintSales} />
+  <Portfolio photos={shuffled} showCaptions={showCaptions} showBuyButton={enablePrintSales} />
   ```
 
 - [ ] **Step 8: Deploy schema to Sanity cloud**
@@ -269,7 +269,7 @@ The toggle controls whether the buy button renders on the public site. Admin syn
 - [ ] **Step 10: Commit**
 
   ```bash
-  git add studio/schemaTypes/siteSettingsType.ts web/types/index.ts web/lib/sanity.ts web/components/admin/SettingsPanel.tsx web/app/gallery/page.tsx web/components/Gallery.tsx web/components/PhotoModal.tsx
+  git add studio/schemaTypes/siteSettingsType.ts web/types/index.ts web/lib/sanity.ts web/components/admin/SettingsPanel.tsx web/app/portfolio/page.tsx web/components/Portfolio.tsx web/components/PhotoModal.tsx
   git commit -m "feat: add enablePrintSales feature toggle to admin settings"
   ```
 
@@ -1724,7 +1724,7 @@ The photo detail page is a server component that already fetches `SiteSettings`.
 
 - [ ] **Step 4: Smoke test**
 
-  Open the gallery, click a photo that is synced to Shopify. The buy button should appear in the modal footer. Navigate to the next photo — the SDK should reinitialise without errors (check browser console). Navigate back — no orphaned SDK instances.
+  Open the portfolio, click a photo that is synced to Shopify. The buy button should appear in the modal footer. Navigate to the next photo — the SDK should reinitialise without errors (check browser console). Navigate back — no orphaned SDK instances.
 
 - [ ] **Step 5: Commit**
 

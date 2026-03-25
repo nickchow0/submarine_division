@@ -13,14 +13,14 @@ export default function PageTransition({
 }) {
   const pathname = usePathname();
 
-  // When navigating from /gallery to /photo/[id], Next.js opens a modal overlay
+  // When navigating from /portfolio to /photo/[id], Next.js opens a modal overlay
   // via the @modal intercepting route. In that case we don't want to re-animate
-  // the background page — the gallery should stay mounted silently behind the
-  // modal backdrop. Grouping gallery and photo routes under the same key achieves
+  // the background page — the portfolio should stay mounted silently behind the
+  // modal backdrop. Grouping portfolio and photo routes under the same key achieves
   // this: React sees no key change, so it doesn't unmount/remount the <main>.
   const transitionKey =
-    pathname.startsWith("/gallery") || pathname.startsWith("/photo/")
-      ? "/gallery"
+    pathname.startsWith("/portfolio") || pathname.startsWith("/photo/")
+      ? "/portfolio"
       : pathname;
 
   return (

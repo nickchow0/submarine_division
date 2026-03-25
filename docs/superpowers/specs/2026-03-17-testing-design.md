@@ -83,9 +83,9 @@ Tests client components in a jsdom environment using React Testing Library. Comp
 
 **`SearchBar` debounce:** `SearchBar` debounces `onSearch` by 150ms. All tests that assert the callback was called must use `vi.useFakeTimers()` and advance by 150ms (`vi.advanceTimersByTime(150)`) before asserting. Restore real timers in `afterEach`.
 
-**`Gallery` search debounce:** `Gallery` renders `SearchBar` as a child. Typing into the gallery search input also requires 150ms of fake timer advancement before `query` state updates and photo filtering occurs.
+**`Portfolio` search debounce:** `Portfolio` renders `SearchBar` as a child. Typing into the portfolio search input also requires 150ms of fake timer advancement before `query` state updates and photo filtering occurs.
 
-**`Gallery` history mock:** `Gallery` calls `Object.getPrototypeOf(window.history).pushState` (the History prototype, not the instance). Mock with `vi.spyOn(Object.getPrototypeOf(window.history), 'pushState')` in test setup. The pushState call itself is not asserted — it is intentionally covered by E2E tests only.
+**`Portfolio` history mock:** `Portfolio` calls `Object.getPrototypeOf(window.history).pushState` (the History prototype, not the instance). Mock with `vi.spyOn(Object.getPrototypeOf(window.history), 'pushState')` in test setup. The pushState call itself is not asserted — it is intentionally covered by E2E tests only.
 
 **Analytics in jsdom:** `trackEvent` calls in components will silently no-op in jsdom (`window.gtag` is undefined). This is expected — no mocking needed.
 
@@ -106,7 +106,7 @@ Tests client components in a jsdom environment using React Testing Library. Comp
 | Applies active styling to the selected tag    | Active tag has a distinct visual state                         |
 | Returns null when no tags provided            | Empty tags array: component returns `null`, container is empty |
 
-### `Gallery`
+### `Portfolio`
 
 | Test                                            | Description                                                           |
 | ----------------------------------------------- | --------------------------------------------------------------------- |
@@ -134,12 +134,12 @@ The password gate test explicitly opts out of storage state so it hits the middl
 
 | Flow                  | Auth          | Steps                              | Assertion                               |
 | --------------------- | ------------- | ---------------------------------- | --------------------------------------- |
-| Password gate         | None          | Navigate to `/gallery`             | Redirected to `/password`               |
-| Gallery loads         | Authenticated | Navigate to `/gallery`             | Photo grid visible with ≥1 photo        |
+| Password gate         | None          | Navigate to `/portfolio`             | Redirected to `/password`               |
+| Portfolio loads         | Authenticated | Navigate to `/portfolio`             | Photo grid visible with ≥1 photo        |
 | Search filters photos | Authenticated | Type a search term                 | Fewer photos visible than initial count |
 | Open photo modal      | Authenticated | Click a photo thumbnail            | Modal overlay appears with the photo    |
 | Modal navigation      | Authenticated | Open modal, click next arrow       | A different photo is displayed          |
-| Close modal           | Authenticated | Open modal, press Escape           | Modal dismissed, gallery visible        |
+| Close modal           | Authenticated | Open modal, press Escape           | Modal dismissed, portfolio visible        |
 | Direct photo page     | Authenticated | Navigate to `/photo/[id]` directly | Photo and metadata rendered             |
 | About page loads      | Authenticated | Navigate to `/about`               | Page renders without errors             |
 

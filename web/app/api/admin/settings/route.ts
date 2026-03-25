@@ -36,7 +36,7 @@ export async function PATCH(req: Request) {
     ];
     for (const key of booleanKeys) {
       if (key in body && typeof body[key] === "boolean") {
-        updates[key] = body[key] as boolean;
+        (updates as Record<string, unknown>)[key] = body[key];
       }
     }
 

@@ -104,9 +104,9 @@ export const photoType = defineType({
 
     defineField({
       name: 'visible',
-      title: 'Visible in gallery',
+      title: 'Visible in portfolio',
       type: 'boolean',
-      description: 'Uncheck to hide this photo from the public gallery without deleting it.',
+      description: 'Uncheck to hide this photo from the public portfolio without deleting it.',
       initialValue: true,
     }),
   ],

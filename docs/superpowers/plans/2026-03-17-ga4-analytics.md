@@ -4,7 +4,7 @@
 
 **Goal:** Add Google Analytics 4 to the SubmarineDivision website to track page views and photo engagement events.
 
-**Architecture:** Inject the GA4 script in `layout.tsx` via `next/script`. A new `Analytics` client component uses `usePathname` to fire `page_view` on every soft navigation. A `trackEvent` utility in `lib/analytics.ts` provides a safe, typed wrapper around `window.gtag`. Custom events are added to `PhotoModal`, `PhotoPageClient`, and `Gallery` via `useEffect` hooks.
+**Architecture:** Inject the GA4 script in `layout.tsx` via `next/script`. A new `Analytics` client component uses `usePathname` to fire `page_view` on every soft navigation. A `trackEvent` utility in `lib/analytics.ts` provides a safe, typed wrapper around `window.gtag`. Custom events are added to `PhotoModal`, `PhotoPageClient`, and `Portfolio` via `useEffect` hooks.
 
 **Tech Stack:** Next.js 15 App Router, TypeScript, Google Analytics 4 (gtag.js)
 
@@ -21,7 +21,7 @@
 | `web/app/layout.tsx` | **Modify** | Add GA4 `<Script>` tags and render `<Analytics />` |
 | `web/components/PhotoModal.tsx` | **Modify** | Fire `photo_view` on every `photo` prop change |
 | `web/components/PhotoPageClient.tsx` | **Modify** | Fire `photo_view` on mount (direct link visits) |
-| `web/components/Gallery.tsx` | **Modify** | Fire `gallery_search` (debounced) and `tag_filter` events |
+| `web/components/Portfolio.tsx` | **Modify** | Fire `gallery_search` (debounced) and `tag_filter` events |
 | `web/.env.local` | **Modify** | Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX` |
 
 ---
@@ -82,7 +82,7 @@ git commit -m "feat: add trackEvent analytics helper"
 
 GA4 only fires a page view on initial hard load. This component watches `usePathname` and fires `page_view` on every subsequent App Router navigation. It renders nothing — pure side-effect.
 
-Note: The `nativePush` calls in `Gallery.tsx` bypass Next.js routing entirely, so `usePathname` will NOT fire for those URL changes. That's correct — `photo_view` events handle gallery modal tracking separately.
+Note: The `nativePush` calls in `Portfolio.tsx` bypass Next.js routing entirely, so `usePathname` will NOT fire for those URL changes. That's correct — `photo_view` events handle portfolio modal tracking separately.
 
 - [ ] **Step 1: Create the file**
 
@@ -189,7 +189,7 @@ Expected: no errors
 cd web && npm run dev
 ```
 
-Open the browser. Open DevTools → Network tab, filter by "gtag" or "googletagmanager". Navigate between pages (/gallery, /about). Confirm the gtag requests fire. You don't need GA4 to be receiving data — just verify the script loads and network calls go out.
+Open the browser. Open DevTools → Network tab, filter by "gtag" or "googletagmanager". Navigate between pages (/portfolio, /about). Confirm the gtag requests fire. You don't need GA4 to be receiving data — just verify the script loads and network calls go out.
 
 - [ ] **Step 5: Commit**
 
@@ -241,7 +241,7 @@ Expected: no errors
 
 ```bash
 git add web/components/PhotoModal.tsx
-git commit -m "feat: fire photo_view event from gallery modal"
+git commit -m "feat: fire photo_view event from portfolio modal"
 ```
 
 ---
@@ -295,19 +295,19 @@ git commit -m "feat: fire photo_view event on direct photo page visits"
 
 ---
 
-## Task 6: Fire `gallery_search` and `tag_filter` from `Gallery.tsx`
+## Task 6: Fire `gallery_search` and `tag_filter` from `Portfolio.tsx`
 
 **Files:**
-- Modify: `web/components/Gallery.tsx`
+- Modify: `web/components/Portfolio.tsx`
 
-Two new `useEffect` hooks added to the `Gallery` component:
+Two new `useEffect` hooks added to the `Portfolio` component:
 
 1. **`gallery_search`** — fires 500ms after the user stops typing, only when the query is non-empty. Uses a debounce pattern with cleanup to avoid stale state updates on unmount.
 2. **`tag_filter`** — fires when `activeTag` becomes non-null (a tag was selected).
 
 - [ ] **Step 1: Add the import**
 
-At the top of `web/components/Gallery.tsx`, add:
+At the top of `web/components/Portfolio.tsx`, add:
 
 ```typescript
 import { trackEvent } from '@/lib/analytics'
@@ -315,7 +315,7 @@ import { trackEvent } from '@/lib/analytics'
 
 - [ ] **Step 2: Add the `gallery_search` effect**
 
-Inside the `Gallery` component, after the `handleTagClick` callback (around line 126), add:
+Inside the `Portfolio` component, after the `handleTagClick` callback (around line 126), add:
 
 ```typescript
 // Fire gallery_search 500ms after the user stops typing.
@@ -359,7 +359,7 @@ Expected: no errors
 - [ ] **Step 5: Commit**
 
 ```bash
-git add web/components/Gallery.tsx
+git add web/components/Portfolio.tsx
 git commit -m "feat: fire gallery_search and tag_filter analytics events"
 ```
 
@@ -383,7 +383,7 @@ Alternatively, temporarily replace `gtag('config', ...)` with `gtag('config', ..
 
 With the site running locally (`npm run dev`):
 - Navigate between pages → confirm `page_view` events appear in DebugView
-- Open a photo in the gallery modal → confirm `photo_view`
+- Open a photo in the portfolio modal → confirm `photo_view`
 - Navigate to next/prev in the modal → confirm `photo_view` fires again
 - Visit a photo directly at `/photo/[id]` → confirm `photo_view`
 - Type a search query → confirm `gallery_search` fires after 500ms

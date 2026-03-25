@@ -1,6 +1,6 @@
-# Photo Gallery — Next.js Starter
+# Photo Portfolio — Next.js Starter
 
-A searchable photo gallery with manual tags + AI-generated captions, built with Next.js, Sanity CMS, and Claude.
+A searchable photo portfolio with manual tags + AI-generated captions, built with Next.js, Sanity CMS, and Claude.
 
 ---
 
@@ -69,7 +69,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-> The gallery will be empty until you add photos in Sanity.
+> The portfolio will be empty until you add photos in Sanity.
 
 ---
 
@@ -145,7 +145,7 @@ submarine-division/
 │       └── generate-caption/
 │           └── route.ts        ← Sanity webhook → Claude → caption (Node.js)
 ├── components/
-│   ├── Gallery.tsx             ← Grid + search + filters (client component)
+│   ├── Portfolio.tsx             ← Grid + search + filters (client component)
 │   ├── SearchBar.tsx           ← Search input with debounce
 │   ├── TagFilter.tsx           ← Tag pill buttons
 │   └── Lightbox.tsx            ← Full-screen photo viewer

@@ -20,7 +20,7 @@ import { FONTS } from "@/lib/fonts";
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
-  title: "Photo Gallery",
+  title: "Portfolio",
   description: "Underwater & nature photography — searchable image library",
 };
 
@@ -89,7 +89,7 @@ export default async function RootLayout({
           </h1>
           <p className="page-subtitle mt-[4px]">Underwater Photography by Nick Chow</p>
           <nav className="mt-4 flex justify-center gap-6">
-            <Link href="/gallery" className="nav-link">Gallery</Link>
+            <Link href="/portfolio" className="nav-link">Portfolio</Link>
             {showLocations && (
               <Link href="/map" className="nav-link">Map</Link>
             )}

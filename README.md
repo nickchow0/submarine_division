@@ -24,7 +24,7 @@ A password-protected underwater photography portfolio. Visitors search and brows
 
 ## 1. What this site does
 
-From the outside, this is a photo gallery. The interesting engineering is in the layers underneath:
+From the outside, this is a photo portfolio. The interesting engineering is in the layers underneath:
 
 - A **password gate** that blocks every page before any HTML is served — implemented in Edge Middleware so nothing leaks, not even the page title.
 - **Client-side fuzzy search** that indexes every photo by title, tags, AI-generated captions, location, and all EXIF metadata — zero network round-trips per keystroke.
@@ -64,7 +64,7 @@ graph LR
 
 **Sanity is the single source of truth for all content and images.** It stores documents, manages binary assets (original JPEGs), and serves images from its CDN with on-the-fly resizing. Having the CMS and the image CDN in the same system means there's no separate image host to manage, no signed URL strategy, and no second storage bucket. When a photo is uploaded through the admin panel, it goes into Sanity and every part of the application — galleries, maps, captions — has immediate access to both the document and the asset.
 
-**Next.js's rendering model maps directly onto this site's content patterns.** The gallery page and photo detail pages don't change every second — they change when a photo is uploaded. Incremental Static Regeneration (ISR) means these pages are pre-rendered as static HTML and cached at Vercel's edge, but automatically re-rendered in the background when Sanity data changes. The result is a page that loads as fast as a static site but stays fresh within 60 seconds of a content change — no manual cache invalidation or rebuild triggers.
+**Next.js's rendering model maps directly onto this site's content patterns.** The portfolio page and photo detail pages don't change every second — they change when a photo is uploaded. Incremental Static Regeneration (ISR) means these pages are pre-rendered as static HTML and cached at Vercel's edge, but automatically re-rendered in the background when Sanity data changes. The result is a page that loads as fast as a static site but stays fresh within 60 seconds of a content change — no manual cache invalidation or rebuild triggers.
 
 **Vercel is the native deployment target for Next.js.** Edge Middleware, ISR, and Server Components all have first-class support without configuration. The password gate runs as Edge Middleware, which executes at the CDN level before the request hits the Next.js runtime — so unauthenticated visitors are redirected without ever reaching application code, leaking HTML, or hitting the Sanity API.
 
@@ -73,7 +73,7 @@ graph LR
 | Route         | Strategy             | Why                                                         |
 | ------------- | -------------------- | ----------------------------------------------------------- |
 | `/` (landing) | Static (SSG)         | Hero photos never change between deployments                |
-| `/gallery`    | ISR, 60 s revalidate | Updates within a minute of a new photo upload               |
+| `/portfolio`    | ISR, 60 s revalidate | Updates within a minute of a new photo upload               |
 | `/photo/[id]` | ISR, 60 s revalidate | Same — plus generates dynamic Open Graph metadata per photo |
 | `/map`        | ISR                  | Dive locations change infrequently                          |
 | `/about`      | Static (SSG)         | Never changes                                               |
@@ -98,7 +98,7 @@ No-code/low-code platforms. Fast for standard portfolios, but the entire point o
 
 **Ghost**
 
-Ghost is excellent for text-heavy content (newsletters, blogs). Its media management is minimal and not designed for browsable photo galleries with EXIF metadata.
+Ghost is excellent for text-heavy content (newsletters, blogs). Its media management is minimal and not designed for browsable photo portfolios with EXIF metadata.
 
 **Gatsby + Contentful**
 
@@ -142,7 +142,7 @@ The decisive factor for Sanity was that it solves three problems simultaneously:
 | **Postgres full-text search** | ~50–150 ms                | Requires a database | Limited                 | Not chosen |
 | **Typesense (self-hosted)**   | ~20–50 ms                 | Server cost         | Yes                     | Not chosen |
 
-The corpus is measured in hundreds of photos, not millions. The entire dataset fits in browser memory without noticeable impact. Client-side search with Fuse.js eliminates network latency entirely — the index is built once when the gallery mounts, and every subsequent search is synchronous. At the scale of a portfolio, the operational simplicity (no search service to manage) outweighs the marginal quality advantage of a dedicated search provider.
+The corpus is measured in hundreds of photos, not millions. The entire dataset fits in browser memory without noticeable impact. Client-side search with Fuse.js eliminates network latency entirely — the index is built once when the portfolio mounts, and every subsequent search is synchronous. At the scale of a portfolio, the operational simplicity (no search service to manage) outweighs the marginal quality advantage of a dedicated search provider.
 
 ---
 
@@ -284,7 +284,7 @@ flowchart TB
         PUB3["AI captions\nvisible/hidden on photo pages"]
         PUB4["Upload auto-captions\non/off"]
         PUB5["Maintenance page\nfor unauthenticated visitors"]
-        PUB6["Gallery content\nphoto visible/hidden"]
+        PUB6["Portfolio content\nphoto visible/hidden"]
         PUB7["Dive map pins\nand their photos"]
     end
 
@@ -299,7 +299,7 @@ flowchart TB
 
 ### How each setting changes the public site
 
-**`requirePassword`** — Read by Edge Middleware on every unauthenticated request. When `false`, the middleware skips the redirect to `/password` and lets the visitor through to the gallery directly. The middleware caches this value for 60 seconds per worker instance to avoid a Sanity API call on every request.
+**`requirePassword`** — Read by Edge Middleware on every unauthenticated request. When `false`, the middleware skips the redirect to `/password` and lets the visitor through to the portfolio directly. The middleware caches this value for 60 seconds per worker instance to avoid a Sanity API call on every request.
 
 ```
 requirePassword: true  → every visitor hits /password before seeing anything
@@ -308,7 +308,7 @@ requirePassword: false → site is open, no password needed (e.g. during a job s
 
 **`showLocations`** — Controls whether the `/map` route is linked in the navigation and accessible. Useful if the map is incomplete or under construction — you can hide it from visitors without removing the route from the codebase.
 
-**`showCaptions`** — Controls whether `aiCaption` text is rendered on individual photo pages and gallery modals. Captions are always stored in Sanity regardless of this setting; this is purely a display flag. The photographer might disable captions if the AI descriptions for a batch of photos need review before being shown publicly.
+**`showCaptions`** — Controls whether `aiCaption` text is rendered on individual photo pages and portfolio modals. Captions are always stored in Sanity regardless of this setting; this is purely a display flag. The photographer might disable captions if the AI descriptions for a batch of photos need review before being shown publicly.
 
 **`autoGenerateCaptions`** — When `true`, the admin panel automatically calls `/api/admin/captions` after every successful photo upload, triggering the Claude vision pipeline. When `false`, captions must be generated manually via the "Generate Caption" button or the bulk action. Useful to toggle off when uploading a large batch — generate captions once at the end rather than making one Claude API call per upload.
 
@@ -365,7 +365,7 @@ The admin photo list supports inline editing of every metadata field. When the p
 
 This pattern keeps the editing experience fast on slow connections — the photographer sees the change instantly and the network request happens in the background.
 
-The `visible` toggle works the same way. Setting a photo to hidden (`visible: false`) patches the Sanity document and the photo disappears from the local admin list immediately. The public gallery picks up the change on the next ISR cycle (within 60 seconds).
+The `visible` toggle works the same way. Setting a photo to hidden (`visible: false`) patches the Sanity document and the photo disappears from the local admin list immediately. The public portfolio picks up the change on the next ISR cycle (within 60 seconds).
 
 ---
 
@@ -442,7 +442,7 @@ flowchart LR
     TAG -->|"exact filter\nafter search"| GRID
 ```
 
-The GROQ query fetches every visible photo with every field — title, tags, aiCaption, location, camera, lens, focalLength, aperture, shutterSpeed, iso, dateTaken — and embeds the full JSON payload in the initial HTML. When the gallery component mounts, it builds a Fuse.js index once (via `useMemo`) and all subsequent searches are synchronous in-memory lookups.
+The GROQ query fetches every visible photo with every field — title, tags, aiCaption, location, camera, lens, focalLength, aperture, shutterSpeed, iso, dateTaken — and embeds the full JSON payload in the initial HTML. When the portfolio component mounts, it builds a Fuse.js index once (via `useMemo`) and all subsequent searches are synchronous in-memory lookups.
 
 **Search weights reflect editorial trust:**
 
@@ -554,11 +554,11 @@ The `/map` page is gated by the `showLocations` feature flag — if disabled in 
 
 Two test layers with different purposes:
 
-**Vitest (unit + component)** — Tests logic and components in isolation, without a running server. Fast (~1 s total). Covers the search index (Fuse.js configuration, query results, scoring), the image loader (URL parameter construction, 2000px width cap), GA4 event helpers, middleware authentication logic, and React components (gallery filter state, search bar input, tag selection).
+**Vitest (unit + component)** — Tests logic and components in isolation, without a running server. Fast (~1 s total). Covers the search index (Fuse.js configuration, query results, scoring), the image loader (URL parameter construction, 2000px width cap), GA4 event helpers, middleware authentication logic, and React components (portfolio filter state, search bar input, tag selection).
 
-**Playwright (end-to-end)** — Tests the full application with a real browser against a real Next.js dev server. Covers the password gate redirect, gallery search and filtering, photo modal interaction, keyboard navigation, and individual photo pages. Slower (~60 s), but catches integration bugs that unit tests miss.
+**Playwright (end-to-end)** — Tests the full application with a real browser against a real Next.js dev server. Covers the password gate redirect, portfolio search and filtering, photo modal interaction, keyboard navigation, and individual photo pages. Slower (~60 s), but catches integration bugs that unit tests miss.
 
-One non-obvious detail: the auth E2E test must use `storageState: { cookies: [], origins: [] }` (an explicit empty object) rather than `storageState: undefined`. In Playwright 1.58, `undefined` falls through to the project-level default (the saved auth cookie), so the browser silently arrives at the gallery already authenticated — and the redirect assertion fails. An empty object is the correct way to opt out of a project-level storage state.
+One non-obvious detail: the auth E2E test must use `storageState: { cookies: [], origins: [] }` (an explicit empty object) rather than `storageState: undefined`. In Playwright 1.58, `undefined` falls through to the project-level default (the saved auth cookie), so the browser silently arrives at the portfolio already authenticated — and the redirect assertion fails. An empty object is the correct way to opt out of a project-level storage state.
 
 ---
 
@@ -610,7 +610,7 @@ submarine_division_website/
 └── web/                             # Next.js application
     ├── app/
     │   ├── page.tsx                 # Landing page (hero carousel, SSG)
-    │   ├── gallery/page.tsx         # Gallery (ISR, 60 s)
+    │   ├── portfolio/page.tsx         # Portfolio (ISR, 60 s)
     │   ├── photo/[id]/page.tsx      # Photo detail (ISR, OG metadata)
     │   ├── map/page.tsx             # Interactive dive map (ISR)
     │   ├── about/page.tsx           # About page (SSG)
@@ -629,7 +629,7 @@ submarine_division_website/
     │       └── generate-caption/    # Sanity webhook handler
     │
     ├── components/
-    │   ├── Gallery.tsx              # Search, filter, photo grid, modal (client)
+    │   ├── Portfolio.tsx              # Search, filter, photo grid, modal (client)
     │   ├── AdminDashboard.tsx       # Photo list, upload, settings panel (client)
     │   └── ...
     │

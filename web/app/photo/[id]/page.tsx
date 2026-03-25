@@ -22,7 +22,7 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
-// Revalidate every 60 seconds, matching the gallery page
+// Revalidate every 60 seconds, matching the portfolio page
 export const revalidate = 60;
 
 // Dynamic metadata for SEO / link previews
@@ -64,7 +64,7 @@ export default async function PhotoPage({ params }: Props) {
         {/* Navigation bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
-            href="/gallery"
+            href="/portfolio"
             className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
           >
             <svg
@@ -80,7 +80,7 @@ export default async function PhotoPage({ params }: Props) {
                 d="M15.75 19.5L8.25 12l7.5-7.5"
               />
             </svg>
-            Back to gallery
+            Back to portfolio
           </Link>
 
           <div className="flex items-center gap-3">

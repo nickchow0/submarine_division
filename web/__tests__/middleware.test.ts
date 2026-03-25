@@ -35,14 +35,14 @@ describe("middleware – requirePassword bypass", () => {
   it("redirects to /password when no cookie and requirePassword is true", async () => {
     mockSanityFetch(true);
     const { middleware } = await import("@/middleware");
-    const response = await middleware(makeRequest("/gallery"));
+    const response = await middleware(makeRequest("/portfolio"));
     expect(response.headers.get("location")).toContain("/password");
   });
 
   it("allows through when no cookie and requirePassword is false", async () => {
     mockSanityFetch(false);
     const { middleware } = await import("@/middleware");
-    const response = await middleware(makeRequest("/gallery"));
+    const response = await middleware(makeRequest("/portfolio"));
     expect(response.headers.get("location")).toBeNull();
   });
 
@@ -50,7 +50,7 @@ describe("middleware – requirePassword bypass", () => {
     const fetchSpy = vi.spyOn(global, "fetch");
     const { middleware } = await import("@/middleware");
     const response = await middleware(
-      makeRequest("/gallery", { site_access: "granted" }),
+      makeRequest("/portfolio", { site_access: "granted" }),
     );
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBeNull();
@@ -61,8 +61,8 @@ describe("middleware – requirePassword bypass", () => {
     const { middleware } = await import("@/middleware");
 
     // Two requests — Sanity should only be called once (second hits cache)
-    await middleware(makeRequest("/gallery"));
-    await middleware(makeRequest("/gallery"));
+    await middleware(makeRequest("/portfolio"));
+    await middleware(makeRequest("/portfolio"));
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
@@ -71,9 +71,9 @@ describe("middleware – requirePassword bypass", () => {
     const fetchSpy = mockSanityFetch(true);
     const { middleware } = await import("@/middleware");
 
-    await middleware(makeRequest("/gallery"));
+    await middleware(makeRequest("/portfolio"));
     vi.advanceTimersByTime(61_000); // expire the cache
-    await middleware(makeRequest("/gallery"));
+    await middleware(makeRequest("/portfolio"));
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
@@ -81,7 +81,7 @@ describe("middleware – requirePassword bypass", () => {
   it("defaults to requiring password when the Sanity fetch fails", async () => {
     vi.spyOn(global, "fetch").mockRejectedValue(new Error("network error"));
     const { middleware } = await import("@/middleware");
-    const response = await middleware(makeRequest("/gallery"));
+    const response = await middleware(makeRequest("/portfolio"));
     expect(response.headers.get("location")).toContain("/password");
   });
 

@@ -1,7 +1,7 @@
 "use client";
 
 // ─── TagFilter ────────────────────────────────────────────────────────────────
-// Renders a row of clickable tag pills. Clicking a tag filters the gallery
+// Renders a row of clickable tag pills. Clicking a tag filters the portfolio
 // to photos with that tag. Clicking the active tag deselects it.
 
 type Props = {

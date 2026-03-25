@@ -14,7 +14,7 @@ export type Photo = {
   iso: string | null;
   shutterSpeed: string | null;
   aperture: string | null;
-  visible: boolean; // false = hidden from gallery (default true)
+  visible: boolean; // false = hidden from portfolio (default true)
 
   // Image fields projected from the Sanity asset
   src: string; // Full CDN URL from Sanity
@@ -71,7 +71,7 @@ export type SiteSettings = {
   requirePassword: boolean; // when false, password gate is disabled and site is public
   showLocations: boolean; // show map/locations page in nav
   maintenanceMode: boolean; // replace public site with maintenance page
-  showCaptions: boolean; // show AI captions in the gallery, modal, and photo page
+  showCaptions: boolean; // show AI captions in the portfolio, modal, and photo page
   autoGenerateCaptions: boolean; // auto-generate AI caption when a photo is uploaded
   bodyFont: string | null; // Google Fonts family name for the body font, null = CSS default
 };
