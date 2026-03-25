@@ -179,7 +179,7 @@ export default function PhotoModal({
               {photo.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-400"
+                  className="tag-badge"
                 >
                   {tag}
                 </span>

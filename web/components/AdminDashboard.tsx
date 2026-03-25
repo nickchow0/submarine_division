@@ -14,6 +14,7 @@ import BulkOperations from "@/components/admin/BulkOperations";
 import PhotoTable from "@/components/admin/PhotoTable";
 import PhotoEditModal from "@/components/admin/PhotoEditModal";
 import SettingsPanel from "@/components/admin/SettingsPanel";
+import FontPreviewer from "@/components/admin/FontPreviewer";
 
 type Props = {
   initialPhotos: AdminPhoto[];
@@ -125,18 +126,14 @@ export default function AdminDashboard({
       <div className="flex items-center justify-between mb-10">
         <div>
           <h2
-            style={{ fontFamily: "'Italiana', serif" }}
-            className="text-3xl text-sky-400 tracking-wider"
+            className="admin-page-title"
           >
             Admin
           </h2>
-          <p className="text-slate-500 text-sm mt-0.5">SubmarineDivision</p>
+          <p className="page-subtitle">SubmarineDivision</p>
         </div>
         <div className="flex items-center gap-4">
-          <a
-            href="/admin/locations"
-            className="text-sm text-slate-400 hover:text-sky-400 transition-colors"
-          >
+          <a href="/admin/locations" className="nav-link">
             Locations
           </a>
           <button
@@ -365,6 +362,9 @@ export default function AdminDashboard({
         settingsFeedback={settings.settingsFeedback}
         onToggle={settings.toggleSetting}
       />
+
+      {/* Font previewer */}
+      <FontPreviewer />
     </div>
   );
 }

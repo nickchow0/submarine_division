@@ -37,8 +37,7 @@ export default function PasswordPage() {
       <div className="w-full max-w-sm mx-4 text-center">
         {/* Title */}
         <h1
-          style={{ fontFamily: "'Italiana', serif" }}
-          className="text-4xl font-normal tracking-wider text-sky-400 mb-2"
+          className="font-title text-4xl font-normal tracking-wider text-sky-400 mb-2"
         >
           SubmarineDivision
         </h1>

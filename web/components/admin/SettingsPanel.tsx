@@ -18,17 +18,12 @@ export default function SettingsPanel({
   return (
     <div className="mt-16 border-t border-slate-800 pt-10">
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-slate-300 text-sm font-semibold uppercase tracking-widest">
-          Experiments
-        </h3>
+        <h3 className="section-label">Experiments</h3>
         {settingsFeedback && (
           <span className="text-xs text-sky-400">{settingsFeedback}</span>
         )}
       </div>
-      <p className="text-slate-600 text-xs mb-6">
-        Feature flags that control behaviour across the public site. Changes
-        take effect immediately.
-      </p>
+      <p className="section-description mb-6">Feature flags that control behaviour across the public site. Changes take effect immediately.</p>
 
       <div className="space-y-3">
         {(

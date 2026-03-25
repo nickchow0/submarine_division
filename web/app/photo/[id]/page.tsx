@@ -199,7 +199,7 @@ export default async function PhotoPage({ params }: Props) {
               {photo.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-400"
+                  className="tag-badge"
                 >
                   {tag}
                 </span>

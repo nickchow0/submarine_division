@@ -1,5 +1,8 @@
 {
   "permissions": {
-    "allow": ["Bash(*)"]
+    "allow": [
+      "Bash(*)",
+      "mcp__ide__getDiagnostics"
+    ]
   }
 }

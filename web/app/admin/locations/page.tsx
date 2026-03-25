@@ -145,12 +145,11 @@ export default function AdminLocationsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2
-              style={{ fontFamily: "'Italiana', serif" }}
-              className="text-3xl text-sky-400 tracking-wider"
+              className="admin-page-title"
             >
               Locations
             </h2>
-            <p className="text-slate-500 text-sm mt-0.5">
+            <p className="page-subtitle">
               Click the map to place a pin, then assign photos to it.
             </p>
           </div>
