@@ -16,7 +16,7 @@ body {
 /* Smooth scrolling + base font size */
 html {
   scroll-behavior: smooth;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 /* ─── Page transition ──────────────────────────────────────────────────────── */
