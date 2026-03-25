@@ -73,6 +73,7 @@ export type SiteSettings = {
   maintenanceMode: boolean; // replace public site with maintenance page
   showCaptions: boolean; // show AI captions in the gallery, modal, and photo page
   autoGenerateCaptions: boolean; // auto-generate AI caption when a photo is uploaded
+  bodyFont: string | null; // Google Fonts family name for the body font, null = CSS default
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -81,6 +82,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   maintenanceMode: false,
   showCaptions: false,
   autoGenerateCaptions: true,
+  bodyFont: null,
 };
 
 // ─── Sanity webhook payload ───────────────────────────────────────────────────

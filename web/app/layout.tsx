@@ -11,10 +11,12 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
 import ImageProtection from "@/components/ImageProtection";
+import FontSessionApplier from "@/components/FontSessionApplier";
 import PageTransition from "@/components/PageTransition";
 import Analytics from "@/components/Analytics";
 import { sanityWriteClient, SITE_SETTINGS_QUERY } from "@/lib/sanity";
 import { DEFAULT_SETTINGS, type SiteSettings } from "@/types";
+import { FONTS } from "@/lib/fonts";
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
@@ -34,7 +36,8 @@ export default async function RootLayout({
       .catch(() => null),
   ]);
   const isAdmin = cookieStore.get("admin_access")?.value === "granted";
-  const { showLocations, maintenanceMode } = settings ?? DEFAULT_SETTINGS;
+  const { showLocations, maintenanceMode, bodyFont } = settings ?? DEFAULT_SETTINGS;
+  const activeFont = bodyFont ? FONTS.find(f => f.family === bodyFont) ?? null : null;
 
   // Maintenance mode — show a placeholder instead of the site,
   // but admin users can still navigate normally.
@@ -43,7 +46,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Fonts — Cormorant Garamond (body) + Italiana (title) */}
+        {/* Google Fonts — body font (from settings or CSS default) + Italiana (title) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -51,7 +54,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Italiana&display=swap"
+          href={`https://fonts.googleapis.com/css2?family=${activeFont?.googleFamily ?? 'Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400'}&family=Italiana&display=swap`}
           rel="stylesheet"
         />
         {/* Leaflet CSS — served from /public so it works without postcss-import.
@@ -59,7 +62,7 @@ export default async function RootLayout({
             and CSS imports inside next/dynamic chunks are unreliable. */}
         <link rel="stylesheet" href="/leaflet.css" />
       </head>
-      <body className="min-h-screen">
+      <body className="min-h-screen" style={activeFont ? { fontFamily: activeFont.stack } : undefined}>
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
             <Script
@@ -78,6 +81,7 @@ export default async function RootLayout({
           </>
         )}
         <ImageProtection />
+        <FontSessionApplier />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
           <h1 className="font-title text-[24px] leading-[32px] sm:text-[30px] sm:leading-[36px] md:text-[36px] md:leading-[40px] lg:text-[48px] lg:leading-[48px] font-normal tracking-tight sm:tracking-wider">

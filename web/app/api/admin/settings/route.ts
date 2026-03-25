@@ -28,20 +28,20 @@ export async function PATCH(req: Request) {
   try {
     const body = (await req.json()) as Partial<SiteSettings>;
 
-    // Only allow known boolean keys through
-    const allowed: (keyof SiteSettings)[] = [
-      "requirePassword",
-      "showLocations",
-      "maintenanceMode",
-      "showCaptions",
-      "autoGenerateCaptions",
-    ];
-
     const updates: Partial<SiteSettings> = {};
-    for (const key of allowed) {
+
+    const booleanKeys: (keyof SiteSettings)[] = [
+      "requirePassword", "showLocations", "maintenanceMode",
+      "showCaptions", "autoGenerateCaptions",
+    ];
+    for (const key of booleanKeys) {
       if (key in body && typeof body[key] === "boolean") {
-        updates[key] = body[key];
+        updates[key] = body[key] as boolean;
       }
+    }
+
+    if ("bodyFont" in body && (typeof body.bodyFont === "string" || body.bodyFont === null)) {
+      updates.bodyFont = body.bodyFont;
     }
 
     // createOrReplace with a fixed _id creates the singleton if it doesn't exist yet,
