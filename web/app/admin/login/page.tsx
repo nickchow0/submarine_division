@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-black px-4">
       <div className="w-full max-w-sm">
         <h1
-          className="font-title text-3xl text-sky-400 text-center mb-2 tracking-wider"
+          className="font-title text-[30px] text-sky-400 text-center mb-2 tracking-wider"
         >
           Admin
         </h1>

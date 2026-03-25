@@ -10,14 +10,13 @@
 body {
   background-color: #000000;
   color: #e2e8f0;
-  font-family:
-    "Cormorant Garamond",
-    serif;
+  font-family: "Cormorant Garamond", serif;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling + base font size */
 html {
   scroll-behavior: smooth;
+  font-size: 18px;
 }
 
 /* ─── Page transition ──────────────────────────────────────────────────────── */
@@ -57,23 +56,23 @@ html {
 /* Page/section heading in admin (Italiana, sky-400) */
 .admin-page-title {
   font-family: "Italiana", serif;
-  font-size: 1.875rem; /* text-3xl */
-  color: #38bdf8;      /* text-sky-400 */
+  font-size: 30px; /* text-3xl at 16px base */
+  color: #38bdf8; /* text-sky-400 */
   letter-spacing: 0.05em; /* tracking-wider */
 }
 
 /* Muted tagline beneath a page title */
 .page-subtitle {
   font-size: 0.875rem; /* text-sm */
-  color: #64748b;      /* text-slate-500 */
-  margin-top: 0.125rem; /* mt-0.5 */
+  color: #64748b; /* text-slate-500 */
+  margin-top: 2px;
 }
 
 /* ALL-CAPS section label (e.g. "Experiments", "Font Preview") */
 .section-label {
-  font-size: 0.875rem;   /* text-sm */
-  font-weight: 600;      /* font-semibold */
-  color: #cbd5e1;        /* text-slate-300 */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 600; /* font-semibold */
+  color: #cbd5e1; /* text-slate-300 */
   text-transform: uppercase;
   letter-spacing: 0.1em; /* tracking-widest */
 }
@@ -81,26 +80,26 @@ html {
 /* Dim helper text beneath a section label */
 .section-description {
   font-size: 0.75rem; /* text-xs */
-  color: #475569;     /* text-slate-600 */
+  color: #475569; /* text-slate-600 */
 }
 
 /* Nav / inline text link */
 .nav-link {
   font-size: 0.875rem; /* text-sm */
-  color: #94a3b8;      /* text-slate-400 */
+  color: #94a3b8; /* text-slate-400 */
   transition: color 0.15s;
 }
 .nav-link:hover {
-  color: #38bdf8;      /* text-sky-400 */
+  color: #38bdf8; /* text-sky-400 */
 }
 
 /* Photo tag pill */
 .tag-badge {
-  font-size: 0.75rem;        /* text-xs */
+  font-size: 0.75rem; /* text-xs */
   padding: 0.125rem 0.625rem; /* py-0.5 px-2.5 */
-  border-radius: 9999px;      /* rounded-full */
+  border-radius: 9999px; /* rounded-full */
   background-color: rgb(14 165 233 / 0.15); /* bg-sky-500/15 */
-  color: #38bdf8;             /* text-sky-400 */
+  color: #38bdf8; /* text-sky-400 */
 }
 
 /* Remove default button focus outline on mouse click (keep for keyboard) */

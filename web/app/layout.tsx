@@ -80,10 +80,10 @@ export default async function RootLayout({
         <ImageProtection />
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
-          <h1 className="font-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight sm:tracking-wider">
+          <h1 className="font-title text-[24px] leading-[32px] sm:text-[30px] sm:leading-[36px] md:text-[36px] md:leading-[40px] lg:text-[48px] lg:leading-[48px] font-normal tracking-tight sm:tracking-wider">
             <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors">SubmarineDivision</Link>
           </h1>
-          <p className="page-subtitle mt-1">Underwater Photography by Nick Chow</p>
+          <p className="page-subtitle mt-[4px]">Underwater Photography by Nick Chow</p>
           <nav className="mt-4 flex justify-center gap-6">
             <Link href="/gallery" className="nav-link">Gallery</Link>
             {showLocations && (
@@ -104,7 +104,7 @@ export default async function RootLayout({
         {/* ── Page content ── */}
         {showMaintenance ? (
           <div className="flex flex-col items-center justify-center py-40 text-center px-4">
-            <p className="font-title text-4xl text-sky-400 mb-4">Coming soon</p>
+            <p className="font-title text-[36px] text-sky-400 mb-4">Coming soon</p>
             <p className="text-slate-500 text-sm max-w-xs">We&apos;re working on something new. Check back soon.</p>
           </div>
         ) : (
