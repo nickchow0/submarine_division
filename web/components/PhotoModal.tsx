@@ -59,37 +59,9 @@ export default function PhotoModal({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-6 md:p-10"
+      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-2 sm:p-6 md:p-10"
       onClick={onClose}
     >
-      {/* Prev arrow — outside the panel, floating over backdrop */}
-      {prevId && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate(prevId);
-          }}
-          className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors p-2 z-10"
-          aria-label="Previous photo"
-        >
-          <ChevronLeftIcon className="w-7 h-7" />
-        </button>
-      )}
-
-      {/* Next arrow — outside the panel, floating over backdrop */}
-      {nextId && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate(nextId);
-          }}
-          className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors p-2 z-10"
-          aria-label="Next photo"
-        >
-          <ChevronRightIcon className="w-7 h-7" />
-        </button>
-      )}
-
       {/* Hidden prefetch images for the next 3 photos */}
       {prefetchPhotos.map((p) => (
         <div
@@ -100,8 +72,8 @@ export default function PhotoModal({
             top: 0,
             left: 0,
             aspectRatio: `${p.width} / ${p.height}`,
-            maxHeight: "calc(90dvh - 300px)",
-            width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * (90dvh - 300px)))`,
+            maxHeight: "calc(90dvh - 240px)",
+            width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * (90dvh - 150px)))`,
             visibility: "hidden",
             pointerEvents: "none",
           }}
@@ -121,17 +93,47 @@ export default function PhotoModal({
         className="relative bg-[#000000] rounded-xl w-full max-w-5xl max-h-[90dvh] flex flex-col overflow-hidden shadow-2xl border border-white/10"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Close button ── */}
-        <button
-          onClick={onClose}
-          className="absolute top-3.5 right-4 z-10 text-slate-500 hover:text-white transition-colors"
-          aria-label="Close"
-        >
-          <XIcon className="w-5 h-5" />
-        </button>
+        {/* ── Top bar: prev / next + close ── */}
+        <div className="shrink-0 flex items-center justify-between px-2 pt-2 pb-1">
+          <div className="flex items-center">
+            {prevId ? (
+              <button
+                onClick={() => onNavigate(prevId)}
+                className="p-2 text-slate-400 hover:text-white transition-colors"
+                aria-label="Previous photo"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+            ) : (
+              <span className="p-2 text-slate-700">
+                <ChevronLeftIcon className="w-5 h-5" />
+              </span>
+            )}
+            {nextId ? (
+              <button
+                onClick={() => onNavigate(nextId)}
+                className="p-2 text-slate-400 hover:text-white transition-colors"
+                aria-label="Next photo"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            ) : (
+              <span className="p-2 text-slate-700">
+                <ChevronRightIcon className="w-5 h-5" />
+              </span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 text-slate-500 hover:text-white transition-colors"
+            aria-label="Close"
+          >
+            <XIcon className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* ── Photo ── */}
-        <div className="flex-1 min-h-0 flex items-center justify-center px-8 pt-12 pb-8">
+        <div className="flex-1 min-h-0 flex items-center justify-center px-4 pt-2 pb-3 sm:px-8 sm:pb-8">
           {/* Aspect-ratio wrapper reserves the exact photo space before the image
               loads so the modal never jumps in size. Width is the smaller of
               (a) the available flex width and (b) the width implied by maxHeight
@@ -141,8 +143,8 @@ export default function PhotoModal({
             className="relative overflow-hidden photo-fade-in bg-slate-900"
             style={{
               aspectRatio: `${photo.width} / ${photo.height}`,
-              maxHeight: "calc(90dvh - 300px)",
-              width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * (90dvh - 300px)))`,
+              maxHeight: "calc(90dvh - 240px)",
+              width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * (90dvh - 240px)))`,
             }}
           >
             <Image
@@ -163,12 +165,12 @@ export default function PhotoModal({
 
         {/* ── Metadata strip (bottom) ── */}
         <div
-          className="shrink-0 px-7 pb-6 pt-4 space-y-2.5"
+          className="shrink-0 px-4 sm:px-7 pb-4 sm:pb-6 pt-3 sm:pt-4 space-y-2.5 overflow-y-auto max-h-[35vmin] sm:max-h-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Caption */}
           {showCaptions && photo.aiCaption && (
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
               {photo.aiCaption}
             </p>
           )}
@@ -189,7 +191,7 @@ export default function PhotoModal({
 
           {/* Location / date */}
           {(photo.location || photo.dateTaken) && (
-            <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500">
+            <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs sm:text-sm text-slate-500">
               {photo.location && (
                 <span className="flex items-center gap-1.5">
                   <svg
@@ -226,7 +228,7 @@ export default function PhotoModal({
 
           {/* EXIF */}
           {hasExif && (
-            <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500 border-t border-slate-800 pt-2.5">
+            <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs sm:text-sm text-slate-500 border-t border-slate-800 pt-2.5">
               {photo.camera && (
                 <span className="flex items-center gap-1.5">
                   <svg
@@ -259,6 +261,7 @@ export default function PhotoModal({
           )}
 
         </div>
+
       </div>
     </div>
   );

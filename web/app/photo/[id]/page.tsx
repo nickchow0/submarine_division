@@ -169,8 +169,8 @@ export default async function PhotoPage({ params }: Props) {
           className="relative mx-auto overflow-hidden photo-fade-in"
           style={{
             aspectRatio: `${photo.width} / ${photo.height}`,
-            maxHeight: "80vh",
-            width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * 80vh))`,
+            maxHeight: "90dvh",
+            width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * 90dvh))`,
           }}
         >
           <Image

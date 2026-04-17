@@ -15,7 +15,11 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "anthropic.claude-code",
+        "burkeholland.simple-react-snippets",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github"
       ]
     }
   }
