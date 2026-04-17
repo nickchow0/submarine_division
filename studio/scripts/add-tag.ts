@@ -1,10 +1,10 @@
 // ─── Add a tag to all photos ──────────────────────────────────────────────────
 // Usage:  npx tsx scripts/add-tag.ts "truk lagoon"
 
-import { createClient } from '@sanity/client'
+import {createClient} from '@sanity/client'
 import * as dotenv from 'dotenv'
 
-dotenv.config({ path: '.env.local' })
+dotenv.config({path: '.env.local'})
 
 const sanity = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -25,7 +25,7 @@ async function main() {
   // Fetch all photos that don't already have this tag
   const photos = await sanity.fetch(
     `*[_type == "photo" && !($tag in coalesce(tags, []))] { _id, title, tags }`,
-    { tag: TAG }
+    {tag: TAG},
   )
 
   if (photos.length === 0) {
@@ -35,17 +35,15 @@ async function main() {
 
   console.log(`Adding "${TAG}" to ${photos.length} photo(s)…\n`)
 
+  const transaction = sanity.transaction()
+
   for (const photo of photos) {
-    process.stdout.write(`  "${photo.title}"… `)
-    await sanity
-      .patch(photo._id)
-      .setIfMissing({ tags: [] })
-      .append('tags', [TAG])
-      .commit()
-    console.log('✅')
+    transaction.patch(photo._id).setIfMissing({tags: []}).append('tags', [TAG])
   }
 
-  console.log(`\nDone.`)
+  await transaction.commit()
+
+  console.log(`\nDone. Updated ${photos.length} photos in a single transaction.`)
 }
 
 main().catch(console.error)

@@ -9,12 +9,12 @@
 // Requirements:
 //   - .env.local must be set up with ANTHROPIC_API_KEY and SANITY_WRITE_TOKEN
 
-import { createClient } from '@sanity/client'
+import {createClient} from '@sanity/client'
 import Anthropic from '@anthropic-ai/sdk'
 import * as dotenv from 'dotenv'
 
 // Load .env.local so this script can run outside of Next.js
-dotenv.config({ path: '.env.local' })
+dotenv.config({path: '.env.local'})
 
 const sanity = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -33,11 +33,12 @@ const anthropic = new Anthropic({
 function buildImageUrl(ref: string): string {
   const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
   const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production'
-  // ref format: "image-{id}-{WxH}-{format}"
-  const parts = ref.split('-')
-  const id = parts[1]
-  const format = parts[parts.length - 1]
-  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${id}.${format}?w=1200&q=85`
+  // ref format:  "image-{id}-{WxH}-{format}"
+  const withoutPrefix = ref.replace(/^image-/, '')
+  const lastDash = withoutPrefix.lastIndexOf('-')
+  const nameWithDims = withoutPrefix.slice(0, lastDash)
+  const format = withoutPrefix.slice(lastDash + 1)
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${nameWithDims}.${format}?w=1200&q=85`
 }
 
 async function generateCaption(imageUrl: string): Promise<string> {
@@ -51,21 +52,30 @@ async function generateCaption(imageUrl: string): Promise<string> {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 300,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'image', source: { type: 'base64', media_type: contentType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: imageBase64 } },
-        {
-          type: 'text',
-          text: `Describe this underwater or nature photograph in 1-2 concise sentences for a searchable image library caption.
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: contentType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+              data: imageBase64,
+            },
+          },
+          {
+            type: 'text',
+            text: `Describe this underwater or nature photograph in 1-2 concise sentences for a searchable image library caption.
 
 Include as many of these as visible: subject/species, behavior or action, environment/habitat, water conditions, lighting, colors, mood.
 
 Be specific and factual. Do not use subjective phrases like "stunning" or "beautiful".
 Start directly with the subject — no preamble.`,
-        },
-      ],
-    }],
+          },
+        ],
+      },
+    ],
   })
 
   return response.content[0].type === 'text' ? response.content[0].text.trim() : ''
@@ -113,7 +123,7 @@ async function main() {
       const imageUrl = buildImageUrl(photo.imageRef)
       const caption = await generateCaption(imageUrl)
 
-      await sanity.patch(photo._id).set({ aiCaption: caption }).commit()
+      await sanity.patch(photo._id).set({aiCaption: caption}).commit()
 
       console.log(`✅`)
       console.log(`    "${caption.slice(0, 80)}${caption.length > 80 ? '…' : ''}"\n`)
@@ -121,7 +131,6 @@ async function main() {
 
       // Rate limit: wait 1 second between requests to be kind to the API
       if (i < photos.length - 1) await sleep(1000)
-
     } catch (err) {
       console.log(`❌ Error: ${err}`)
       failed++
