@@ -4,7 +4,7 @@
 // Full-screen photo viewer overlay used by the Portfolio component.
 // No Next.js navigation — the portfolio stays mounted in the background.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
@@ -22,17 +22,32 @@ const VERTICAL_CONSTRAINT = "calc(90svh - 240px)";
 // The `photo-frame-instant` class overrides to transition:none during swipe —
 // both the class change and the new dimensions land in the same React commit,
 // so the browser never has a chance to start the transition.
-// CSS transitions don't fire on initial mount (no old value to animate from),
-// so the frame never animates when the modal first opens.
+//
+// The inner <div> is NOT keyed by photo._id. Key-remounting creates a new <img>
+// element which is blank for 1 frame while the browser decodes the image (even
+// from cache), causing an intermittent black flash. Updating src in-place keeps
+// the old image visible until the new one is decoded — no flash.
+// The fade animation is re-triggered manually via useLayoutEffect instead.
 function CurrentPhotoFrame({ photo }: { photo: Photo }) {
   const ratio = photo.width / photo.height;
-  // Read synchronously during render — plain module variable, not a React ref
+  // Read during render — module-level variable, not a React ref (no lint issue)
   const isSwipe = pendingSwipeNav;
-  const fadeIn = !isSwipe;
+  const imageWrapRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const el = imageWrapRef.current;
+    if (!el) return;
+    if (!pendingSwipeNav) {
+      // Button nav / initial open: restart the fade-in animation
+      el.classList.remove("photo-fade-in");
+      void el.offsetWidth; // flush so removing the class takes effect before re-adding
+      el.classList.add("photo-fade-in");
+    } else {
+      // Swipe: instant swap, ensure no stale animation
+      el.classList.remove("photo-fade-in");
+    }
     pendingSwipeNav = false;
-  }, [photo._id]);
+  }, [photo._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -44,8 +59,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
         maxHeight: VERTICAL_CONSTRAINT,
       }}
     >
-      {/* Keyed by photo ID so photo-fade-in re-triggers on every navigation */}
-      <div key={photo._id} className={`absolute inset-0 ${fadeIn ? "photo-fade-in" : ""}`}>
+      <div ref={imageWrapRef} className="absolute inset-0">
         <Image
           src={photo.src}
           alt={photo.title}
