@@ -161,6 +161,7 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
               </div>
               <button
                 onClick={() => setSelected(null)}
+                aria-label="Close"
                 className="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0 ml-2"
               >
                 <XIcon className="w-5 h-5" />

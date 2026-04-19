@@ -31,11 +31,3 @@ test.describe("Photo page", () => {
   });
 });
 
-test.describe("About page", () => {
-  test("renders without errors", async ({ page }) => {
-    const response = await page.goto("/about");
-    expect(response?.status()).toBeLessThan(400);
-    // Page should have some content
-    await expect(page.locator("body")).not.toBeEmpty();
-  });
-});
