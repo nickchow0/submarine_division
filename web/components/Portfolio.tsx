@@ -73,12 +73,6 @@ export default function Portfolio({
       ? visiblePhotos[selectedIndex + 1]
       : null;
 
-  const prevId =
-    selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
-  const nextId =
-    selectedIndex < visiblePhotos.length - 1
-      ? visiblePhotos[selectedIndex + 1]._id
-      : null;
   const prefetchPhotos = useMemo(
     () =>
       selectedIndex >= 0

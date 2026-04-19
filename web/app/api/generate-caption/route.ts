@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { sanityWriteClient } from "@/lib/sanity";
+import { sanityWriteClient, urlFor } from "@/lib/sanity";
 import type { SanityWebhookPayload } from "@/types";
 
 const anthropic = new Anthropic({
@@ -35,19 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 2. Build the image URL from the Sanity asset reference ───────────────
-    // Sanity asset refs look like: "image-abc123-1920x1080-jpg"
-    // We need to convert that to a CDN URL.
-    const ref = payload.image.asset._ref;
-    const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-    const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
-
-    // ref format:  "image-{id}-{WxH}-{format}"
-    // CDN expects: "{id}-{WxH}.{format}"  ← dimensions must stay in the filename
-    const withoutPrefix = ref.replace(/^image-/, "");
-    const lastDash = withoutPrefix.lastIndexOf("-");
-    const nameWithDims = withoutPrefix.slice(0, lastDash);
-    const format = withoutPrefix.slice(lastDash + 1);
-    const imageUrl = `https://cdn.sanity.io/images/${projectId}/${dataset}/${nameWithDims}.${format}?w=1200&q=85`;
+    const imageUrl = urlFor(payload.image.asset).width(1200).quality(85).url();
 
     // ── 3. Fetch image and convert to base64 ─────────────────────────────────
     // The Anthropic SDK requires images as base64, not URLs.

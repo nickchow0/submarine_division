@@ -7,25 +7,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { sanityClient, sanityWriteClient } from "@/lib/sanity";
-
-const PROJECT_ID = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const DATASET = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
-
-function buildImageUrl(ref: string): string {
-  const withoutPrefix = ref.replace(/^image-/, "");
-  const lastDash = withoutPrefix.lastIndexOf("-");
-  const nameWithDims = withoutPrefix.slice(0, lastDash);
-  const format = withoutPrefix.slice(lastDash + 1);
-  return `https://cdn.sanity.io/images/${PROJECT_ID}/${DATASET}/${nameWithDims}.${format}?w=1200&q=85`;
-}
+import { sanityClient, sanityWriteClient, urlFor } from "@/lib/sanity";
 
 async function generateCaption(
   photoId: string,
   imageRef: string,
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const imageUrl = buildImageUrl(imageRef);
+  const imageUrl = urlFor({ _ref: imageRef }).width(1200).quality(85).url();
   const imageRes = await fetch(imageUrl);
   if (!imageRes.ok)
     throw new Error(`Failed to fetch image: ${imageRes.status}`);

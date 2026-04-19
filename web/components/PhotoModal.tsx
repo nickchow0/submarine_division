@@ -39,7 +39,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
       el.classList.remove("photo-fade-in");
     }
     pendingSwipeNav = false;
-  }, [photo._id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [photo._id]);
 
   return (
     <div
@@ -85,28 +85,18 @@ export default function PhotoModal({
   onNavigate,
   showCaptions = false,
 }: Props) {
-  const [isNavigatingByButton, setIsNavigatingByButton] = useState(false);
-  const [isNavigatingBySwipe, setIsNavigatingBySwipe] = useState(false);
-
   const prevId = prevPhoto?._id ?? null;
   const nextId = nextPhoto?._id ?? null;
-
-  const handleButtonNavigate = (id: string) => {
-    setIsNavigatingByButton(true);
-    onNavigate(id);
-    // Duration matches the new slow transition
-    setTimeout(() => setIsNavigatingByButton(false), 1200);
-  };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && prevId) handleButtonNavigate(prevId);
-      if (e.key === "ArrowRight" && nextId) handleButtonNavigate(nextId);
+      if (e.key === "ArrowLeft" && prevId) onNavigate(prevId);
+      if (e.key === "ArrowRight" && nextId) onNavigate(nextId);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose, prevId, nextId]);
+  }, [onClose, onNavigate, prevId, nextId]);
 
   // Lock body scroll while modal is open
   useEffect(() => {
@@ -160,13 +150,11 @@ export default function PhotoModal({
     const containerWidth = trackRef.current?.offsetWidth ?? window.innerWidth;
 
     const navigate = (id: string, direction: number) => {
-      setIsNavigatingBySwipe(true);
       setIsAnimating(true);
       setSwipeOffset(direction * containerWidth);
       setTimeout(() => {
         setIsAnimating(false);
         setSwipeOffset(0);
-        setIsNavigatingBySwipe(false);
         pendingSwipeNav = true;
         onNavigate(id);
       }, 350); // Match track transition duration
@@ -264,7 +252,7 @@ export default function PhotoModal({
           <div className="flex items-center">
             {prevId ? (
               <button
-                onClick={() => handleButtonNavigate(prevId)}
+                onClick={() => onNavigate(prevId)}
                 className="p-2 text-slate-400 hover:text-white transition-colors"
                 aria-label="Previous photo"
               >
@@ -277,7 +265,7 @@ export default function PhotoModal({
             )}
             {nextId ? (
               <button
-                onClick={() => handleButtonNavigate(nextId)}
+                onClick={() => onNavigate(nextId)}
                 className="p-2 text-slate-400 hover:text-white transition-colors"
                 aria-label="Next photo"
               >

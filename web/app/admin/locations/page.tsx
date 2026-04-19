@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import AdminMapPickerWrapper from "@/components/AdminMapPickerWrapper";
+import AdminMapPicker from "@/components/AdminMapPicker";
 import type { AdminPin, PinForm, PhotoPickerItem } from "@/types";
 
 const EMPTY_FORM: PinForm = {
@@ -64,7 +64,7 @@ export default function AdminLocationsPage() {
   }
 
   // ── Start editing existing pin ───────────────────────────────────────────────
-  // Accepts PinBase so it's compatible with AdminMapPickerWrapper's onPinClick,
+  // Accepts PinBase so it's compatible with AdminMapPicker's onPinClick,
   // then looks up the full AdminPin from state to access description/photoIds.
   function startEdit(base: { _id: string }) {
     const pin = pins.find((p) => p._id === base._id);
@@ -170,7 +170,7 @@ export default function AdminLocationsPage() {
         }}
       >
         {!loading && (
-          <AdminMapPickerWrapper
+          <AdminMapPicker
             pins={pins}
             pendingCoords={pendingCoords}
             onMapClick={handleMapClick}

@@ -22,7 +22,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(wc:*)"
     ]
   }
 }
