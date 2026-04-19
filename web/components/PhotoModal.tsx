@@ -4,12 +4,54 @@
 // Full-screen photo viewer overlay used by the Portfolio component.
 // No Next.js navigation — the portfolio stays mounted in the background.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
 import { formatCamera } from "@/lib/exif";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
+
+const VERTICAL_CONSTRAINT = "calc(90dvh - 240px)";
+const SIZE_TRANSITION =
+  "width 0.6s cubic-bezier(0.16, 1, 0.3, 1), aspect-ratio 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out";
+
+// Renders the current photo with a size transition that only activates after
+// the first paint, preventing the frame from animating in from zero on open.
+function CurrentPhotoFrame({ photo }: { photo: Photo }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const ratio = photo.width / photo.height;
+
+  useLayoutEffect(() => {
+    if (ref.current) ref.current.style.transition = SIZE_TRANSITION;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div
+      ref={ref}
+      className="relative overflow-hidden bg-black shadow-2xl"
+      style={{
+        width: `calc(${ratio.toFixed(6)} * ${VERTICAL_CONSTRAINT})`,
+        maxWidth: "100%",
+        aspectRatio: `${photo.width} / ${photo.height}`,
+        maxHeight: VERTICAL_CONSTRAINT,
+      }}
+    >
+      {/* Keyed by photo ID so photo-fade-in re-triggers on every navigation */}
+      <div key={photo._id} className="absolute inset-0 photo-fade-in">
+        <Image
+          src={photo.src}
+          alt={photo.title}
+          fill
+          sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
+          className="object-contain transition-opacity duration-700 ease-in-out"
+          priority
+          placeholder={photo.blurDataURL ? "blur" : "empty"}
+          blurDataURL={photo.blurDataURL ?? undefined}
+        />
+      </div>
+    </div>
+  );
+}
 
 type Props = {
   photo: Photo;
@@ -126,27 +168,19 @@ export default function PhotoModal({
     photo.shutterSpeed ||
     photo.iso;
 
-  // Helper to render the photo frame with consistent aspect-ratio logic
-  const renderPhoto = (p: Photo, isCurrent = false, stableKey?: string) => {
-    const enter = isCurrent ? "photo-fade-in" : "";
-    const verticalConstraint = "calc(90dvh - 240px)";
+  // Renders a peek (prev/next) photo frame — no size transition needed.
+  const renderPeekPhoto = (p: Photo, stableKey: string) => {
     const ratio = p.width / p.height;
-
-    // Transitioning width alone while having aspect-ratio set in style
-    // allows the browser to resize height smoothly without the scale-like "growing" glitch.
-    const transition =
-      "width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out";
-
     return (
       <div
         key={stableKey}
-        className={`relative overflow-hidden bg-black shadow-2xl ${enter}`}
+        className="relative overflow-hidden bg-black shadow-2xl"
         style={{
-          width: `calc(${ratio.toFixed(6)} * ${verticalConstraint})`,
+          width: `calc(${ratio.toFixed(6)} * ${VERTICAL_CONSTRAINT})`,
           maxWidth: "100%",
           aspectRatio: `${p.width} / ${p.height}`,
-          maxHeight: verticalConstraint,
-          transition: isCurrent ? transition : "opacity 0.2s ease-out",
+          maxHeight: VERTICAL_CONSTRAINT,
+          transition: "opacity 0.2s ease-out",
         }}
       >
         <Image
@@ -154,8 +188,7 @@ export default function PhotoModal({
           alt={p.title}
           fill
           sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
-          className="object-contain transition-opacity duration-700 ease-in-out"
-          priority={isCurrent}
+          className="object-contain"
           placeholder={p.blurDataURL ? "blur" : "empty"}
           blurDataURL={p.blurDataURL ?? undefined}
         />
@@ -264,13 +297,13 @@ export default function PhotoModal({
                 className="absolute inset-0 flex items-center justify-center -translate-x-full px-4 sm:px-8 py-4"
                 aria-hidden="true"
               >
-                {renderPhoto(prevPhoto, false, "prev-photo")}
+                {renderPeekPhoto(prevPhoto, "prev-photo")}
               </div>
             )}
 
             {/* Current Photo */}
             <div className="relative flex items-center justify-center px-4 sm:px-8 py-4">
-              {renderPhoto(photo, true, "current-photo")}
+              <CurrentPhotoFrame photo={photo} />
             </div>
 
             {/* Next Photo (Peek) */}
@@ -279,7 +312,7 @@ export default function PhotoModal({
                 className="absolute inset-0 flex items-center justify-center translate-x-full px-4 sm:px-8 py-4"
                 aria-hidden="true"
               >
-                {renderPhoto(nextPhoto, false, "next-photo")}
+                {renderPeekPhoto(nextPhoto, "next-photo")}
               </div>
             )}
           </div>
