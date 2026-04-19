@@ -125,12 +125,21 @@ export default function PhotoModal({
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 1) return; // pinch-to-zoom — don't track swipe
     touchStartX.current = e.touches[0].clientX;
     setIsAnimating(false);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
+    if (e.touches.length > 1) {
+      // Second finger added mid-swipe — cancel the swipe and snap back
+      touchStartX.current = null;
+      setIsAnimating(true);
+      setSwipeOffset(0);
+      setTimeout(() => setIsAnimating(false), 200);
+      return;
+    }
     const delta = e.touches[0].clientX - touchStartX.current;
     setSwipeOffset(
       (delta > 0 && !prevId) || (delta < 0 && !nextId) ? delta * 0.2 : delta,
