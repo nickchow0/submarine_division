@@ -206,7 +206,7 @@ export default function PhotoModal({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center sm:p-6 md:p-10"
+      className="fixed inset-0 z-[2000] bg-black flex items-center justify-center"
       onClick={onClose}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -241,7 +241,7 @@ export default function PhotoModal({
 
       {/* Modal panel */}
       <div
-        className="relative bg-[#000000] w-full h-full sm:rounded-xl sm:max-w-5xl sm:max-h-[90svh] sm:h-auto flex flex-col overflow-hidden shadow-2xl sm:border border-white/10"
+        className="relative bg-[#000000] w-full h-full flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Top bar: prev / next + close ── */}
