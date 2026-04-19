@@ -44,7 +44,7 @@ export default async function RootLayout({
   const showMaintenance = maintenanceMode && !isAdmin;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Fonts — body font (from settings or CSS default) + Italiana (title) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
