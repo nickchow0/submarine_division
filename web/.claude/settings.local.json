@@ -21,7 +21,8 @@
       "mcp__Sanity__query_documents",
       "mcp__ide__getDiagnostics",
       "Bash(npm install:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ls:*)"
     ]
   }
 }

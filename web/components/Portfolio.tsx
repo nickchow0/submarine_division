@@ -7,8 +7,9 @@
 // /photo/[id] WITHOUT triggering a Next.js navigation — so the portfolio page
 // stays completely mounted in the background and the modal overlays it.
 //
-// Visiting /photo/[id] directly (shared link, hard navigation) bypasses this
-// component entirely and shows the full dedicated photo page instead.
+// Visiting /photo/[id] directly passes `initialPhotoId` so the modal opens
+// immediately over the portfolio grid, giving the same experience as clicking
+// from within the gallery.
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Image from "next/image";
@@ -23,14 +24,16 @@ import PhotoModal from "./PhotoModal";
 export default function Portfolio({
   photos,
   showCaptions = false,
+  initialPhotoId,
 }: {
   photos: Photo[];
   showCaptions?: boolean;
+  initialPhotoId?: string;
 }) {
   // ── State ──────────────────────────────────────────────────────────────────
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialPhotoId ?? null);
 
   // ── Search index ───────────────────────────────────────────────────────────
   const fuseIndex = useMemo<Fuse<Photo>>(
