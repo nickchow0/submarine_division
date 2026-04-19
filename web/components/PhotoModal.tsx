@@ -11,6 +11,10 @@ import { trackEvent } from "@/lib/analytics";
 import { formatCamera } from "@/lib/exif";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 
+// Set to true by swipe navigation before onNavigate fires; read during
+// CurrentPhotoFrame's render to suppress the fade-in animation for swipes.
+let pendingSwipeNav = false;
+
 const VERTICAL_CONSTRAINT = "calc(90dvh - 240px)";
 const SIZE_TRANSITION =
   "width 0.6s cubic-bezier(0.16, 1, 0.3, 1), aspect-ratio 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out";
@@ -20,10 +24,18 @@ const SIZE_TRANSITION =
 function CurrentPhotoFrame({ photo }: { photo: Photo }) {
   const ref = useRef<HTMLDivElement>(null);
   const ratio = photo.width / photo.height;
+  // Read synchronously during render — plain module variable, not a React ref
+  const fadeIn = !pendingSwipeNav;
 
   useLayoutEffect(() => {
     if (ref.current) ref.current.style.transition = SIZE_TRANSITION;
+    pendingSwipeNav = false; // clear after this render is committed
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Also clear after subsequent navigations (re-renders of the same instance)
+  useEffect(() => {
+    pendingSwipeNav = false;
+  }, [photo._id]);
 
   return (
     <div
@@ -37,7 +49,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
       }}
     >
       {/* Keyed by photo ID so photo-fade-in re-triggers on every navigation */}
-      <div key={photo._id} className="absolute inset-0 photo-fade-in">
+      <div key={photo._id} className={`absolute inset-0 ${fadeIn ? "photo-fade-in" : ""}`}>
         <Image
           src={photo.src}
           alt={photo.title}
@@ -45,8 +57,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
           sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
           className="object-contain transition-opacity duration-700 ease-in-out"
           priority
-          placeholder={photo.blurDataURL ? "blur" : "empty"}
-          blurDataURL={photo.blurDataURL ?? undefined}
+          placeholder="empty"
         />
       </div>
     </div>
@@ -145,6 +156,7 @@ export default function PhotoModal({
         setIsAnimating(false);
         setSwipeOffset(0);
         setIsNavigatingBySwipe(false);
+        pendingSwipeNav = true;
         onNavigate(id);
       }, 350); // Match track transition duration
     };
@@ -189,8 +201,7 @@ export default function PhotoModal({
           fill
           sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
           className="object-contain"
-          placeholder={p.blurDataURL ? "blur" : "empty"}
-          blurDataURL={p.blurDataURL ?? undefined}
+          placeholder="empty"
         />
       </div>
     );
