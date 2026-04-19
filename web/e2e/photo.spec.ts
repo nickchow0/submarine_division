@@ -2,7 +2,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Photo page", () => {
-  test("renders the photo and metadata when visited directly", async ({
+  test("opens the modal over the portfolio when visited directly", async ({
     page,
   }) => {
     // First, find a real photo ID by opening the portfolio and clicking a photo
@@ -21,14 +21,13 @@ test.describe("Photo page", () => {
     // Navigate directly (hard navigation) to the photo URL
     await page.goto(photoUrl);
 
-    // Photo should be rendered with an image
-    const photoImg = page
-      .locator("main img, article img, .max-w-5xl img")
-      .first();
-    await expect(photoImg).toBeVisible({ timeout: 10_000 });
+    // The modal should open automatically with the photo visible
+    await expect(page.getByRole("button", { name: "Close" })).toBeVisible({
+      timeout: 10_000,
+    });
 
-    // Back to portfolio link should be present
-    await expect(page.getByText("Back to portfolio")).toBeVisible();
+    // The portfolio grid should be rendered in the background
+    await expect(page.locator("img[alt]").first()).toBeVisible();
   });
 });
 
