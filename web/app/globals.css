@@ -48,6 +48,21 @@ html {
   animation: photo-fade-in 0.3s ease-in-out forwards;
 }
 
+@keyframes photo-slide-from-right {
+  from { transform: translateX(110vw); }
+  to   { transform: translateX(0); }
+}
+@keyframes photo-slide-from-left {
+  from { transform: translateX(-110vw); }
+  to   { transform: translateX(0); }
+}
+.photo-slide-from-right {
+  animation: photo-slide-from-right 0.28s ease-out forwards;
+}
+.photo-slide-from-left {
+  animation: photo-slide-from-left 0.28s ease-out forwards;
+}
+
 /* ─── Shared text utilities ────────────────────────────────────────────────── */
 .font-title {
   font-family: "Italiana", serif;

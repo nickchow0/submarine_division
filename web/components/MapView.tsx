@@ -5,7 +5,7 @@
 // (Leaflet accesses window/navigator at module-evaluation time, which throws in
 // Node). This also eliminates the need for next/dynamic with ssr:false.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { Marker } from "leaflet";
 import type { MapPin, Photo } from "@/types";
@@ -111,16 +111,19 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
     if (p) setModalPhoto(pinPhotoToFull(p));
   }
 
-  const modalPrevId = modalPhoto
-    ? (modalPinPhotos[
-        modalPinPhotos.findIndex((p) => p._id === modalPhoto._id) - 1
-      ]?._id ?? null)
-    : null;
-  const modalNextId = modalPhoto
-    ? (modalPinPhotos[
-        modalPinPhotos.findIndex((p) => p._id === modalPhoto._id) + 1
-      ]?._id ?? null)
-    : null;
+  const modalPrevPhoto = useMemo(() => {
+    if (!modalPhoto) return null;
+    const idx = modalPinPhotos.findIndex((p) => p._id === modalPhoto._id);
+    return idx > 0 ? pinPhotoToFull(modalPinPhotos[idx - 1]) : null;
+  }, [modalPhoto, modalPinPhotos]);
+
+  const modalNextPhoto = useMemo(() => {
+    if (!modalPhoto) return null;
+    const idx = modalPinPhotos.findIndex((p) => p._id === modalPhoto._id);
+    return idx < modalPinPhotos.length - 1
+      ? pinPhotoToFull(modalPinPhotos[idx + 1])
+      : null;
+  }, [modalPhoto, modalPinPhotos]);
 
   return (
     // position:absolute fills the nearest positioned ancestor regardless of
@@ -206,8 +209,8 @@ export default function MapView({ pins }: { pins: MapPin[] }) {
       {modalPhoto && (
         <PhotoModal
           photo={modalPhoto}
-          prevId={modalPrevId}
-          nextId={modalNextId}
+          prevPhoto={modalPrevPhoto}
+          nextPhoto={modalNextPhoto}
           onClose={() => setModalPhoto(null)}
           onNavigate={navigateModal}
         />

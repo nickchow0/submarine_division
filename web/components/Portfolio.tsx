@@ -63,6 +63,13 @@ export default function Portfolio({
     () => visiblePhotos.findIndex((p) => p._id === selectedId),
     [visiblePhotos, selectedId],
   );
+
+  const prevPhoto = selectedIndex > 0 ? visiblePhotos[selectedIndex - 1] : null;
+  const nextPhoto =
+    selectedIndex < visiblePhotos.length - 1
+      ? visiblePhotos[selectedIndex + 1]
+      : null;
+
   const prevId =
     selectedIndex > 0 ? visiblePhotos[selectedIndex - 1]._id : null;
   const nextId =
@@ -187,8 +194,8 @@ export default function Portfolio({
       {selectedPhoto && (
         <PhotoModal
           photo={selectedPhoto}
-          prevId={prevId}
-          nextId={nextId}
+          prevPhoto={prevPhoto}
+          nextPhoto={nextPhoto}
           prefetchPhotos={prefetchPhotos}
           onClose={closeModal}
           onNavigate={navigateModal}

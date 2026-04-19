@@ -4,7 +4,7 @@
 // Full-screen photo viewer overlay used by the Portfolio component.
 // No Next.js navigation — the portfolio stays mounted in the background.
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
@@ -13,8 +13,8 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 
 type Props = {
   photo: Photo;
-  prevId: string | null;
-  nextId: string | null;
+  prevPhoto?: Photo | null;
+  nextPhoto?: Photo | null;
   prefetchPhotos?: Photo[];
   onClose: () => void;
   onNavigate: (id: string) => void;
@@ -23,22 +23,43 @@ type Props = {
 
 export default function PhotoModal({
   photo,
-  prevId,
-  nextId,
+  prevPhoto,
+  nextPhoto,
   prefetchPhotos = [],
   onClose,
   onNavigate,
   showCaptions = false,
 }: Props) {
+  const [isNavigatingByButton, setIsNavigatingByButton] = useState(false);
+  const [isNavigatingBySwipe, setIsNavigatingBySwipe] = useState(false);
+
+  const prevId = prevPhoto?._id ?? null;
+  const nextId = nextPhoto?._id ?? null;
+
+  const handleButtonNavigate = (id: string) => {
+    setIsNavigatingByButton(true);
+    onNavigate(id);
+    // Duration matches the new slow transition
+    setTimeout(() => setIsNavigatingByButton(false), 1200);
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && prevId) onNavigate(prevId);
-      if (e.key === "ArrowRight" && nextId) onNavigate(nextId);
+      if (e.key === "ArrowLeft" && prevId) handleButtonNavigate(prevId);
+      if (e.key === "ArrowRight" && nextId) handleButtonNavigate(nextId);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose, onNavigate, prevId, nextId]);
+  }, [onClose, prevId, nextId]);
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   useEffect(() => {
     trackEvent("photo_view", {
@@ -48,6 +69,55 @@ export default function PhotoModal({
     });
   }, [photo]);
 
+  const touchStartX = useRef<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsAnimating(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.touches[0].clientX - touchStartX.current;
+    setSwipeOffset(
+      (delta > 0 && !prevId) || (delta < 0 && !nextId) ? delta * 0.2 : delta,
+    );
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+
+    const containerWidth = trackRef.current?.offsetWidth ?? window.innerWidth;
+
+    const navigate = (id: string, direction: number) => {
+      setIsNavigatingBySwipe(true);
+      setIsAnimating(true);
+      setSwipeOffset(direction * containerWidth);
+      setTimeout(() => {
+        setIsAnimating(false);
+        setSwipeOffset(0);
+        setIsNavigatingBySwipe(false);
+        onNavigate(id);
+      }, 350); // Match track transition duration
+    };
+
+    if (delta > 50 && prevId) {
+      navigate(prevId, 1);
+    } else if (delta < -50 && nextId) {
+      navigate(nextId, -1);
+    } else {
+      setIsAnimating(true);
+      setSwipeOffset(0);
+      setTimeout(() => setIsAnimating(false), 200);
+    }
+  };
+
   const hasExif =
     photo.camera ||
     photo.lens ||
@@ -56,11 +126,51 @@ export default function PhotoModal({
     photo.shutterSpeed ||
     photo.iso;
 
+  // Helper to render the photo frame with consistent aspect-ratio logic
+  const renderPhoto = (p: Photo, isCurrent = false, stableKey?: string) => {
+    const enter = isCurrent ? "photo-fade-in" : "";
+    const verticalConstraint = "calc(90dvh - 240px)";
+    const ratio = p.width / p.height;
+
+    // Transitioning width alone while having aspect-ratio set in style
+    // allows the browser to resize height smoothly without the scale-like "growing" glitch.
+    const transition =
+      "width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out";
+
+    return (
+      <div
+        key={stableKey}
+        className={`relative overflow-hidden bg-black shadow-2xl ${enter}`}
+        style={{
+          width: `calc(${ratio.toFixed(6)} * ${verticalConstraint})`,
+          maxWidth: "100%",
+          aspectRatio: `${p.width} / ${p.height}`,
+          maxHeight: verticalConstraint,
+          transition: isCurrent ? transition : "opacity 0.2s ease-out",
+        }}
+      >
+        <Image
+          src={p.src}
+          alt={p.title}
+          fill
+          sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
+          className="object-contain transition-opacity duration-700 ease-in-out"
+          priority={isCurrent}
+          placeholder={p.blurDataURL ? "blur" : "empty"}
+          blurDataURL={p.blurDataURL ?? undefined}
+        />
+      </div>
+    );
+  };
+
   return (
     /* Backdrop */
     <div
       className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-2 sm:p-6 md:p-10"
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Hidden prefetch images for the next 3 photos */}
       {prefetchPhotos.map((p) => (
@@ -71,9 +181,10 @@ export default function PhotoModal({
             position: "absolute",
             top: 0,
             left: 0,
+            width: `calc(${(p.width / p.height).toFixed(6)} * (90dvh - 240px))`,
+            maxWidth: "100%",
             aspectRatio: `${p.width} / ${p.height}`,
             maxHeight: "calc(90dvh - 240px)",
-            width: `min(100%, calc(${(p.width / p.height).toFixed(6)} * (90dvh - 150px)))`,
             visibility: "hidden",
             pointerEvents: "none",
           }}
@@ -98,7 +209,7 @@ export default function PhotoModal({
           <div className="flex items-center">
             {prevId ? (
               <button
-                onClick={() => onNavigate(prevId)}
+                onClick={() => handleButtonNavigate(prevId)}
                 className="p-2 text-slate-400 hover:text-white transition-colors"
                 aria-label="Previous photo"
               >
@@ -111,7 +222,7 @@ export default function PhotoModal({
             )}
             {nextId ? (
               <button
-                onClick={() => onNavigate(nextId)}
+                onClick={() => handleButtonNavigate(nextId)}
                 className="p-2 text-slate-400 hover:text-white transition-colors"
                 aria-label="Next photo"
               >
@@ -133,39 +244,50 @@ export default function PhotoModal({
         </div>
 
         {/* ── Photo ── */}
-        <div className="flex-1 min-h-0 flex items-center justify-center px-4 pt-2 pb-3 sm:px-8 sm:pb-8">
-          {/* Aspect-ratio wrapper reserves the exact photo space before the image
-              loads so the modal never jumps in size. Width is the smaller of
-              (a) the available flex width and (b) the width implied by maxHeight
-              × the photo's aspect ratio — whichever constraint binds first. */}
+        <div className="flex-1 min-h-0 relative overflow-hidden">
+          {/* Sliding Track */}
           <div
-            key={photo._id}
-            className="relative overflow-hidden photo-fade-in bg-slate-900"
+            ref={trackRef}
+            className="w-full relative overflow-visible"
             style={{
-              aspectRatio: `${photo.width} / ${photo.height}`,
-              maxHeight: "calc(90dvh - 240px)",
-              width: `min(100%, calc(${(photo.width / photo.height).toFixed(6)} * (90dvh - 240px)))`,
+              transform: swipeOffset
+                ? `translateX(${swipeOffset}px)`
+                : undefined,
+              transition: isAnimating
+                ? "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+                : "none",
             }}
           >
-            <Image
-              src={photo.src}
-              alt={photo.title}
-              fill
-              // Modal panel is max-w-5xl (1024px) with px-8 padding each side,
-              // so the photo is at most ~880px on large screens.
-              sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
-              quality={90}
-              className="object-contain"
-              placeholder={photo.blurDataURL ? "blur" : "empty"}
-              blurDataURL={photo.blurDataURL ?? undefined}
-              priority
-            />
+            {/* Previous Photo (Peek) */}
+            {prevPhoto && (
+              <div
+                className="absolute inset-0 flex items-center justify-center -translate-x-full px-4 sm:px-8 py-4"
+                aria-hidden="true"
+              >
+                {renderPhoto(prevPhoto, false, "prev-photo")}
+              </div>
+            )}
+
+            {/* Current Photo */}
+            <div className="relative flex items-center justify-center px-4 sm:px-8 py-4">
+              {renderPhoto(photo, true, "current-photo")}
+            </div>
+
+            {/* Next Photo (Peek) */}
+            {nextPhoto && (
+              <div
+                className="absolute inset-0 flex items-center justify-center translate-x-full px-4 sm:px-8 py-4"
+                aria-hidden="true"
+              >
+                {renderPhoto(nextPhoto, false, "next-photo")}
+              </div>
+            )}
           </div>
         </div>
 
         {/* ── Metadata strip (bottom) ── */}
         <div
-          className="shrink-0 px-4 sm:px-7 pb-4 sm:pb-6 pt-3 sm:pt-4 space-y-2.5 overflow-y-auto max-h-[35vmin] sm:max-h-none"
+          className="shrink-0 px-4 sm:px-7 pb-4 sm:pb-6 pt-3 sm:pt-4 space-y-2.5 overflow-y-auto max-h-[45vh] sm:max-h-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Caption */}
@@ -179,10 +301,7 @@ export default function PhotoModal({
           {photo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {photo.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="tag-badge"
-                >
+                <span key={tag} className="tag-badge">
                   {tag}
                 </span>
               ))}
@@ -193,7 +312,7 @@ export default function PhotoModal({
           {(photo.location || photo.dateTaken) && (
             <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs sm:text-sm text-slate-500">
               {photo.location && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
                   <svg
                     className="w-4 h-4 shrink-0"
                     fill="none"
@@ -216,7 +335,7 @@ export default function PhotoModal({
                 </span>
               )}
               {photo.dateTaken && (
-                <span>
+                <span className="whitespace-nowrap">
                   {new Date(photo.dateTaken).toLocaleDateString("en-GB", {
                     year: "numeric",
                     month: "long",
@@ -230,7 +349,7 @@ export default function PhotoModal({
           {hasExif && (
             <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs sm:text-sm text-slate-500 border-t border-slate-800 pt-2.5">
               {photo.camera && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
                   <svg
                     className="w-4 h-4 shrink-0"
                     fill="none"
@@ -252,16 +371,24 @@ export default function PhotoModal({
                   {formatCamera(photo.camera)}
                 </span>
               )}
-              {photo.lens && <span>{photo.lens}</span>}
-              {photo.focalLength && <span>{photo.focalLength}</span>}
-              {photo.aperture && <span>{photo.aperture}</span>}
-              {photo.shutterSpeed && <span>{photo.shutterSpeed}s</span>}
-              {photo.iso && <span>ISO {photo.iso}</span>}
+              {photo.lens && (
+                <span className="whitespace-nowrap">{photo.lens}</span>
+              )}
+              {photo.focalLength && (
+                <span className="whitespace-nowrap">{photo.focalLength}</span>
+              )}
+              {photo.aperture && (
+                <span className="whitespace-nowrap">{photo.aperture}</span>
+              )}
+              {photo.shutterSpeed && (
+                <span className="whitespace-nowrap">{photo.shutterSpeed}s</span>
+              )}
+              {photo.iso && (
+                <span className="whitespace-nowrap">ISO {photo.iso}</span>
+              )}
             </div>
           )}
-
         </div>
-
       </div>
     </div>
   );

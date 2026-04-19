@@ -102,10 +102,9 @@ export default async function PhotoPage({ params }: Props) {
                     d="M15.75 19.5L8.25 12l7.5-7.5"
                   />
                 </svg>
-                Prev
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 cursor-default">
+              <span className="inline-flex items-center text-sm text-slate-700 cursor-default">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -119,15 +118,13 @@ export default async function PhotoPage({ params }: Props) {
                     d="M15.75 19.5L8.25 12l7.5-7.5"
                   />
                 </svg>
-                Prev
               </span>
             )}
             {nextId ? (
               <Link
                 href={`/photo/${nextId}`}
-                className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-400 transition-colors"
+                className="inline-flex items-center text-sm text-slate-500 hover:text-sky-400 transition-colors"
               >
-                Next
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -143,8 +140,7 @@ export default async function PhotoPage({ params }: Props) {
                 </svg>
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 cursor-default">
-                Next
+              <span className="inline-flex items-center text-sm text-slate-700 cursor-default">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -208,7 +204,7 @@ export default async function PhotoPage({ params }: Props) {
           )}
 
           {/* EXIF-style info */}
-          <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+          <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-slate-500">
             {photo.location && (
               <span className="flex items-center gap-1.5">
                 <svg
@@ -250,7 +246,7 @@ export default async function PhotoPage({ params }: Props) {
             photo.iso ||
             photo.shutterSpeed ||
             photo.aperture) && (
-            <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-500 border-t border-slate-800 pt-4">
+            <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs sm:text-sm text-slate-500 border-t border-slate-800 pt-4">
               {photo.camera && (
                 <span className="flex items-center gap-1.5">
                   <svg
