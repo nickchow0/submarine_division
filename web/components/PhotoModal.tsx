@@ -17,12 +17,6 @@ let pendingSwipeNav = false;
 
 const VERTICAL_CONSTRAINT = "calc(90svh - 240px)";
 
-// Renders the current photo with a CSS size transition.
-// The `photo-frame` class enables width/aspect-ratio transitions.
-// The `photo-frame-instant` class overrides to transition:none during swipe —
-// both the class change and the new dimensions land in the same React commit,
-// so the browser never has a chance to start the transition.
-//
 // The inner <div> is NOT keyed by photo._id. Key-remounting creates a new <img>
 // element which is blank for 1 frame while the browser decodes the image (even
 // from cache), causing an intermittent black flash. Updating src in-place keeps
@@ -30,8 +24,6 @@ const VERTICAL_CONSTRAINT = "calc(90svh - 240px)";
 // The fade animation is re-triggered manually via useLayoutEffect instead.
 function CurrentPhotoFrame({ photo }: { photo: Photo }) {
   const ratio = photo.width / photo.height;
-  // Read during render — module-level variable, not a React ref (no lint issue)
-  const isSwipe = pendingSwipeNav;
   const imageWrapRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -51,7 +43,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
 
   return (
     <div
-      className={`photo-frame relative overflow-hidden bg-black shadow-2xl${isSwipe ? " photo-frame-instant" : ""}`}
+      className="relative overflow-hidden bg-black shadow-2xl"
       style={{
         width: `calc(${ratio.toFixed(6)} * ${VERTICAL_CONSTRAINT})`,
         maxWidth: "100%",
