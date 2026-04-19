@@ -20,7 +20,8 @@
       "mcp__Sanity__get_schema",
       "mcp__Sanity__query_documents",
       "mcp__ide__getDiagnostics",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(curl:*)"
     ]
   }
 }

@@ -38,14 +38,14 @@ export default function AboutPage() {
           alt="Nick Chow underwater"
           width={800}
           height={534}
-          className="rounded-lg object-cover w-full aspect-[4/3]"
+          className="w-full h-auto"
         />
         <Image
-          src="https://cdn.sanity.io/images/vtmlottj/production/3d7c99ba9c64500303e5babbab0327766896c59d-2048x1366.jpg?w=800&q=85&fm=jpg&auto=format"
-          alt="Nick Chow underwater"
+          src="https://cdn.sanity.io/images/vtmlottj/production/7fbc260057dc97090536a388043139257e1c4476-1200x800.jpg?w=800&q=85&fm=jpg&auto=format"
+          alt="Diver photographing a submerged aircraft wreck, Chuuk"
           width={800}
           height={534}
-          className="rounded-lg object-cover w-full aspect-[4/3]"
+          className="w-full h-auto"
         />
       </div>
 
