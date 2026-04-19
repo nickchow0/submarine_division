@@ -15,7 +15,7 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 // CurrentPhotoFrame's render to suppress the fade-in animation for swipes.
 let pendingSwipeNav = false;
 
-const VERTICAL_CONSTRAINT = "calc(90svh - 240px)";
+const VERTICAL_CONSTRAINT = "calc(90svh - 160px)";
 
 // The inner <div> is NOT keyed by photo._id. Key-remounting creates a new <img>
 // element which is blank for 1 frame while the browser decodes the image (even
@@ -224,10 +224,10 @@ export default function PhotoModal({
             position: "absolute",
             top: 0,
             left: 0,
-            width: `calc(${(p.width / p.height).toFixed(6)} * (90dvh - 240px))`,
+            width: `calc(${(p.width / p.height).toFixed(6)} * (90dvh - 160px))`,
             maxWidth: "100%",
             aspectRatio: `${p.width} / ${p.height}`,
-            maxHeight: "calc(90dvh - 240px)",
+            maxHeight: "calc(90dvh - 160px)",
             visibility: "hidden",
             pointerEvents: "none",
           }}
@@ -248,7 +248,7 @@ export default function PhotoModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Top bar: prev / next + close ── */}
-        <div className="shrink-0 flex items-center justify-between px-2 pt-2 pb-1">
+        <div className="shrink-0 flex items-center justify-between px-2 pt-1 pb-0">
           <div className="flex items-center">
             {prevId ? (
               <button
@@ -304,7 +304,7 @@ export default function PhotoModal({
             {/* Previous Photo (Peek) */}
             {prevPhoto && (
               <div
-                className="absolute inset-0 flex items-center justify-center -translate-x-full px-4 sm:px-8 py-4"
+                className="absolute inset-0 flex items-center justify-center -translate-x-full px-4 sm:px-8 py-1"
                 aria-hidden="true"
               >
                 {renderPeekPhoto(prevPhoto, "prev-photo")}
@@ -312,14 +312,14 @@ export default function PhotoModal({
             )}
 
             {/* Current Photo */}
-            <div className="relative flex items-center justify-center px-4 sm:px-8 py-4">
+            <div className="relative flex items-center justify-center px-4 sm:px-8 py-1">
               <CurrentPhotoFrame photo={photo} />
             </div>
 
             {/* Next Photo (Peek) */}
             {nextPhoto && (
               <div
-                className="absolute inset-0 flex items-center justify-center translate-x-full px-4 sm:px-8 py-4"
+                className="absolute inset-0 flex items-center justify-center translate-x-full px-4 sm:px-8 py-1"
                 aria-hidden="true"
               >
                 {renderPeekPhoto(nextPhoto, "next-photo")}
@@ -330,7 +330,7 @@ export default function PhotoModal({
 
         {/* ── Metadata strip (bottom) ── */}
         <div
-          className="shrink-0 px-4 sm:px-7 pb-4 sm:pb-6 pt-3 sm:pt-4 space-y-2.5 overflow-y-auto max-h-[45vh] sm:max-h-none"
+          className="shrink-0 px-4 sm:px-7 pb-3 sm:pb-5 pt-2 sm:pt-3 space-y-2.5 overflow-y-auto max-h-[45vh] sm:max-h-none"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Caption */}

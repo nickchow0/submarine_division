@@ -60,7 +60,6 @@ test.describe("Portfolio", () => {
     const nextButton = page.getByRole("button", { name: "Next photo" });
     await expect(nextButton).toBeVisible();
     await nextButton.click();
-    console.log("OUTPUT: ", firstSrc);
     await expect(modalImg).not.toHaveAttribute("src", firstSrc!);
   });
 
