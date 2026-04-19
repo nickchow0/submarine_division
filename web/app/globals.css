@@ -35,6 +35,17 @@ html {
   animation: page-fade-in 0.3s ease-out;
 }
 
+/* ─── Modal photo frame size transition ────────────────────────────────────── */
+/* Applied via CSS class so transition:none and new dimensions land in the same
+   browser style recalculation, preventing animation during swipe navigation. */
+.photo-frame {
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              aspect-ratio 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.photo-frame-instant {
+  transition: none !important;
+}
+
 /* ─── Modal photo fade-in ───────────────────────────────────────────────────── */
 @keyframes photo-fade-in {
   from {

@@ -4,7 +4,7 @@
 // Full-screen photo viewer overlay used by the Portfolio component.
 // No Next.js navigation — the portfolio stays mounted in the background.
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
@@ -15,32 +15,28 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 // CurrentPhotoFrame's render to suppress the fade-in animation for swipes.
 let pendingSwipeNav = false;
 
-const VERTICAL_CONSTRAINT = "calc(90dvh - 240px)";
-const SIZE_TRANSITION =
-  "width 0.6s cubic-bezier(0.16, 1, 0.3, 1), aspect-ratio 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease-out";
+const VERTICAL_CONSTRAINT = "calc(90svh - 240px)";
 
-// Renders the current photo with a size transition that only activates after
-// the first paint, preventing the frame from animating in from zero on open.
+// Renders the current photo with a CSS size transition.
+// The `photo-frame` class enables width/aspect-ratio transitions.
+// The `photo-frame-instant` class overrides to transition:none during swipe —
+// both the class change and the new dimensions land in the same React commit,
+// so the browser never has a chance to start the transition.
+// CSS transitions don't fire on initial mount (no old value to animate from),
+// so the frame never animates when the modal first opens.
 function CurrentPhotoFrame({ photo }: { photo: Photo }) {
-  const ref = useRef<HTMLDivElement>(null);
   const ratio = photo.width / photo.height;
   // Read synchronously during render — plain module variable, not a React ref
-  const fadeIn = !pendingSwipeNav;
+  const isSwipe = pendingSwipeNav;
+  const fadeIn = !isSwipe;
 
-  useLayoutEffect(() => {
-    if (ref.current) ref.current.style.transition = SIZE_TRANSITION;
-    pendingSwipeNav = false; // clear after this render is committed
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Also clear after subsequent navigations (re-renders of the same instance)
   useEffect(() => {
     pendingSwipeNav = false;
   }, [photo._id]);
 
   return (
     <div
-      ref={ref}
-      className="relative overflow-hidden bg-black shadow-2xl"
+      className={`photo-frame relative overflow-hidden bg-black shadow-2xl${isSwipe ? " photo-frame-instant" : ""}`}
       style={{
         width: `calc(${ratio.toFixed(6)} * ${VERTICAL_CONSTRAINT})`,
         maxWidth: "100%",
@@ -55,7 +51,7 @@ function CurrentPhotoFrame({ photo }: { photo: Photo }) {
           alt={photo.title}
           fill
           sizes="(max-width: 640px) 95vw, (max-width: 1024px) 85vw, 880px"
-          className="object-contain transition-opacity duration-700 ease-in-out"
+          className="object-contain"
           priority
           placeholder="empty"
         />
@@ -210,7 +206,7 @@ export default function PhotoModal({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-2 sm:p-6 md:p-10"
+      className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center sm:p-6 md:p-10"
       onClick={onClose}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -245,7 +241,7 @@ export default function PhotoModal({
 
       {/* Modal panel */}
       <div
-        className="relative bg-[#000000] rounded-xl w-full max-w-5xl max-h-[90dvh] flex flex-col overflow-hidden shadow-2xl border border-white/10"
+        className="relative bg-[#000000] w-full h-full sm:rounded-xl sm:max-w-5xl sm:max-h-[90svh] sm:h-auto flex flex-col overflow-hidden shadow-2xl sm:border border-white/10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Top bar: prev / next + close ── */}
@@ -288,7 +284,7 @@ export default function PhotoModal({
         </div>
 
         {/* ── Photo ── */}
-        <div className="flex-1 min-h-0 relative overflow-hidden">
+        <div className="flex-1 min-h-0 relative overflow-hidden flex items-center">
           {/* Sliding Track */}
           <div
             ref={trackRef}
