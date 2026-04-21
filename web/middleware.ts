@@ -32,14 +32,11 @@ async function isPasswordRequired(): Promise<boolean> {
   try {
     const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
     const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
-    const token = process.env.SANITY_READ_TOKEN;
     const query = encodeURIComponent(
       '*[_type == "siteSettings" && _id == "siteSettings"][0]{ "requirePassword": coalesce(requirePassword, true) }',
     );
     const url = `https://${projectId}.api.sanity.io/v2024-01-01/data/query/${dataset}?query=${query}`;
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    const res = await fetch(url);
     if (res.ok) {
       const data = (await res.json()) as {
         result?: { requirePassword?: boolean };

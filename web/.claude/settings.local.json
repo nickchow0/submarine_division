@@ -23,7 +23,8 @@
       "Bash(npm install:*)",
       "Bash(curl:*)",
       "Bash(ls:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(openssl rand:*)"
     ]
   }
 }
