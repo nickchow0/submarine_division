@@ -3,3 +3,4 @@ node_modules/
 web/playwright/.auth/
 web/playwright-report/
 web/test-results/
+/photos

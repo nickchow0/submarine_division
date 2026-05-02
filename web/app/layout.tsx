@@ -20,7 +20,7 @@ import { FONTS } from "@/lib/fonts";
 
 // Metadata is used by search engines and social media previews
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "SubmarineDivision",
   description: "Underwater & nature photography — searchable image library",
 };
 
@@ -36,8 +36,11 @@ export default async function RootLayout({
       .catch(() => null),
   ]);
   const isAdmin = cookieStore.get("admin_access")?.value === "granted";
-  const { showLocations, maintenanceMode, bodyFont } = settings ?? DEFAULT_SETTINGS;
-  const activeFont = bodyFont ? FONTS.find(f => f.family === bodyFont) ?? null : null;
+  const { showLocations, maintenanceMode, bodyFont } =
+    settings ?? DEFAULT_SETTINGS;
+  const activeFont = bodyFont
+    ? (FONTS.find((f) => f.family === bodyFont) ?? null)
+    : null;
 
   // Maintenance mode — show a placeholder instead of the site,
   // but admin users can still navigate normally.
@@ -54,7 +57,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href={`https://fonts.googleapis.com/css2?family=${activeFont?.googleFamily ?? 'Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400'}&family=Italiana&display=swap`}
+          href={`https://fonts.googleapis.com/css2?family=${activeFont?.googleFamily ?? "Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400"}&family=Italiana&display=swap`}
           rel="stylesheet"
         />
         {/* Leaflet CSS — served from /public so it works without postcss-import.
@@ -62,7 +65,10 @@ export default async function RootLayout({
             and CSS imports inside next/dynamic chunks are unreliable. */}
         <link rel="stylesheet" href="/leaflet.css" />
       </head>
-      <body className="min-h-screen" style={activeFont ? { fontFamily: activeFont.stack } : undefined}>
+      <body
+        className="min-h-screen"
+        style={activeFont ? { fontFamily: activeFont.stack } : undefined}
+      >
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
             <Script
@@ -85,15 +91,28 @@ export default async function RootLayout({
         {/* ── Header ── */}
         <header className="text-center pt-12 pb-6 bg-black">
           <h1 className="font-title text-[24px] leading-[32px] sm:text-[30px] sm:leading-[36px] md:text-[36px] md:leading-[40px] lg:text-[48px] lg:leading-[48px] font-normal tracking-tight sm:tracking-wider">
-            <Link href="/" className="text-sky-400 hover:text-sky-300 transition-colors">SubmarineDivision</Link>
+            <Link
+              href="/"
+              className="text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              SubmarineDivision
+            </Link>
           </h1>
-          <p className="page-subtitle mt-[4px]">Underwater Photography by Nick Chow</p>
+          <p className="page-subtitle mt-[4px]">
+            Underwater Photography by Nick Chow
+          </p>
           <nav className="mt-4 flex justify-center gap-6">
-            <Link href="/portfolio" className="nav-link">Portfolio</Link>
+            <Link href="/portfolio" className="nav-link">
+              Portfolio
+            </Link>
             {showLocations && (
-              <Link href="/map" className="nav-link">Map</Link>
+              <Link href="/map" className="nav-link">
+                Map
+              </Link>
             )}
-            <Link href="/about" className="nav-link">About</Link>
+            <Link href="/about" className="nav-link">
+              About
+            </Link>
             {isAdmin && (
               <Link
                 href="/admin"
@@ -108,8 +127,12 @@ export default async function RootLayout({
         {/* ── Page content ── */}
         {showMaintenance ? (
           <div className="flex flex-col items-center justify-center py-40 text-center px-4">
-            <p className="font-title text-[36px] text-sky-400 mb-4">Coming soon</p>
-            <p className="text-slate-500 text-sm max-w-xs">We&apos;re working on something new. Check back soon.</p>
+            <p className="font-title text-[36px] text-sky-400 mb-4">
+              Coming soon
+            </p>
+            <p className="text-slate-500 text-sm max-w-xs">
+              We&apos;re working on something new. Check back soon.
+            </p>
           </div>
         ) : (
           <PageTransition>{children}</PageTransition>
