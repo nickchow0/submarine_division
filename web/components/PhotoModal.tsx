@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/types";
 import { trackEvent } from "@/lib/analytics";
-import { formatCamera } from "@/lib/exif";
+import { formatCamera, formatLensOverride } from "@/lib/exif";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "@/components/icons";
 
 // Set to true by swipe navigation before onNavigate fires; read during
@@ -171,6 +171,7 @@ export default function PhotoModal({
     }
   };
 
+  const lensOverride = formatLensOverride(photo.focalLength, photo.aperture);
   const hasExif =
     photo.camera ||
     photo.lens ||
@@ -431,14 +432,14 @@ export default function PhotoModal({
                     {formatCamera(photo.camera)}
                   </span>
                 )}
-                {photo.lens && (
-                  <span className="whitespace-nowrap">{photo.lens}</span>
-                )}
-                {photo.focalLength && (
-                  <span className="whitespace-nowrap">{photo.focalLength}</span>
-                )}
-                {photo.aperture && (
-                  <span className="whitespace-nowrap">{photo.aperture}</span>
+                {lensOverride ? (
+                  <span className="whitespace-nowrap">{lensOverride}</span>
+                ) : (
+                  <>
+                    {photo.lens && <span className="whitespace-nowrap">{photo.lens}</span>}
+                    {photo.focalLength && <span className="whitespace-nowrap">{photo.focalLength}</span>}
+                    {photo.aperture && <span className="whitespace-nowrap">{photo.aperture}</span>}
+                  </>
                 )}
                 {photo.shutterSpeed && (
                   <span className="whitespace-nowrap">

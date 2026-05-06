@@ -21,7 +21,7 @@ export default defineConfig({
   // All authenticated tests use saved storage state by default.
   // Individual tests can override this with `storageState: undefined`.
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3001",
     storageState: "playwright/.auth/user.json",
     // Capture traces and screenshots on failure for debugging
     trace: "on-first-retry",
@@ -38,7 +38,7 @@ export default defineConfig({
   // Automatically start next dev before running tests
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:3000",
+    url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

@@ -17,6 +17,20 @@ export function formatCamera(camera: string | null | undefined): string | null {
   return CAMERA_DISPLAY_NAMES[camera.trim().toUpperCase()] ?? camera;
 }
 
+// Maps "focalLength aperture" pairs to a friendly lens/camera display name.
+// Key format: "<focalLength> <aperture>" (e.g. "50mm f/1.8")
+const LENS_DISPLAY_OVERRIDES: Record<string, string> = {
+  "50mm f/1.8": "Nikonos RS13",
+};
+
+export function formatLensOverride(
+  focalLength: string | null | undefined,
+  aperture: string | null | undefined,
+): string | null {
+  if (!focalLength || !aperture) return null;
+  return LENS_DISPLAY_OVERRIDES[`${focalLength} ${aperture}`] ?? null;
+}
+
 export type ExifData = {
   camera?: string;
   lens?: string;
