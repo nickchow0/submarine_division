@@ -1,8 +1,3 @@
-// ─── Portfolio Page ───────────────────────────────────────────────────────────
-// This is a SERVER Component. It runs at build time (or on the server)
-// to fetch all photos from Sanity, then passes them to the Portfolio
-// client component which handles all the interactive stuff.
-
 import {
   sanityClient,
   ALL_PHOTOS_QUERY,
@@ -11,7 +6,6 @@ import {
 import Portfolio from "@/components/Portfolio";
 import { type Photo, type SiteSettings, DEFAULT_SETTINGS } from "@/types";
 
-// Tell Next.js to revalidate this page every 60 seconds.
 export const revalidate = 60;
 
 export default async function PortfolioPage() {
@@ -22,8 +16,6 @@ export default async function PortfolioPage() {
 
   const { showCaptions } = settings ?? DEFAULT_SETTINGS;
 
-  // Shuffle using Fisher-Yates so the portfolio order is random on each
-  // cache revalidation (every 60 seconds) rather than always newest-first.
   const shuffled = [...photos];
   for (let i = shuffled.length - 1; i > 0; i--) {
     // eslint-disable-next-line react-hooks/purity
