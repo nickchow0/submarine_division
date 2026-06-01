@@ -66,6 +66,8 @@ export default function Screensaver({ photos }: { photos: Photo[] }) {
       className="fixed inset-0 z-50 bg-black cursor-pointer"
       onClick={dismiss}
       onKeyDown={dismiss}
+      onTouchStart={(e) => e.nativeEvent.stopImmediatePropagation()}
+      onTouchEnd={(e) => { e.preventDefault(); dismiss(); }}
     >
       <div
         className="absolute inset-0 transition-opacity duration-700"
