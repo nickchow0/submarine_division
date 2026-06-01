@@ -73,6 +73,7 @@ export type SiteSettings = {
   maintenanceMode: boolean; // replace public site with maintenance page
   showCaptions: boolean; // show AI captions in the portfolio, modal, and photo page
   autoGenerateCaptions: boolean; // auto-generate AI caption when a photo is uploaded
+  screensaverEnabled: boolean; // show fullscreen photo carousel after inactivity
   bodyFont: string | null; // Google Fonts family name for the body font, null = CSS default
 };
 
@@ -82,6 +83,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   maintenanceMode: false,
   showCaptions: false,
   autoGenerateCaptions: true,
+  screensaverEnabled: false,
   bodyFont: null,
 };
 

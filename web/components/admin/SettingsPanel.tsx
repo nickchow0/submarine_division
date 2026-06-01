@@ -47,6 +47,12 @@ export default function SettingsPanel({
                 "Automatically generates an AI caption for each photo when it is uploaded.",
             },
             {
+              key: "screensaverEnabled" as const,
+              label: "Screensaver",
+              description:
+                "Shows a fullscreen photo carousel on the portfolio page after 30 seconds of inactivity. Dismissed by any interaction.",
+            },
+            {
               key: "requirePassword" as const,
               label: "Require site password",
               description:

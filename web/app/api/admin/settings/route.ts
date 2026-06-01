@@ -32,7 +32,7 @@ export async function PATCH(req: Request) {
 
     const booleanKeys: (keyof SiteSettings)[] = [
       "requirePassword", "showLocations", "maintenanceMode",
-      "showCaptions", "autoGenerateCaptions",
+      "showCaptions", "autoGenerateCaptions", "screensaverEnabled",
     ];
     for (const key of booleanKeys) {
       if (key in body && typeof body[key] === "boolean") {

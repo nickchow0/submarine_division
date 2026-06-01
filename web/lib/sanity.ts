@@ -125,6 +125,7 @@ export const SITE_SETTINGS_QUERY = `
     "maintenanceMode":      coalesce(maintenanceMode,      false),
     "showCaptions":         coalesce(showCaptions,         false),
     "autoGenerateCaptions": coalesce(autoGenerateCaptions, true),
+    "screensaverEnabled":   coalesce(screensaverEnabled,   false),
     "bodyFont":             coalesce(bodyFont,             null)
   }
 `;

@@ -20,14 +20,17 @@ import { trackEvent } from "@/lib/analytics";
 import SearchBar from "./SearchBar";
 import TagFilter from "./TagFilter";
 import PhotoModal from "./PhotoModal";
+import Screensaver from "./Screensaver";
 
 export default function Portfolio({
   photos,
   showCaptions = false,
+  screensaverEnabled = false,
   initialPhotoId,
 }: {
   photos: Photo[];
   showCaptions?: boolean;
+  screensaverEnabled?: boolean;
   initialPhotoId?: string;
 }) {
   // ── State ──────────────────────────────────────────────────────────────────
@@ -199,6 +202,9 @@ export default function Portfolio({
           showCaptions={showCaptions}
         />
       )}
+      {/* Screensaver overlay */}
+      {screensaverEnabled && <Screensaver photos={photos} />}
+
       {/* Search + tag filter */}
       <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-sm py-4 space-y-3">
         <SearchBar

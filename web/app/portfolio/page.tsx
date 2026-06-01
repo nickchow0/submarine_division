@@ -14,7 +14,7 @@ export default async function PortfolioPage() {
     sanityClient.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   ]);
 
-  const { showCaptions } = settings ?? DEFAULT_SETTINGS;
+  const { showCaptions, screensaverEnabled } = settings ?? DEFAULT_SETTINGS;
 
   const shuffled = [...photos];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -23,5 +23,5 @@ export default async function PortfolioPage() {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return <Portfolio photos={shuffled} showCaptions={showCaptions} />;
+  return <Portfolio photos={shuffled} showCaptions={showCaptions} screensaverEnabled={screensaverEnabled} />;
 }
